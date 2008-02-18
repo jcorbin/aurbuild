@@ -21,20 +21,20 @@
 #
 
 import os, sys, tarfile, urllib, signal, getopt, time, pwd, glob 
-import Aurbuild.pacman
-import Aurbuild.version
-import Aurbuild.find
-import Aurbuild.aurparse
-import Aurbuild.execute
+import aurbuild.pacman
+import aurbuild.version
+import aurbuild.find
+import aurbuild.aurparse
+import aurbuild.execute
 from shutil import rmtree, copytree, copy
 from subprocess import Popen, PIPE
 
 # globals
-Apacman			= Aurbuild.pacman
-Aversion		= Aurbuild.version
-Afind			= Aurbuild.find
-Aaurparse 		= Aurbuild.aurparse
-Aexec			= Aurbuild.execute
+Apacman			= aurbuild.pacman
+Aversion		= aurbuild.version
+Afind			= aurbuild.find
+Aaurparse 		= aurbuild.aurparse
+Aexec			= aurbuild.execute
 aurbuild_home		= '/var/tmp/aurbuild'
 makepkg_config		= '/etc/makepkg.conf'
 uid			= os.getuid()
@@ -135,12 +135,12 @@ def handler(signo, frame):
 signal.signal(signal.SIGINT, handler)
 signal.signal(signal.SIGTERM, handler)
 
-myver = '1.7.8'
-myname = os.path.basename(sys.argv[0])
+PROGRAM_VERSION = '1.7.8'
+PROGRAM_NAME = os.path.basename(sys.argv[0])
 
 def usage():
 	print ''
-	print 'usage: %s [options] [package] <package>'%myname
+	print 'usage: %s [options] [package] <package>'%PROGRAM_NAME
 	print ''
 	print 'options:'
 	print '  -h, --help            show this help message and exit'
@@ -220,7 +220,7 @@ for opt, optarg in opts:
 
 if VERSION:
 	print ''
-	print 'Aurbuild v' + myver
+	print 'aurbuild v' + PROGRAM_VERSION
 	print 'Copyright (C) 2005-2007 Tyler Gates <TGates81@gmail.com>'
 	print ''
 	print 'This program may be freely redistributed under'
@@ -237,28 +237,31 @@ if len(opts) == 0:
 
 # must have an arg unless --upgrade or --clean are specified
 if (len(args) == 0) and (not UPGRADE and not CLEAN):
-	print myname + ': no target specified'
+	print PROGRAM_NAME + ': no target specified'
 	sys.exit(1)
 
 # --builddeps and --syncdeps can't be used together
 if BUILDDEPS and SYNCDEPS:
-	print myname + ': -b, --builddeps and -s, --syncdeps cannot be used at the same time'
+	print PROGRAM_NAME + ': -b, --builddeps and ' + \
+			'-s, --syncdeps cannot be used at the same time'
 	sys.exit(1)
 
 # --local, --official, --auto-build, and --upgrade must be used with a dependency install method
 if LOCAL or OFFICIAL or AUTO_BUILD or UPGRADE:
 	if not BUILDDEPS and not SYNCDEPS:
-		print myname + ': this switch requires either -b, --builddeps or -s, --syncdeps'
+		print PROGRAM_NAME + ': this switch requires either ' + \
+				'-b, --builddeps or -s, --syncdeps'
 		sys.exit(1)
 
 # --vote and --unvote can't be used together
 if VOTE and UNVOTE:
-	print myname + ': -V, --vote and -U, --unvote cannot be used at the same time'
+	print PROGRAM_NAME + ': -V, --vote and ' + \
+			'-U, --unvote cannot be used at the same time'
 	sys.exit(1)
 
 # --revision must be used with upgrade
 if REVISION and not UPGRADE:
-	print myname + ': -r, --revision must be used with -u, --upgrade'
+	print PROGRAM_NAME + ': -r, --revision must be used with -u, --upgrade'
 	sys.exit(1)
 
 def msg(text):
@@ -1005,9 +1008,9 @@ def main():
 		search()
 		sys.exit(0)
 	if VOTE or UNVOTE:
-		import getpass, Aurbuild.login
+		import getpass, aurbuild.login
 
-		login = Aurbuild.login
+		login = aurbuild.login
 		
 		print ''
 		username = raw_input('AUR Username: ')

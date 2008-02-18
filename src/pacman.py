@@ -20,7 +20,7 @@
 #
 
 import os, sys, re
-from Aurbuild.version import vercmp
+from aurbuild.version import vercmp
 
 class PacmanError(Exception):
 	# base excpetion

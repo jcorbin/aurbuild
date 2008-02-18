@@ -1,17 +1,28 @@
 #!/usr/bin/python
 
+NAME="aurbuild"
+VERSION="1.7.8"
+DESC="An utility to build and install packages from Archlinux User Repository"
+AUTHOR="Tyler Gates, Loui Chang"
+EMAIL="TGates81@gmail.com, louipc.ist@gmail.com"
+LICENSE="GPL"
+
 from distutils.core import setup
 
-myver="1.7.8"
-DATAFILES = [('/usr/man/man1', ['aurbuild.1']), ('/usr/share/doc/aurbuild-'+myver, ['COPYING', 'README', 'AUTHORS', 'CHANGELOG'])]
+DATAFILES = [('/usr/man/man1', ['aurbuild.1']),
+		('/usr/share/doc/aurbuild-'+VERSION,
+			['COPYING', 'README', 'AUTHORS', 'CHANGELOG'])]
 
 setup(name="aurbuild",
-	version=myver,
-	description="A utility to build and install packages from ArchLinux' AUR",
-	author="Tyler Gates",
-	author_email="TGates81@gmail.com",
-	license="GPL",
+	version=VERSION,
+	description=DESC,
+	author=AUTHOR,
+	author_email=EMAIL,
+	license=LICENSE,
 	platforms="linux2",
-	packages=['Aurbuild'], scripts=['aurbuild'], data_files = DATAFILES)
+	packages=['aurbuild'],
+	package_dir={'aurbuild':'src'},
+	scripts=['scripts/aurbuild'], 
+	data_files = DATAFILES)
 
 
