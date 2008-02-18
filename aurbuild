@@ -1,0 +1,1300 @@
+#!/usr/bin/python
+#
+#   aurbuild
+#
+#   Copyright (C) 2005-2007 by Tyler Gates <TGates81@gmail.com>
+#  
+#   This program is free software; you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation; either version 2 of the License, or
+#   (at your option) any later version.
+# 
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#  
+#   You should have received a copy of the GNU General Public License
+#   along with this program; if not, write to the Free Software
+#   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+#   USA.
+#
+
+import os, sys, tarfile, urllib, signal, getopt, time, pwd, glob 
+import Aurbuild.pacman
+import Aurbuild.version
+import Aurbuild.find
+import Aurbuild.aurparse
+import Aurbuild.execute
+from shutil import rmtree, copytree, copy
+from subprocess import Popen, PIPE
+
+# globals
+Apacman			= Aurbuild.pacman
+Aversion		= Aurbuild.version
+Afind			= Aurbuild.find
+Aaurparse 		= Aurbuild.aurparse
+Aexec			= Aurbuild.execute
+aurbuild_home		= '/var/tmp/aurbuild'
+makepkg_config		= '/etc/makepkg.conf'
+uid			= os.getuid()
+gid			= os.getgid()
+pid			= str(os.getpid())
+build_dir	 	= os.path.join(aurbuild_home, 'build')
+save_dir 		= os.path.join(aurbuild_home, 'pkgbuilds')
+editor			= os.getenv('EDITOR')
+cookiefile 		= os.getenv('HOME') + '/.aurbuild/aurcookie.lwp'
+PKGEXT			= 'pkg.tar.gz'
+# these will be populated later
+builduser_uid		= None
+builduser_gid		= None
+working_pkg		= None
+# this will be build_dir/working_pkg.pid
+pkg_build_dir		= 'dummy'
+aur_tarfile		= 'dummy'
+
+if editor == None:
+	editor = ['']
+else:
+	# get editor with list separated args
+	editor = editor.split(' ')
+abs_root 	= '/var/abs'
+pm_db_root 	= '/var/lib/pacman'
+pm_cache	= '/var/cache/pacman'
+installed_dir 	= pm_db_root + '/local'
+pacman_lock	= '/tmp/pacman.lck'
+aursite 	= 'http://aur.archlinux.org'
+# for filter_deps
+filtered	= []
+db_pkgs		= []
+db_paths	= []
+
+def echo_bash_vars(path, value, array=False):
+	""" return a variable from a bash file """
+	
+	p = Popen('source '+path+'; echo '+value, shell=True, stdout=PIPE, stderr=PIPE)
+	out = p.stdout.read()
+	out = out.strip()
+	if array:
+		out = out.split(' ')
+	p.stdout.close()
+	err = p.stderr.read()
+	p.stderr.close()
+	return out, err
+
+# examine makepkg.conf and set more globals
+if os.access(makepkg_config, os.F_OK|os.R_OK):
+	makepkg_v2 = False
+	makepkg_v3 = False
+	BUILDENV = echo_bash_vars(makepkg_config, '${BUILDENV[@]}', array=True)[0]
+	if BUILDENV != ['']:
+		makepkg_v3 = True
+		valid_buildenv = []
+		for var in BUILDENV:
+			if var[0] != '!':
+				valid_buildenv.append(var)
+		if 'color' in valid_buildenv: USE_COLOR = 'y'
+		else: USE_COLOR = 'n'
+
+		if 'fakeroot' in valid_buildenv: USE_FAKEROOT = 'y'
+		else: USE_FAKEROOT = 'n'
+
+	else:
+		makepkg_v2 = True
+		out = echo_bash_vars(makepkg_config, "$USE_COLOR:$USE_FAKEROOT", array=False)[0]
+		out = out.split(":")
+		USE_COLOR = out[0].lower()
+		USE_FAKEROOT = out[1].lower()
+		del(out)
+	
+	out = echo_bash_vars(makepkg_config, '$PKGDEST:$SRCDEST:$CARCH', array=False)[0]
+	out = out.split(':')
+	PKGDEST = out[0]
+	SRCDEST = out[1]
+	CARCH = out[2]
+	del(out)
+else:
+	print >>sys.stderr.write('Error: '+makepkg_config+' is missing or read permissions are denied.')
+	sys.exit(1)
+		
+def cleanup():
+	if os.path.isdir(pkg_build_dir):
+		rmtree(pkg_build_dir)
+	if aur_tarfile != None:
+		if os.path.isfile(aur_tarfile):
+			os.remove(aur_tarfile)
+
+def handler(signo, frame):
+	if signo == 2:
+		cleanup()
+		sys.exit(130)
+	elif signo == 15:
+		cleanup()
+		sys.exit(143)
+
+signal.signal(signal.SIGINT, handler)
+signal.signal(signal.SIGTERM, handler)
+
+myver = '1.7.8'
+myname = os.path.basename(sys.argv[0])
+
+def usage():
+	print ''
+	print 'usage: %s [options] [package] <package>'%myname
+	print ''
+	print 'options:'
+	print '  -h, --help            show this help message and exit'
+	print '  -v, --version         display version and exit'
+	print '  -b, --builddeps       build and install missing dependencies from abs'
+	print '  -s, --syncdeps        install missing dependencies with pacman'
+	print '  -o \"OPTS\", --builder-opts=\"OPTS\"'
+	print '                        pass OPTS to makepkg or versionpkg during build'
+	print '  -e, --save            save build files in `'+save_dir+'\''
+	print '  -l, --local           use build files found in `'+save_dir+'\''
+	print '                        instead of AUR'
+	print '  -f, --official        build official packages found in `'+abs_root+'\''
+	print '                        instead of AUR'
+	print '  -a, --auto-build      bypass menu and build if detected safe'
+	print '  -u, --upgrade         upgrade all packages installed from unsupported AUR'
+	print '  -n, --noconfirm       bypass any confirmation messages by answering yes'
+	print '  -x, --noinstall       do not install the package after building'
+	print '  -r, --revision        check for latest CVS/SVN/MERCURIAL revisions during'
+	print '                        --upgrade'
+	print '  -m, --rm-make-deps    remove uneeded make dependencies'
+	print '  -c  --clean           clean the build directory'
+	print '  -S, --search          search aur for single [keyword]'
+	print '  -V, --vote            vote for a package'
+	print '  -U, --unvote          unvote for a package'
+	print ''
+
+try:
+	opts, args = getopt.getopt(sys.argv[1:], 'hvbso:elfaunxrmcSVU', ['help', 'version', 'builddeps', 'syncdeps', 
+		'builder-opts=', 'save', 'local', 'official', 'auto-build', 'upgrade', 'noconfirm', 
+		'noinstall', 'revision', 'rm-make-deps', 'clean', 'search', 'vote', 'unvote'])
+except getopt.GetoptError, e:
+	usage()
+	print 'Error: ' + str(e)
+	sys.exit(1)
+
+VERSION		= 0
+BUILDDEPS	= 0
+SYNCDEPS	= 0
+BUILDER_OPTS	= 0
+SAVE		= 0
+LOCAL		= 0
+OFFICIAL	= 0
+AUTO_BUILD	= 0
+UPGRADE		= 0
+NOCONFIRM	= 0
+NOINSTALL	= 0
+REVISION	= 0
+CLEAN		= 0
+SEARCH		= 0
+VOTE		= 0
+UNVOTE		= 0
+RM_MDEPS	= 0
+BUILDER_OPTARGS	= ''
+OFFICIAL_PATH	= abs_root
+
+for opt, optarg in opts:
+	if opt in ['-h', '--help']: usage(); sys.exit(0)
+	if opt in ['-v', '--version']: VERSION = 1
+	if opt in ['-b', '--builddeps']: BUILDDEPS = 1
+	if opt in ['-s', '--syncdeps']: SYNCDEPS = 1
+	if opt in ['-o', '--builder-opts']: 
+		BUILDER_OPTS = 1
+		BUILDER_OPTARGS = optarg
+	if opt in ['-e', '--save']: SAVE = 1
+	if opt in ['-l', '--local']: LOCAL = 1
+	if opt in ['-f', '--official']: OFFICIAL = 1
+	if opt in ['-a', '--auto-build']: AUTO_BUILD = 1
+	if opt in ['-u', '--upgrade']: UPGRADE =1
+	if opt in ['-n', '--noconfirm']: NOCONFIRM = 1
+	if opt in ['-x', '--noinstall']: NOINSTALL = 1
+	if opt in ['-r', '--revision' ]: REVISION = 1
+	if opt in ['-m', '--rm-make-deps' ]: RM_MDEPS = 1
+	if opt in ['-c', '--clean' ]: CLEAN = 1
+	if opt in ['-S', '--search']: SEARCH = 1
+	if opt in ['-V', '--vote']: VOTE = 1
+	if opt in ['-U', '--unvote']: UNVOTE = 1
+
+if VERSION:
+	print ''
+	print 'Aurbuild v' + myver
+	print 'Copyright (C) 2005-2007 Tyler Gates <TGates81@gmail.com>'
+	print ''
+	print 'This program may be freely redistributed under'
+	print 'the terms of the GNU General Public License'
+	print ''
+	sys.exit(0)
+
+# check for no no's:
+
+# must have an opt
+if len(opts) == 0:
+	usage()
+	sys.exit(1)
+
+# must have an arg unless --upgrade or --clean are specified
+if (len(args) == 0) and (not UPGRADE and not CLEAN):
+	print myname + ': no target specified'
+	sys.exit(1)
+
+# --builddeps and --syncdeps can't be used together
+if BUILDDEPS and SYNCDEPS:
+	print myname + ': -b, --builddeps and -s, --syncdeps cannot be used at the same time'
+	sys.exit(1)
+
+# --local, --official, --auto-build, and --upgrade must be used with a dependency install method
+if LOCAL or OFFICIAL or AUTO_BUILD or UPGRADE:
+	if not BUILDDEPS and not SYNCDEPS:
+		print myname + ': this switch requires either -b, --builddeps or -s, --syncdeps'
+		sys.exit(1)
+
+# --vote and --unvote can't be used together
+if VOTE and UNVOTE:
+	print myname + ': -V, --vote and -U, --unvote cannot be used at the same time'
+	sys.exit(1)
+
+# --revision must be used with upgrade
+if REVISION and not UPGRADE:
+	print myname + ': -r, --revision must be used with -u, --upgrade'
+	sys.exit(1)
+
+def msg(text):
+	if USE_COLOR == 'y':
+		return '\033[1;32m==>\033[1;0m \033[1;1m' + text + '\033[1;0m'
+	else:
+		return '==> ' + text
+
+def color(text, color_alias):
+	if USE_COLOR == 'y':
+		color_dict = {'grey':'0', 'red':'1', 'green':'2', 'yellow':'3', 'blue':'4', 'magenta':'5', 'cyan':'6', 'white':'7', 'black': '8'}
+		return '\033[1;3' + color_dict[color_alias] + 'm' + text + '\033[1;0m'
+	else:
+		return text
+
+def fakeroot_check():
+	if USE_FAKEROOT != 'y':
+		print '\nUSE_FAKEROOT variable in /etc/makepkg.conf is not set to \"y\". Refusing to proceed.\n'
+		sys.exit(1)
+		
+def get_depends(pkgbuild, dep1, dep2):
+	# dep1 is makedepends. dep2 is depends
+	p = Popen('source ' + pkgbuild + '; echo "${' + dep1 + '[@]}:${' + dep2 + '[@]}"',
+			shell=True, stdout=PIPE, stderr=PIPE)
+	out = p.stdout.read()
+	err = p.stderr.read()
+	p.stdout.close()
+	p.stderr.close()
+	if err != '':
+		print >>sys.stderr.write('\nPKGBUILD syntax error:\n\n' + err)
+		cleanup()
+		sys.exit(1)
+	out = out.strip()
+	out = out.split(':')
+	dep1 = out[0].split(' ')
+	dep2 = out[1].split(' ')
+	return dep1, dep2
+
+def get_dep_path(dep):
+	if not os.path.isdir(abs_root):
+		print >>sys.stderr.write('\n' + abs_root + 'not found in filesystem. Cannot build dependencies\n')
+		cleanup()
+		sys.exit(1)
+	results = Afind.find_dir(abs_root + '/', dep)[0]
+	if results != []:
+		for p in results:
+			if os.path.isfile(p + '/PKGBUILD'):
+				return p
+		return None
+	else:
+		return None
+
+def user_copytree(target, des, u_uid, u_gid):
+		os.setegid(u_gid)
+		os.seteuid(u_uid)
+		copytree(target, des)
+		os.seteuid(uid)
+		os.setegid(gid)
+
+def user_makedirs(target, u_uid, u_gid):
+		os.setegid(u_gid)
+		os.seteuid(u_uid)
+		os.makedirs(target)
+		os.seteuid(uid)
+		os.setegid(gid)
+
+
+def prepare_work_dirs():
+	try:
+		cleanup()
+		# parent directory of aurbuild_home should exist and owned by root
+		if not os.path.isdir(os.path.dirname(aurbuild_home)):
+			os.makedirs(os.path.dirname(aurbuild_home))
+
+		# aurbuild_home should be root:aurbuild with 0775	
+		if not os.path.isdir(aurbuild_home):
+			os.mkdir(aurbuild_home)
+			os.chmod(aurbuild_home, 0775)
+			os.chown(aurbuild_home, 0, builduser_uid)
+
+		# build_dir should be the same as aurbuild_home
+		if not os.path.isdir(build_dir):
+			os.mkdir(build_dir)
+			os.chmod(build_dir, 0775)
+			os.chown(build_dir, 0, builduser_uid)
+
+		# pkg_build_dir should be created by the builduser
+		user_makedirs(pkg_build_dir, builduser_uid, builduser_gid)
+	except Exception, e:
+		print >>sys.stderr.write('\ncould not prepare for build: ' + str(e) + '\n')
+		sys.exit(1)
+
+def prepare_build_user():
+	global builduser_uid, builduser_gid
+	try:
+		builduser_uid = pwd.getpwnam('aurbuild')[2]
+		builduser_gid = pwd.getpwnam('aurbuild')[3]
+	except:
+		# setup an account
+		print 'creating designated build user... ',
+		code = Popen(['useradd', '-s', '/bin/false', '-d', '/var/tmp/aurbuild', '-u', '360', '-c', 'aurbuild', 'aurbuild']).wait()
+		if code != 0:
+			print >>sys.stderr.write('Error: could not create designated build user. Reports exit status '+str(code)+'. ')
+			sys.exit(1)
+		else: print 'done.'
+		
+		# lock password
+		print 'locking password... ',
+		code = Popen(['passwd', '-l', '-q', 'aurbuild']).wait()
+		if code != 0:
+			print >>sys.stderr.write('Error: could not lock password. Reports exit status of '+str(code))
+			sys.exit(1)
+		else:
+			print 'done.'
+		
+		# prepare_work_dirs() will handle the proper build directories
+		
+		# try again
+		prepare_build_user()
+	
+
+def get_tarball(pkg, pkg_query = None):
+	if pkg_query == None: pkg_query = pkg
+	aur_space = '%20'
+	try:
+		raw_text = Aaurparse.raw_pkg_query(pkg_query)
+	except Exception, e:
+		print >>sys.stderr.write('\ncould not retrieve needed data from aur: ' + str(e))
+		cleanup()
+		sys.exit(1)
+		
+	main_url = Aaurparse.pkg_main_url(raw_text, pkg)
+
+	if main_url == '':
+		if not aur_space in pkg_query:
+			# try again with a space
+			return get_tarball(pkg, pkg_query=pkg+aur_space)
+		else:
+			if UPGRADE: 
+				return None, None
+			else:
+				print >>sys.stderr.write(pkg + ': not found in AUR')
+				cleanup()
+				sys.exit(1)
+
+	safe = Aaurparse.pkg_safe_status(raw_text, pkg)
+
+	try:
+		f = urllib.urlopen(main_url)
+		raw_text = f.readlines()
+		f.close()
+	except IOError, e:
+		print >>sys.stderr.write('\ncould not retrieve needed data from aur: '+main_url + ': ' + str(e) + '\n')
+		cleanup()
+		sys.exit(1)
+
+	try:
+		tarball_url = Aaurparse.pkg_tarball_url(raw_text)
+	except:
+		print >>sys.stderr.write('\nUnable to parse tarball info. If you see this message rarely, it is\n' + 
+						'possible user comments have skewed the parsing results on the web page.\n')
+		cleanup()
+		sys.exit(1)
+	
+	if tarball_url == '' and UPGRADE:
+		return None, None
+	elif tarball_url == '':
+		print >>sys.stderr.write(pkg + ': possible [community] package')
+		if SYNCDEPS:
+			cmd = 'aurbuild --syncdeps --official '+pkg
+		elif BUILDDEPS:
+			cmd = 'aurbuild --builddeps --official '+pkg
+		choice = raw_input('\nInstall by running `'+cmd+'\'? [Y/n]  ')
+		if choice == '': choice = 'y'
+		if NOCONFIRM: choice == 'y'
+		choice = choice.lower()
+		if choice == 'y' or choice == 'yes':
+			retval = Popen(cmd, shell=True).wait()
+			return None, None
+		else:
+			cleanup()
+			sys.exit(1)
+
+
+	try:
+		tar = urllib.urlretrieve(tarball_url)[0]
+		return tar, safe
+	except IOError, e:
+		print >>sys.stderr.write('\ncould not retrieve needed data from aur: '+tarball_url + ': ' + str(e) + '\n')
+		cleanup()
+		sys.exit(1)
+
+def extract(file):
+	extract_dir = pkg_build_dir
+	# split off the extension at `.'. Up to two allowed
+	file_extension = file.rsplit('.', 2)[1:]
+	if 'gz' in file_extension: ext = 'gz'
+	elif 'tgz' in file_extension: ext = 'gz'
+	elif 'bz2' in file_extension: ext = 'bz2'
+	else:
+		print >>sys.stderr.write('\n' + file + ': unsupported compression. Cannot extract.\n')
+		cleanup()
+		if os.path.exists(file): os.remove(file)
+		cleanup()
+		sys.exit(1)
+	
+	try:
+		if os.path.isdir(extract_dir): rmtree(extract_dir)
+		os.mkdir(extract_dir)
+		os.chmod(extract_dir, 0775)
+		os.chown(extract_dir, 0, builduser_gid) 
+	except Exception, e:
+		print >>sys.stderr.write('could not create temporary extraction point:')
+		print >>sys.stderr.write(str(e))
+		cleanup()
+		sys.exit(1)
+
+	try:
+		tar_f = tarfile.open(file, 'r:' + ext)
+		for member in tar_f.getmembers():
+			tar_f.extract(member, extract_dir)
+	except tarfile.TarError, e:
+		print >>sys.stderr.write('\ncould not extract tarfile: ' + str(e) + '\n')
+		if os.path.exists(file): os.remove(file)
+		cleanup()
+		sys.exit(1)
+
+	# aur gives us fucked tarballs with nobody:nobody ownership... this will fix it
+	def mod_extracted(dir):
+		for d in os.listdir(dir):
+			v = os.path.join(dir, d)
+			os.chown(v, builduser_uid, builduser_gid)
+			if os.path.isdir(v):
+				mod_extracted(v)
+
+	# the parent directory of the extracted tarball has a setgroup id bit set from AUR. This needs to be removed:
+	for j in os.listdir(extract_dir):
+		jf = os.path.join(extract_dir, j)
+		if os.path.isdir(jf):
+			os.chmod(jf, 0755)
+
+	mod_extracted(extract_dir)
+
+	tar_f.close()
+	os.remove(file)
+
+def get_PKGBUILD_path(parent_dir):
+	results = Afind.find_file(parent_dir, 'PKGBUILD')[0]
+	if results != []:
+		results = results[0].replace('/PKGBUILD', '')
+		return results
+	else:
+		print >>sys.stderr.write('\nPKGBUILD not found.\n')
+		cleanup()
+		sys.exit(1)
+
+def filter_deps(pkg, fd_ct, type):
+	""" give required dependency and return it if it needs to be installed or return group packages if it is that keyword
+	filtered = [], list """
+	# for tabbing over tree branch symbols
+	pre_space  = 2
+	# spaces must be greater than pre_space
+	spaces = 3
+	v = fd_ct/spaces
+	indents = ' '*pre_space + ('|' + ' '*spaces)*v
+	sys.stdout.write(color(indents + '`- ', 'blue') + color(pkg + ': ', 'black'))
+	sys.stdout.flush()
+	code = Apacman.operations().pacmanT(pkg)
+	if code == 127:
+		# see if its a group name
+		group_pkgs = Apacman.db_tools().get_group(pkg)
+		if group_pkgs == []:
+			print color('missing ' + type, 'red')
+			pkg = Apacman.db_tools().strip_ver_cmps(pkg)[0]
+			if BUILDDEPS: 
+				dep_path = get_dep_path(pkg)
+				if dep_path != None:
+					# a dependency is found, check it's deps and run this method again
+					mdep_cans, dep_cans = get_depends(dep_path + '/PKGBUILD', 'makedepends', 'depends')
+					if mdep_cans or dep_cans != ['']: fd_ct += spaces
+					if mdep_cans != ['']:
+						for mdep_can in mdep_cans:
+							filter_deps(mdep_can, fd_ct, type='[M]')
+					if dep_cans != ['']: 
+						for dep_can in dep_cans:
+							filter_deps(dep_can, fd_ct, type='[D]')
+				else:
+					print >>sys.stderr.write('\n' + pkg + ': not found in ABS.\n')
+					cleanup()
+					sys.exit(1)
+			elif SYNCDEPS:
+				# follows steps of BUILDDEPS omitting make dependencies
+				if db_paths == []:
+					# generate list to global
+					db_paths.extend(Apacman.db_tools().get_db_pkgpaths())
+				if db_pkgs == []:
+					# generate list to global
+					for db_path in db_paths:
+						descfile = db_path + '/desc'
+						if os.path.isfile(descfile):
+							db_pkg = Apacman.db_tools().get_db_info(descfile, '%NAME%')[0]
+							if db_pkg != []: db_pkgs.append(db_pkg)
+				found = 0
+				for db_pkg in db_pkgs:
+					db_path = db_paths[db_pkgs.index(db_pkg)]
+					if db_pkg != [] and pkg == db_pkg:
+						found = 1
+						dependsfile = db_path + '/depends'
+						dep_cans = Apacman.db_tools().get_db_info(dependsfile, '%DEPENDS%')
+						if dep_cans != []: 
+							fd_ct += spaces
+							for dep_can in dep_cans:
+								filter_deps(dep_can, fd_ct, type='[D]')
+				if not found:
+					print >>sys.stderr.write('\n' + pkg + ': not found in database.\n')
+					cleanup()
+					sys.exit(1)
+			# there must be no remaining deps of deps, add to list
+			if not pkg in filtered: filtered.append(pkg)
+		else:
+			print color('group', 'cyan')
+			fd_ct += 4
+			for group_pkg in group_pkgs:
+				filter_deps(group_pkg, fd_ct, type='[D]')
+	elif code == 0:
+		print color('ok ' + type, 'green')
+		
+	elif code != 127 and code != 0:
+		sys.stderr.write('\naurbuild: fatal error while testing dependencies.\n')
+		cleanup()
+		sys.exit(1)
+	return filtered
+
+
+def src_to_pm_cache(sources):
+	""" copy the sources in raw format (from sources array) to pacman cache """
+
+	cwd = os.getcwd()
+	if SRCDEST == '':
+		_SRCDEST = os.path.join(pm_cache, 'src')
+	else:
+		_SRCDEST = SRCDEST
+	for source in sources:
+		source_file = source.split('/')[-1]
+		try:
+			source_file = os.path.join(cwd, 'src', source_file)
+			copy(source_file, _SRCDEST)
+		except:
+			pass
+
+def get_pkgpath():
+	""" get the built package path """
+
+	cwd = os.getcwd()
+	if PKGDEST == '':
+		_PKGDEST = cwd
+	else:
+		_PKGDEST = PKGDEST
+	
+	out, err = echo_bash_vars(os.path.join(cwd, 'PKGBUILD'), '${pkgname}%${pkgver}%${pkgrel}')
+	if err != '':
+		print >>sys.stderr.write('PKGBUILD syntax error: '+err)
+		cleanup()
+		sys.exit(1)
+
+	out = out.split('%')
+	pkgname, pkgver, pkgrel = out[0], out[1], out[2]
+
+	v2_pkgpath = os.path.join(_PKGDEST, pkgname+'-'+pkgver+'-'+pkgrel+'.'+PKGEXT)
+	v3_pkgpath = os.path.join(_PKGDEST, pkgname+'-'+pkgver+'-'+pkgrel+'-'+CARCH+'.'+PKGEXT)
+
+	if os.path.exists(v2_pkgpath):
+		pkgpath = v2_pkgpath
+	elif os.path.exists(v3_pkgpath):
+		pkgpath = v3_pkgpath
+	else:
+		print >>sys.stderr.write('Error: could not find the built package.')
+		print >>sys.stderr.write('In some cases this might mean the PKGDEST location does not have write and execute permissions')
+		print >>sys.stderr.write('for the `aurbuild\' user or group.')
+		cleanup()
+		sys.exit(1)
+	
+	return pkgpath
+
+def makepkgf(dep):
+
+	cwd = os.getcwd()
+	raw_sources, err = echo_bash_vars(os.path.join(cwd, 'PKGBUILD'), '${source[@]}', array=True)
+	if err != '':
+		print >>sys.stderr.write('PKGBUILD syntax error: '+err)
+		cleanup()
+		sys.exit(1)
+	
+	app = 'makepkg'
+	args = ['makepkg', '-f']
+	if BUILDER_OPTS and BUILDER_OPTARGS != '':
+		args.extend(BUILDER_OPTARGS.split(' '))
+	
+	# ccache needs a writable HOME, set it here.
+	env = os.environ
+	env['HOME'] = aurbuild_home
+	code = Aexec.child_spawn(app, args, builduser_uid, builduser_gid, env)
+
+	# copy src files over to cache
+	src_to_pm_cache(raw_sources)
+
+	if code > 0:
+		print >>sys.stderr.write('\naurbuild: could not build \"' + dep + '\" with makepkg.')
+		print 'build directory retained at `'+pkg_build_dir+'\''
+		print 'In some cases you may be able to cd into the directory, fix the problem and run makepkg with success.'
+		sys.exit(1)
+	
+	return get_pkgpath()
+
+def versionpkg(dep):
+
+	cwd = os.getcwd()
+	raw_sources, err = echo_bash_vars(os.path.join(cwd, 'PKGBUILD'), '${source[@]}', array=True)
+	if err != '':
+		print >>sys.stderr.write('PKGBUILD syntax error: '+err)
+		cleanup()
+		sys.exit(1)
+
+	app = 'versionpkg'
+	args = ['versionpkg', '-f', '-o=-f']
+	if BUILDER_OPTS and BUILDER_OPTARGS != '':
+		args.extend(BUILDER_OPTARGS.split(' '))
+	
+	# ccache needs a writable HOME, set it here.
+	env = os.environ
+	env['HOME'] = aurbuild_home
+	code = Aexec.child_spawn(app, args, builduser_uid, builduser_gid, env)
+
+	# copy src files over to cache
+	src_to_pm_cache(raw_sources)
+	
+	if code > 0:
+		print >>sys.stderr.write('\naurbuild: could not build \"' + dep + '\" with versionpkg.')
+		print 'build directory retained at `'+pkg_build_dir+'\''
+		print 'In some cases you may be able to cd into the directory, fix the problem and run versionpkg with success.'
+		sys.exit(1)
+	
+	return get_pkgpath()
+
+def install(pkgpath):
+	if os.path.isfile(pacman_lock):
+		print '\nPacman is detected running. Package cannot not be installed at this time.'
+		print 'Once pacman exits, you may press enter to install this package. Control + C exits.'
+		raw_input()	
+	print msg('Leaving fakeroot environment...')
+	# (makepkg will do it)
+		
+	print msg('Running pacman -U...')
+	code = Popen(['pacman', '-U', pkgpath]).wait()
+	if code > 0:
+		print >>sys.stderr.write('\naurbuild: could not install package through pacman --upgrade.')
+		cleanup()
+		sys.exit(1)
+			
+def builddeps(deplist):
+        # for -b option
+	cwd = os.getcwd()
+        for each in deplist:
+                dep_path = get_dep_path(each)
+                if dep_path == None:
+                        print >>sys.stderr.write('\naurbuild: dependency \"' + each + '\" not found in abs.')
+                        cleanup()
+                        sys.exit(1)
+
+		des_dir = os.path.join(build_dir, each)
+		os.setegid(builduser_gid)
+		os.seteuid(builduser_uid)
+                copytree(dep_path, des_dir)
+		os.seteuid(uid)
+		os.setegid(gid)
+                os.chdir(des_dir)
+		pkgpath = makepkgf(each)
+		if not NOINSTALL: install(pkgpath)
+
+        os.chdir(cwd)
+	
+def syncdeps(deplist):
+	# for -s option
+	pkglist = []
+	pkgstring = ''
+	for pkg in deplist:
+		if pkg != '':
+			pkg = Apacman.db_tools().strip_ver_cmps(pkg)[0]
+			pkglist.append(pkg)
+	
+	cmd = ['pacman', '-S', '--noconfirm']
+	cmd.extend(pkglist)
+			
+	code = Popen(cmd).wait()
+	if code == 127:
+		sys.stderr.write('\naurbuild: pacman could not install dependencies.\n')
+		cleanup()
+		sys.exit(1)
+
+def appcheck(app):
+	path = os.getenv('PATH')
+	path = path.replace(':', '/ ')
+	path = path.split(' ')
+	for each in path:
+		if os.path.isfile(each + app): return True
+	return False
+
+def menu(safe, dir_list, package):
+	files = []
+	editor_cmd = editor
+#	columns = int(os.getenv('COLUMNS'))
+#	if columns == None: columns = 80
+	columns = 80
+	sep_num = 51
+	seperator = '-'*sep_num
+	space_num = (columns - sep_num ) / 2
+	spaces = ' '*space_num
+	for each in dir_list:
+		if os.path.isfile(each):
+			files.append(each)
+	del(each)
+	file_num = len(files)
+	
+	if safe == 'NO' and not NOINSTALL:
+		# open editor with .install file
+		for k in files:
+			extension = k.rsplit('.', 1)[1:]
+			if 'install' in extension:
+				editor_cmd.append(k)
+				code = Popen(editor_cmd).wait()
+				editor_cmd.remove(k)
+				break
+
+	def versionpkg_pkg():
+		# TODO: patch versionpkg to return true or false on a CVS/SVN/MERCURIAL PKGBUILD's
+		cwd = os.getcwd()
+		pc_out, pc_err = echo_bash_vars(os.path.join(cwd, 'PKGBUILD'),'${_cvsmod}%${_cvsroot}%${_svnmod}%${_svntrunk}%${_hgrepo}%${_hgroot}')
+		if pc_err != '': return 0
+		pc_out = pc_out.split('%')
+		_cvsmod 	= pc_out[0]
+		_cvsroot 	= pc_out[1]
+		_svnmod 	= pc_out[2]
+		_svntrunk	= pc_out[3]
+		_hgrepo		= pc_out[4]
+		_hgroot		= pc_out[5]
+		if _cvsmod != '' and _cvsroot != '': return 1
+		elif _svnmod != '' and _svntrunk != '': return 1
+		elif _hgrepo != '' and _hgroot != '': return 1
+		else: return 0
+
+	def title(status, _color):
+		display = package + ': ' + status
+		len_disp = int(len(display))
+		if len_disp > sep_num: centerspaces = ''
+		else: centerspaces = ' '*((sep_num - len_disp) / 2)
+		return spaces + centerspaces + display.replace(status, '') + color(status, _color)
+
+	versionpkg_preferred = versionpkg_pkg()
+	getout = False
+	while not getout:
+		default_choice = 'b'
+		code = Popen('clear').wait()
+		print '\n'
+		if safe == 'NO': print title('NOT SAFE', 'red')
+		elif safe == 'YES': print title('SAFE', 'green')
+		print '\n' + spaces + seperator
+		i=0
+		while i<file_num:
+			print spaces + '  ' + str(i+1) + ')  View/Edit ' + files[i]
+			i = i+1
+		print spaces + seperator
+		if NOINSTALL: 
+			if versionpkg_preferred:
+				print spaces + '  b)  Build with makepkg.'
+				print spaces + color('*', 'blue') + ' v)  Build with versionpkg.'
+				default_choice = 'v'
+			else:
+				print spaces + color('*', 'blue') + ' b)  Build with makepkg.'
+				print spaces + '  v)  Build with versionpkg.'
+				default_choice = 'b'
+		else:
+			if versionpkg_preferred:
+				print spaces + '  b)  Build and install with makepkg and pacman.'
+				print spaces + color('*', 'blue') + ' v)  Build and install with versionpkg and pacman.'
+				default_choice = 'v'
+			else:
+				print spaces + color('*', 'blue') + ' b)  Build and install with makepkg and pacman.'
+				print spaces + '  v)  Build and install with versionpkg and pacman.'
+				default_choice = 'b'
+		print spaces + '  s)  Skip this package.'
+		print spaces + '  q)  Quit without building.'
+		print spaces + seperator
+
+		display_choice = default_choice.upper()
+		choice = raw_input('\n' + spaces + 'Enter a selection: ['+ display_choice + '] ')
+		if choice == 'b':
+			return choice
+		elif choice == 'v':
+			return choice
+		elif choice == 'q':
+			cleanup()
+			sys.exit(0)
+		elif choice == 's':
+			return choice
+		elif choice.isdigit():
+			if int(choice) >= 1 and int(choice) <= file_num:
+				editor_cmd.append(files[int(choice)-1])
+				code = Popen(editor_cmd).wait()
+				editor_cmd.remove(files[int(choice)-1])
+				
+			else:
+				print '\n' + spaces + choice + ': Invalid entry.'
+				print spaces + 'Press enter to choose again.'
+				raw_input(spaces)
+		elif choice == '': return default_choice
+		else:
+			print '\n' + spaces + choice + ': Invalid entry.'
+			print spaces + 'Press enter to choose again.'
+			raw_input(spaces)
+
+def init():
+	# check that we have everything we need
+	prog_list = ['makepkg', 'pacman', 'versionpkg', 'fakeroot']
+	for prog in prog_list:
+		if not appcheck(prog):
+			print >>sys.stderr.write('\n' + prog + ' program not found in $PATH.\n')
+			sys.exit(1)
+	# must be root
+	if uid != 0:
+		print >>sys.stderr.write('requires root access.')
+		sys.exit(1)
+	# ensure we have fakeroot enabled
+	fakeroot_check()
+	# set up build user
+	prepare_build_user()
+	# leave out prepare_work_dirs(), it should be called as needed
+
+def savefiles(pkg, old_dir):
+	failed = 0
+	def abort_msg(msg):
+		print >>sys.stderr.write('Error saving ' + pkg + ' to ' + save_dir + ': ' + msg)
+		print >>sys.stderr.write('Aborting save...')
+		
+	savecan = os.path.join(save_dir, pkg)
+	if not os.path.isdir(save_dir):
+		try:
+			os.makedirs(save_dir)
+			os.chmod(save_dir, 0775)
+			os.chown(save_dir, 0, builduser_uid)
+		except OSError, e:
+			abort_msg(str(e))
+			failed = 1
+	
+	if os.path.isdir(savecan) and not failed:
+		if not NOCONFIRM: choice = raw_input('`' + savecan + '\': directory exists. Overwrite? [Y/n]  ').lower()
+		if NOCONFIRM or choice == 'y' or choice == 'yes' or choice == '':
+			try:
+				rmtree(savecan)
+				user_copytree(old_dir, savecan, builduser_uid, builduser_gid)
+			except OSError, e:
+				abort_msg(str(e))
+				failed = 1
+	elif not os.path.isdir(savecan) and not failed:
+		try:
+			user_copytree(old_dir, savecan, builduser_uid, builduser_gid)
+		except OSError, e:
+			abort_msg(str(e))
+
+def search():
+	try:
+		names, descriptions, locations, categories, maintainers, votes, safe = Aaurparse.aursearch(args[0])
+	except Exception, e:
+		print >>sys.stderr.write(str(e))
+		sys.exit(1)
+
+	if names == None:
+		print >>sys.stderr.write(args[0] + ': search results empty')
+		sys.exit(1)
+	else:
+		view_list = []
+		for num in range(len(names)):
+			name 		= 'Name:              ' + names[num] + '\n'
+			description 	= 'Description:       ' + descriptions[num] + '\n'
+			location	= 'Location:          ' + locations[num] + '/' + categories[num] + '\n'
+			maintainer	= 'Maintainer:        ' + maintainers[num] + '\n'
+			_votes		= 'Votes:             ' + votes[num] + '\n'
+			_safe		= 'Safe:              ' + safe[num] + '\n\n'
+
+			view_list.append(name + description + location + maintainer + _votes + _safe)
+
+		if not appcheck('less'):
+			for each in view_list:
+				print each
+		else:
+			# ripped off from pydoc.py
+			pipe = os.popen('less', 'w')
+			try:
+				for line in view_list:
+					pipe.write(line)
+				pipe.close()
+			except IOError:
+				# Ignore broken pipes caused be quitting less
+				pass
+
+def rm_dir_contents(dir):
+	""" same as a rm -r dir/* """
+	
+	if not os.path.isdir(dir):
+		return 1
+	start_dir = dir.rstrip('/')
+	
+	# by starting a seperate function like this we will know when to stop the recursion by 
+	# examining the 'static' start_dir variable from the parent function at each pass.
+	def _rm_dir_contents(_dir):
+		try:
+			one_back = os.path.dirname(_dir)
+			for each in os.listdir(_dir):
+				object_path = os.path.join(_dir, each)
+				if os.path.isdir(object_path) and not os.path.islink(object_path):
+					if len(os.listdir(object_path)) == 0:
+						os.rmdir(object_path)
+					else:
+						_rm_dir_contents(object_path)
+				elif os.path.isfile(object_path) or os.path.islink(object_path):
+					os.remove(object_path)
+			if _dir == start_dir:
+				return 0
+			elif os.path.exists(one_back):
+				_rm_dir_contents(one_back)
+		except Exception, e:
+			print >>sys.stderr.write('Error: unable to remove directory contents: '+str(e))
+			return 1
+	return _rm_dir_contents(start_dir)
+
+def main():
+	global editor, args
+	rm_packages = []
+
+	if CLEAN:
+		retcode = rm_dir_contents(build_dir)
+		if len(args) == 0:
+			sys.exit(retcode)
+	if SEARCH: 
+		search()
+		sys.exit(0)
+	if VOTE or UNVOTE:
+		import getpass, Aurbuild.login
+
+		login = Aurbuild.login
+		
+		print ''
+		username = raw_input('AUR Username: ')
+		password = getpass.getpass('AUR Password: ')
+		print ''
+
+		code = []
+		code2 = []
+		for arg in args:
+			if VOTE:
+				print 'casting vote for ' + arg + '... ',
+				sys.stdout.flush()
+				try:
+					code = login.aurlogin().vote(username, password, cookiefile, arg)
+					if code == 2:
+						print 'vote previously cast!'
+						code2.append(0)
+					else:
+						print 'success'
+						code2.append(0)
+				except login.LoginError, e:
+					print'failed: ' + str(e)
+					code2.append(1)
+				except:
+					print 'failed'
+					raise
+					
+			elif UNVOTE:
+				print 'removing vote for ' + arg + '... ',
+				sys.stdout.flush()
+				try:
+					code = login.aurlogin().unvote(username, password, cookiefile, arg)
+					if code == 2:
+						print 'no vote cast!'
+						code2.append(0)
+					else:
+						print 'success'
+						code2.append(0)
+				except login.LoginError, e:
+					print 'failed: ' + str(e)
+					code2.append(1)
+				except:
+					print 'failed'
+					raise
+					
+		# if one fails, exit with error
+		if 1 in code2: sys.exit(1)
+		else: sys.exit(0)
+
+	init()
+	# default to nano if no $EDITOR variable found
+	if editor == ['']: 
+		print "Editor environmental variable not set. Using nano... "
+		time.sleep(3)
+		editor = ['nano']
+	editor_no_args = editor[0]
+	if not appcheck(editor_no_args) and not os.path.isfile(editor_no_args):
+		print >>sys.stderr.write('Error: editor value \"' + editor_no_args + '\" not found on system.')
+		cleanup()
+		sys.exit(1)
+	
+	if UPGRADE:
+		# set args to each potential AUR candidate
+		args, installed = Apacman.db_tools().get_foreign()
+	
+	upgrade_ct = 0
+	for argo in args:
+		global working_pkg, pkg_build_dir, aur_tarfile
+		working_pkg = argo
+		pkg_build_dir = os.path.join(build_dir, working_pkg +'.'+pid)
+		prepare_work_dirs()
+		# a potential pkg work direcotory (after decompression)
+		p_work_dir = os.path.join(pkg_build_dir, working_pkg)
+
+		# retrieve tarball and prepare to build
+		if LOCAL or OFFICIAL:
+			if LOCAL:
+				pkgbuild_root = save_dir
+			if OFFICIAL:
+				pkgbuild_root = OFFICIAL_PATH
+			# test for its existance
+			if not os.access(pkgbuild_root, os.F_OK | os.R_OK):
+				print >>sys.stderr.write('Error: PKGBUILD root '+pkgbuild_root+' not found or read permissions denied.')
+				cleanup()
+				sys.exit(1)
+
+			results = Afind.find_dir(pkgbuild_root, argo)[0]
+
+			if results == [] and not UPGRADE:
+				print '\n\"'+argo+'\" not found under `'+pkgbuild_root+'\'\n'
+				cleanup()
+				sys.exit(1)
+			elif results == [] and UPGRADE:
+				upgrade_ct += 1
+				continue
+			elif results != 0:
+				for r in results:
+					j = os.path.join(r, 'PKGBUILD')
+					if os.path.isfile(j):
+						_p_name, err = echo_bash_vars(j, '${pkgname}')
+						if err != '':
+							print >>sys.stderr.write('PKGBUID syntax error: '+err)
+							cleanup()
+							upgrade_ct += 1
+							continue
+						if _p_name == argo:
+							results = r
+							break
+				if type(results) != str: results = ''
+
+				if results == '':
+					print '\n\"'+argo+'\" not found under `'+pkgbuild_root+'\'\n'
+					cleanup()
+					sys.exit(1)
+			
+				copytree(results, p_work_dir)
+				os.chown(p_work_dir, 0, builduser_uid)
+				os.chmod(p_work_dir, 0775)
+				work_dir = get_PKGBUILD_path(p_work_dir)
+				safe_status = None
+		else:
+			aur_tarfile, safe_status = get_tarball(argo)
+			if aur_tarfile == None and UPGRADE:
+				cleanup()
+				upgrade_ct += 1
+				continue
+			if aur_tarfile == None and safe_status == None:
+				# probably built a community package. At any rate, the loop needs to continue
+				cleanup()
+				upgrade_ct += 1
+				continue
+			extract(aur_tarfile)
+			work_dir = get_PKGBUILD_path(p_work_dir)
+			
+		os.chdir(work_dir)
+
+		# for --upgrade. compare versions and confirm upgrade with user
+		if UPGRADE:
+			if REVISION:
+				# check for latest revision using versionpkg. Use shell to supress output and obtain return code.
+				versionpkg_code = Popen('versionpkg --modify-only &>/dev/null', shell=True).wait()
+
+			pkgbuild_path = os.path.join(os.getcwd(), 'PKGBUILD')
+			package, err = echo_bash_vars(pkgbuild_path, '${pkgname}')
+			if err != '':
+				print >>sys.stderr.write('PKGBUILD syntax error (' +argo+'), unable to process:\n' + err)
+				cleanup()
+				upgrade_ct += 1
+				continue
+
+			aur = echo_bash_vars(pkgbuild_path, '${pkgver}-${pkgrel}')[0]
+			
+			result = Aversion.vercmp().vercmp(aur, installed[upgrade_ct])
+			if result == 1:
+				print '\n  Target: '+package+'-'+aur+'\n'
+				if not NOCONFIRM:
+					choice = raw_input('  Proceed with upgrade?  [Y/n] ').lower()
+					print ''
+					if choice != 'y' and choice != 'yes' and choice != '':
+						if SAVE: savefiles(argo, work_dir)
+						cleanup()
+						upgrade_ct += 1
+						continue
+			elif result == 0:
+				status = 'up2date'
+				rjust_spaces = 60 - (int(len(argo)) + int(len(status)))
+				print argo + status.rjust(rjust_spaces, '.')
+				if SAVE: savefiles(argo, work_dir)
+				cleanup()
+				upgrade_ct += 1
+				continue
+			elif result == -1:
+				print ':: ' + argo + ': local (' + installed[upgrade_ct] + ') appears to be newer than aur (' + aur + ')'
+				if SAVE: savefiles(argo, work_dir)
+				cleanup()
+				upgrade_ct += 1
+				continue
+		
+		# save files if --save is the only opt specified and exit or continue
+		if SAVE:
+			if not BUILDDEPS and not SYNCDEPS:
+				savefiles(argo, work_dir)
+				if argo == args[len(args)-1]:
+					cleanup()
+					sys.exit(0)
+				else: continue
+
+		# evaulate options and go to menu if needed
+		use_versionpkg = 0
+		if AUTO_BUILD and safe_status == 'NO':
+			select = menu(safe_status, os.listdir(work_dir), argo)
+			if select == 's':
+				cleanup()
+				upgrade_ct += 1
+				continue
+			elif select == 'v': use_versionpkg = 1
+		elif AUTO_BUILD and safe_status == 'YES':
+			pass
+		else:
+			select = menu(safe_status, os.listdir(work_dir), argo)
+			if select == 's':
+				cleanup()
+				upgrade_ct += 1
+				continue
+			elif select == 'v': use_versionpkg = 1
+	
+		# save files if requested
+		if SAVE: savefiles(argo, work_dir)
+	
+		# get dependencies
+		mdep_cans, dep_cans = get_depends(work_dir + '/PKGBUILD', 'makedepends', 'depends')
+		mdeps = []
+		deps = []
+		print color('==> ', 'blue') + color('Checking Buildtime Dependencies... \n', 'black')
+		if mdep_cans != ['']: 
+			for mdep_can in mdep_cans:
+				mdeps = filter_deps(mdep_can, fd_ct=1, type='[M]')
+			# reset globals for deps
+			global filtered, db_pkgs, db_paths
+			filtered = []
+			db_pkgs = []
+			db_paths = []
+		print color('==> ','blue') + color('Checking Runtime Dependencies... \n', 'black')
+		if dep_cans != ['']:
+			for dep_can in dep_cans:
+				deps = filter_deps(dep_can, fd_ct=1, type='[D]')
+		# reset again for next loop of args
+		filtered = []
+		db_pkgs = []
+		db_paths = []
+
+		# install missing dependencies
+		remove_packages = []
+		zct = 0
+		zdict = {1: '\nMake Dependency', 2: '\nDependency'}
+		for deps_type in mdeps, deps:
+			zct += 1
+			if deps_type != []:
+				print zdict[zct] + ' Targets: ',
+				for v in deps_type: print v,
+				if not NOCONFIRM:
+					dep_choice = raw_input('\nProceed?  [Y/n] ').lower()
+					print ''
+				else: 
+					print '\n'
+					dep_choice = 'y'
+				if dep_choice == 'y' or dep_choice == 'yes' or dep_choice == '':
+					if BUILDDEPS: builddeps(deps_type)
+					elif SYNCDEPS: syncdeps(deps_type)
+					if RM_MDEPS:
+						if 'make' in zdict[zct].lower():
+							rm_packages.extend(deps_type)
+	
+		if use_versionpkg: pkgname = versionpkg(argo)
+		else: pkgname = makepkgf(argo)
+		if not NOINSTALL: install(pkgname)
+
+		upgrade_ct += 1
+		cleanup()
+	# check for make deps that need to be removed
+	if RM_MDEPS and len(rm_packages) > 0:
+		print '\nRemove Targets: ',
+		for rp in rm_packages: print rp,
+		if not NOCONFIRM:
+			choice = raw_input('\nProceed?  [Y/n] ').lower()
+			print ''
+		else:
+			print '\n'
+			choice = 'y'
+		if choice == 'y' or choice == 'yes' or choice == '':
+			p_cmd = ['pacman', '-R', '--noconfirm']
+			p_cmd.extend(rm_packages)
+			retcode = Popen(p_cmd).wait()
+	cleanup()
+
+if __name__ == '__main__':
+	try:
+		main()
+		sys.exit(0)
+	except SystemExit, e:
+		sys.exit(e)
+	# print pacman specific errors, users will understand these.
+	except (Apacman.DatabaseError, Apacman.ConfigError), e:
+		print >>sys.stderr.write(str(e))
+		cleanup()
+		sys.exit(1)
+	# raise everything else not accounted for. These are problems.
+	except:
+		cleanup()
+		raise

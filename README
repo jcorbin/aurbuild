@@ -1,0 +1,11 @@
+
+aurbuild - A utility to build and install packages from ArchLinux' AUR through the use of makepkg and pacman. Please note root access is required but will be temporarily dropped to an under-privileged user during builds for safety and package integrity. Read the man page aurbuild(1) for more details on this tool.
+ BE CAREFUL when adjusting build files as they could potentially harm your system if not down properly!
+
+
+Requirements:
+	python, pacman, makepkg (found in pacman) fakeroot and versionpkg. 
+
+
+Installation:
+	python setup.py install --root=/path/to/installation/root/
