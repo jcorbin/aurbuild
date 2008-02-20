@@ -72,7 +72,8 @@ db_paths	= []
 def echo_bash_vars(path, value, array=False):
 	""" return a variable from a bash file """
 	
-	p = Popen('source '+path+'; echo '+value, shell=True, stdout=PIPE, stderr=PIPE)
+	p = Popen('source '+path+'; echo '+value, shell=True,
+			stdout=PIPE, stderr=PIPE)
 	out = p.stdout.read()
 	out = out.strip()
 	if array:
@@ -86,7 +87,8 @@ def echo_bash_vars(path, value, array=False):
 if os.access(makepkg_config, os.F_OK|os.R_OK):
 	makepkg_v2 = False
 	makepkg_v3 = False
-	BUILDENV = echo_bash_vars(makepkg_config, '${BUILDENV[@]}', array=True)[0]
+	BUILDENV = echo_bash_vars(makepkg_config, '${BUILDENV[@]}',
+			array=True)[0]
 	if BUILDENV != ['']:
 		makepkg_v3 = True
 		valid_buildenv = []
@@ -101,20 +103,23 @@ if os.access(makepkg_config, os.F_OK|os.R_OK):
 
 	else:
 		makepkg_v2 = True
-		out = echo_bash_vars(makepkg_config, "$USE_COLOR:$USE_FAKEROOT", array=False)[0]
+		out = echo_bash_vars(makepkg_config,
+				"$USE_COLOR:$USE_FAKEROOT", array=False)[0]
 		out = out.split(":")
 		USE_COLOR = out[0].lower()
 		USE_FAKEROOT = out[1].lower()
 		del(out)
 	
-	out = echo_bash_vars(makepkg_config, '$PKGDEST:$SRCDEST:$CARCH', array=False)[0]
+	out = echo_bash_vars(makepkg_config,
+			'$PKGDEST:$SRCDEST:$CARCH', array=False)[0]
 	out = out.split(':')
 	PKGDEST = out[0]
 	SRCDEST = out[1]
 	CARCH = out[2]
 	del(out)
 else:
-	print >>sys.stderr.write('Error: '+makepkg_config+' is missing or read permissions are denied.')
+	print >>sys.stderr.write('Error: '+makepkg_config+
+			' is missing or read permissions are denied.')
 	sys.exit(1)
 		
 def cleanup():
@@ -168,9 +173,11 @@ def usage():
 	print ''
 
 try:
-	opts, args = getopt.getopt(sys.argv[1:], 'hvbso:elfaunxrmcSVU', ['help', 'version', 'builddeps', 'syncdeps', 
-		'builder-opts=', 'save', 'local', 'official', 'auto-build', 'upgrade', 'noconfirm', 
-		'noinstall', 'revision', 'rm-make-deps', 'clean', 'search', 'vote', 'unvote'])
+	opts, args = getopt.getopt(sys.argv[1:], 'hvbso:elfaunxrmcSVU',
+		['help', 'version', 'builddeps', 'syncdeps', 'builder-opts=',
+		'save', 'local', 'official', 'auto-build', 'upgrade',
+		'noconfirm', 'noinstall', 'revision', 'rm-make-deps', 'clean',
+		'search', 'vote', 'unvote'])
 except getopt.GetoptError, e:
 	usage()
 	print 'Error: ' + str(e)
@@ -243,7 +250,7 @@ if (len(args) == 0) and (not UPGRADE and not CLEAN):
 # --builddeps and --syncdeps can't be used together
 if BUILDDEPS and SYNCDEPS:
 	print PROGRAM_NAME + ': -b, --builddeps and ' + \
-			'-s, --syncdeps cannot be used at the same time'
+			'-s, --syncdeps cannot be used together'
 	sys.exit(1)
 
 # --local, --official, --auto-build, and --upgrade must be used with a dependency install method
@@ -256,7 +263,7 @@ if LOCAL or OFFICIAL or AUTO_BUILD or UPGRADE:
 # --vote and --unvote can't be used together
 if VOTE and UNVOTE:
 	print PROGRAM_NAME + ': -V, --vote and ' + \
-			'-U, --unvote cannot be used at the same time'
+			'-U, --unvote cannot be used together'
 	sys.exit(1)
 
 # --revision must be used with upgrade
@@ -284,8 +291,8 @@ def fakeroot_check():
 		
 def get_depends(pkgbuild, dep1, dep2):
 	# dep1 is makedepends. dep2 is depends
-	p = Popen('source ' + pkgbuild + '; echo "${' + dep1 + '[@]}:${' + dep2 + '[@]}"',
-			shell=True, stdout=PIPE, stderr=PIPE)
+	p = Popen('source ' + pkgbuild + '; echo "${' + dep1 + '[@]}:${' +
+			dep2 + '[@]}"', shell=True, stdout=PIPE, stderr=PIPE)
 	out = p.stdout.read()
 	err = p.stderr.read()
 	p.stdout.close()
