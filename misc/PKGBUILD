@@ -2,18 +2,16 @@
 # Contributor: Loui Chang <louipc.ist@gmail.com
 
 pkgname=aurbuild
-pkgver=1.7.9
+pkgver=1.8.0
 pkgrel=1
 pkgdesc="A utility to build and install packages from AUR."
 url="http://developer.berlios.de/projects/aurbuild/"
 license="GPL"
 arch=('i686' 'x86_64')
-depends=('python>=2.4' 'fakeroot' 'versionpkg>=0.7.1')
-source=($pkgname-$pkgver.tar.gz)
-md5sums=('30dc0367c6cc1d04b5714e8e47ade9e9')
+depends=('python' 'fakeroot' 'versionpkg')
 
 build() {
-	cd $startdir/src/$pkgname-$pkgver
+	cd $startdir/..
 	python setup.py install --root=$startdir/pkg
 }
 

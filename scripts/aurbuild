@@ -140,7 +140,7 @@ def handler(signo, frame):
 signal.signal(signal.SIGINT, handler)
 signal.signal(signal.SIGTERM, handler)
 
-PROGRAM_VERSION = '1.7.8'
+PROGRAM_VERSION = '1.8.0'
 PROGRAM_NAME = os.path.basename(sys.argv[0])
 
 def usage():
@@ -150,27 +150,33 @@ def usage():
 	print 'options:'
 	print '  -h, --help            show this help message and exit'
 	print '  -v, --version         display version and exit'
-	print '  -b, --builddeps       build and install missing dependencies from abs'
+	print '  -b, --builddeps       build and install missing ' + \
+					'dependencies from abs'
 	print '  -s, --syncdeps        install missing dependencies with pacman'
 	print '  -o \"OPTS\", --builder-opts=\"OPTS\"'
-	print '                        pass OPTS to makepkg or versionpkg during build'
+	print '                        pass OPTS to makepkg ' + \
+					'or versionpkg during build'
 	print '  -e, --save            save build files in `'+save_dir+'\''
 	print '  -l, --local           use build files found in `'+save_dir+'\''
 	print '                        instead of AUR'
-	print '  -f, --official        build official packages found in `'+abs_root+'\''
+	print '  -f, --official        build official packages found in `' + \
+					abs_root+'\''
 	print '                        instead of AUR'
-	print '  -a, --auto-build      bypass menu and build if detected safe'
-	print '  -u, --upgrade         upgrade all packages installed from unsupported AUR'
-	print '  -n, --noconfirm       bypass any confirmation messages by answering yes'
-	print '  -x, --noinstall       do not install the package after building'
-	print '  -r, --revision        check for latest CVS/SVN/MERCURIAL revisions during'
+	print '  -a, --auto-build      bypass menu and build ' + \
+					'automatically DANGEROUS'
+	print '  -u, --upgrade         upgrade all packages installed ' + \
+					'from unsupported AUR'
+	print '  -n, --noconfirm       bypass any confirmation messages ' + \
+					'by answering yes'
+	print '  -x, --noinstall       do not install package after building'
+	print '  -r, --revision        check for latest CVS/SVN/MERCURIAL ' + \
+					'revisions during'
 	print '                        --upgrade'
 	print '  -m, --rm-make-deps    remove uneeded make dependencies'
 	print '  -c  --clean           clean the build directory'
 	print '  -S, --search          search aur for single [keyword]'
 	print '  -V, --vote            vote for a package'
 	print '  -U, --unvote          unvote for a package'
-	print ''
 
 try:
 	opts, args = getopt.getopt(sys.argv[1:], 'hvbso:elfaunxrmcSVU',
@@ -396,10 +402,11 @@ def get_tarball(pkg, pkg_query = None):
 	try:
 		raw_text = Aaurparse.raw_pkg_query(pkg_query)
 	except Exception, e:
-		print >>sys.stderr.write('\ncould not retrieve needed data from aur: ' + str(e))
+		print >>sys.stderr.write('\ncould not retrieve needed data' +
+			'from aur: ' + str(e))
 		cleanup()
 		sys.exit(1)
-		
+
 	main_url = Aaurparse.pkg_main_url(raw_text, pkg)
 
 	if main_url == '':
@@ -410,11 +417,11 @@ def get_tarball(pkg, pkg_query = None):
 			if UPGRADE: 
 				return None, None
 			else:
-				print >>sys.stderr.write(pkg + ': not found in AUR')
+				print >>sys.stderr.write(pkg + 
+						': not found in AUR')
 				cleanup()
 				sys.exit(1)
 
-	safe = Aaurparse.pkg_safe_status(raw_text, pkg)
 
 	try:
 		f = urllib.urlopen(main_url)
@@ -455,7 +462,7 @@ def get_tarball(pkg, pkg_query = None):
 
 	try:
 		tar = urllib.urlretrieve(tarball_url)[0]
-		return tar, safe
+		return tar
 	except IOError, e:
 		print >>sys.stderr.write('\ncould not retrieve needed data from aur: '+tarball_url + ': ' + str(e) + '\n')
 		cleanup()
@@ -776,7 +783,7 @@ def appcheck(app):
 		if os.path.isfile(each + app): return True
 	return False
 
-def menu(safe, dir_list, package):
+def menu(dir_list, package):
 	files = []
 	editor_cmd = editor
 #	columns = int(os.getenv('COLUMNS'))
@@ -792,7 +799,7 @@ def menu(safe, dir_list, package):
 	del(each)
 	file_num = len(files)
 	
-	if safe == 'NO' and not NOINSTALL:
+	if not NOINSTALL:
 		# open editor with .install file
 		for k in files:
 			extension = k.rsplit('.', 1)[1:]
@@ -832,8 +839,7 @@ def menu(safe, dir_list, package):
 		default_choice = 'b'
 		code = Popen('clear').wait()
 		print '\n'
-		if safe == 'NO': print title('NOT SAFE', 'red')
-		elif safe == 'YES': print title('SAFE', 'green')
+		print title('UNSUPPORTED PACKAGE', 'red')
 		print '\n' + spaces + seperator
 		i=0
 		while i<file_num:
@@ -939,7 +945,7 @@ def savefiles(pkg, old_dir):
 
 def search():
 	try:
-		names, descriptions, locations, categories, maintainers, votes, safe = Aaurparse.aursearch(args[0])
+		names, descriptions, locations, categories, maintainers, votes = Aaurparse.aursearch(args[0]) 
 	except Exception, e:
 		print >>sys.stderr.write(str(e))
 		sys.exit(1)
@@ -955,9 +961,8 @@ def search():
 			location	= 'Location:          ' + locations[num] + '/' + categories[num] + '\n'
 			maintainer	= 'Maintainer:        ' + maintainers[num] + '\n'
 			_votes		= 'Votes:             ' + votes[num] + '\n'
-			_safe		= 'Safe:              ' + safe[num] + '\n\n'
 
-			view_list.append(name + description + location + maintainer + _votes + _safe)
+			view_list.append(name + description + location + maintainer + _votes)
 
 		if not appcheck('less'):
 			for each in view_list:
@@ -1137,15 +1142,15 @@ def main():
 				os.chown(p_work_dir, 0, builduser_uid)
 				os.chmod(p_work_dir, 0775)
 				work_dir = get_PKGBUILD_path(p_work_dir)
-				safe_status = None
 		else:
-			aur_tarfile, safe_status = get_tarball(argo)
+			aur_tarfile = get_tarball(argo)
 			if aur_tarfile == None and UPGRADE:
 				cleanup()
 				upgrade_ct += 1
 				continue
-			if aur_tarfile == None and safe_status == None:
-				# probably built a community package. At any rate, the loop needs to continue
+			if aur_tarfile == None:
+				# Probably built a community package.
+				# At any rate, the loop needs to continue.
 				cleanup()
 				upgrade_ct += 1
 				continue
@@ -1208,16 +1213,16 @@ def main():
 		# evaulate options and go to menu if needed
 		use_versionpkg = 0
 		if AUTO_BUILD and safe_status == 'NO':
-			select = menu(safe_status, os.listdir(work_dir), argo)
+			select = menu(os.listdir(work_dir), argo)
 			if select == 's':
 				cleanup()
 				upgrade_ct += 1
 				continue
 			elif select == 'v': use_versionpkg = 1
-		elif AUTO_BUILD and safe_status == 'YES':
+		elif AUTO_BUILD:
 			pass
 		else:
-			select = menu(safe_status, os.listdir(work_dir), argo)
+			select = menu(os.listdir(work_dir), argo)
 			if select == 's':
 				cleanup()
 				upgrade_ct += 1

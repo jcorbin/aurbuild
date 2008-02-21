@@ -1,9 +1,11 @@
 
 AURBUILD
- -v1.7.9 (February 2008)
+ -v1.8.0 (February 2008)
 	* Cleaned up directory structure
 	* Tweaked setup script, and some other files (more to come)
 	* Added aurbuild's own PKGBUILD to misc/
+	* Removed safe flagging notices and checks.
+	  (Removed from AUR web interface)
 
  -v1.7.8 (March 29, 2007)
 	* USE_FAKEROOT fix due to makepkg v3

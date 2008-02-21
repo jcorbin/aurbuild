@@ -75,7 +75,7 @@ def aursearch(keyword):
 			candidates.append(line)
 
 	if len(candidates) == 0:
-		return None, None, None, None, None, None, None
+		return None, None, None, None, None, None
 
 	name_list		= []
 	description_list	= []
@@ -83,7 +83,6 @@ def aursearch(keyword):
 	category_list		= []
 	maintainer_list		= []
 	votes_list		= []
-	safe_list		= []
 			
 	ct=0
 	while ct<len(candidates):
@@ -92,12 +91,7 @@ def aursearch(keyword):
 			location = location.split("</span")[0]
 			category = candidates[(ct * 6) + 1].split("class='blue'>")[1]
 			category = category.split("</span")[0]
-			if re.search("class='green", candidates[(ct * 6) + 2]):
-				safe='Yes'
-				color="'green'"
-			else:
-				safe='No'
-				color="'black'"
+			color="'black'"
 			name = candidates[(ct * 6) + 2].split("class=" + color + ">")[1]
 			name = name.split("</span></a>")[0]
 			votes = candidates[(ct * 6) + 3].split("&nbsp;&nbsp;&nbsp;")[1]
@@ -117,10 +111,9 @@ def aursearch(keyword):
 			category_list.append(category)
 			maintainer_list.append(maintainer)
 			votes_list.append(votes)
-			safe_list.append(safe)
 		ct=ct+1
 	
-	return name_list, description_list, location_list, category_list, maintainer_list, votes_list, safe_list
+	return name_list, description_list, location_list, category_list, maintainer_list, votes_list
 
 
 if __name__ == '__main__':
