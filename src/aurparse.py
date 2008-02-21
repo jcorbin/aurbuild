@@ -35,23 +35,12 @@ def raw_pkg_query(keyword):
 def pkg_main_url(raw_text, pkg):
         url = '' 
         for line in raw_text:
-                if 'do_MyPackages' in line and '>'+pkg+' ' in line:
-                        url = line.split("href='", 1)[1]
+                if 'packages.php?ID' in line and '>'+pkg+' ' in line:
+                        url = line.split("ID=", 1)[1]
                         url = url.split("'>")[0]
-			url = aururl + url
+			url = aururl + "packages.php?ID=" + url
 			break
 	return url
-
-def pkg_safe_status(raw_text, pkg):
-	safe = ''
-	for line in raw_text:
-		if 'do_MyPackages' in line and '>'+pkg+' ' in line:
-                        if "class='green'" in line:
-                                safe='YES'
-                        else:
-                                safe='NO'
-                        break
-        return safe
 
 def pkg_tarball_url(raw_text):
 	url = ''
