@@ -960,7 +960,7 @@ def search():
 			description 	= 'Description:       ' + descriptions[num] + '\n'
 			location	= 'Location:          ' + locations[num] + '/' + categories[num] + '\n'
 			maintainer	= 'Maintainer:        ' + maintainers[num] + '\n'
-			_votes		= 'Votes:             ' + votes[num] + '\n'
+			_votes		= 'Votes:             ' + votes[num] + '\n\n'
 
 			view_list.append(name + description + location + maintainer + _votes)
 
