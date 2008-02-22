@@ -30,7 +30,7 @@ aurbuild --syncdeps --builder-opts="-B -n --foo"
 
 .TP 
 \fB\-\-auto-build\fR
-This will bypass the menu, build and install the package automatically. Use this as a modifier to --builddeps or --syncdeps, it cannot be used alone.
+This will bypass the menu, build and install the package automatically. Use this as a modifier to --builddeps or --syncdeps. It cannot be used alone.
 
 .TP
 \fB\-e, \-\-save\fR
@@ -46,7 +46,7 @@ Build official packages using \fI/var/abs/\fR as the PKGBUILD root. NOTE: packag
 
 .TP
 \fB\-u, \-\-upgrade\fR
-Upgrade out-of-date packages installed from unsupported AUR. This will check aur's website for each aur package so it may take a while. Each package will be evaluated and upgraded one by one displaying a confirmation message. Use this as a modifier to --syncdeps or --builddeps. Note: --auto-build may be used to bypass the menu, but is not generally recommended unless you know what you are doing.
+Upgrade out of date packages installed from unsupported AUR. This will check aur's website for each aur package so it may take a while. Each package will be evaluated and upgraded one by one displaying a confirmation message. Use this as a modifier to --syncdeps or --builddeps. Note: --auto-build may be used to bypass the menu, but is not generally recommended unless you know what you are doing.
 .TP
 \fBExample:\fR
 aurbuild -su
