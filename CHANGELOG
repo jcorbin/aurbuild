@@ -1,6 +1,6 @@
 
 AURBUILD
- -v1.8.0 (February 2008)
+ -v1.8.0 (February 21, 2008)
 	* Updates to make aurbuild compatible with AUR 1.5.0
 	* Cleaned up directory structure
 	* Tweaked setup script, and some other files (more to come)
