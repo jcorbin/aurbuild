@@ -24,10 +24,11 @@ This will pass options directly to the builder of choice (currently makepkg or v
 
 .TP
 \fBExample:\fR
-makepkg -Bn --> aurbuild -so "-B -n --foo"
+makepkg -Bn --> aurbuild -so "-B -n --foo" -OR- aurbuild --syncdeps --builder-opts="-B -n --foo"
 
-aurbuild --syncdeps --builder-opts="-B -n --foo"
-
+.TP 
+\fB\-a, \-\-auto-build\fR
+This will bypass the menu and build and install the package if the PKGBUILD is detected being flagged safe by a Trusted User from AUR. If this option is used and the PKGBUILD is not detected safe, the menu will be displayed. Use this as a modifier to --builddeps or --syncdeps, it cannot be used alone.
 
 .TP
 \fBExample:\fR
@@ -44,6 +45,14 @@ Look in \fI/var/tmp/aurbuild/pkgbuilds/\fR, aurbuild's --save location, for the 
 .TP
 \fB\-f, \-\-official\fR
 Build official packages using \fI/var/abs/\fR as the PKGBUILD root. NOTE: packages will only be as up to date as your abs tree is! To update it run the command \fBabs\fR. This is switch is also used when aurbuild finds community packages. See the section \fBCOMMUNITY PACKAGES\fR for more details.
+
+
+.TP
+\fB\-u, \-\-upgrade\fR
+Upgrade out-of-date packages installed from unsupported AUR. This will check aur's website for each aur package so it may take a while. Each package will be evaluated and upgraded one by one displaying a confirmation message. Use this as a modifier to --syncdeps or --builddeps. Additionally, --auto-build may be used to bypass the menu if detected safe.
+.TP
+\fBExample:\fR
+aurbuild -sua
 
 .TP
 \fB\-c, \-\-clean\fR
@@ -69,6 +78,14 @@ Remove unneeded make dependencies after a successful build. You will be prompted
 \fB\-S, \-\-search\fR 
 Use this to search AUR for a single [keyword]. Results are piped to the less viewer.
 
+.TP
+\fB\-V, \-\-vote\fR
+Cast a vote for each [package]. You will be prompted for your AUR account information to login. A cookie will be created and located in ~/.aurbuild/aurcookie.lwp.
+
+.TP
+\fB\-S, \-\-unvote\fR
+Unvote for each [package].
+ 
 .TP 
 \fB\-h, \-\-help\fR
 Display the help message and exit.

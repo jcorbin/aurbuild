@@ -7,7 +7,6 @@ AURBUILD
 	* Added aurbuild's own PKGBUILD to misc/
 	* Removed safe flagging notices and checks.
 	  (Removed from AUR web interface)
-	* Temporarily removed --vote --unvote --upgrade and --auto-build
 
  -v1.7.8 (March 29, 2007)
 	* USE_FAKEROOT fix due to makepkg v3
