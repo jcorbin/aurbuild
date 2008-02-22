@@ -19,7 +19,7 @@
 #   USA.
 #
 
-import cookielib, os, urllib2
+import cookielib, os, urllib2, urllib, httplib
 
 
 class LoginError(Exception):
