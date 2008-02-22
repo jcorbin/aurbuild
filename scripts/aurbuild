@@ -1187,7 +1187,7 @@ def main():
 						upgrade_ct += 1
 						continue
 			elif result == 0:
-				status = 'up2date'
+				status = 'up to date'
 				rjust_spaces = 60 - (int(len(argo)) + int(len(status)))
 				print argo + status.rjust(rjust_spaces, '.')
 				if SAVE: savefiles(argo, work_dir)
