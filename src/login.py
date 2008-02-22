@@ -77,10 +77,18 @@ class aurlogin:
 	def login(self, username, password, cookiefile):
 		""" login to the main site """
 	
-		# set the language to english so we can parse for expected response words
-		# this will not permanently set the user's default language to english
-		login_url	= self.aursite+'index.php?setlang=en&user='+username+'&pass='+password
-		
+		login_url = self.aursite
+		login_params = urllib.urlencode(
+			{'user': username, 'pass': password})
+
+		conn = httplib.HTTPConnection(aur_domain)
+		conn.request("POST", "", login_params, self.headers)
+		response = conn.getresponse()
+
+		data = response.read()
+		conn.close()
+	
+
 		# get a cookie
 		if not os.path.isfile(cookiefile): self.get_cookie(cookiefile)
 		
