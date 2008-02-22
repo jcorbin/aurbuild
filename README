@@ -8,7 +8,7 @@ temporarily dropped to an under-privileged user during builds for safety and
 package integrity. Read the man page aurbuild(1) for more details on this tool.
 
 BE CAREFUL when adjusting build files as they could potentially harm your
-system if not down properly!
+system if not done properly!
 
 
 Requirements:
