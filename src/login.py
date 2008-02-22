@@ -46,7 +46,11 @@ class aurlogin:
 	def __init__(self):
 		self.cookie_jar = cookielib.LWPCookieJar()
 		self.aursite	= 'http://aur.archlinux.org/'
-		self.headers	= {'User-agent': 'Mozilla/4.0 (compatible; Linux)'}
+		self.headers    = {'User-agent':
+			'Mozilla/4.0 (compatible; aurbuild/' + VERSION +')',
+			'Content-type': 'application/x-www-form-urlencoded',
+			'Accept': 'text/plain'}
+
 
 	def get_cookie(self, cookiefile):
 		""" get a cookie from the main site and save it to cookiefile """
