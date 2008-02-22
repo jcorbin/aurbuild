@@ -30,11 +30,7 @@ aurbuild --syncdeps --builder-opts="-B -n --foo"
 
 .TP 
 \fB\-\-auto-build\fR
-This will bypass the menu and build and install the package if the PKGBUILD is detected being flagged safe by a Trusted User from AUR. If this option is used and the PKGBUILD is not detected safe, the menu will be displayed. Use this as a modifier to --builddeps or --syncdeps, it cannot be used alone.
-
-.TP
-\fBExample:\fR
-aurbuild -sa foo
+This will bypass the menu, build and install the package automatically. Use this as a modifier to --builddeps or --syncdeps, it cannot be used alone.
 
 .TP
 \fB\-e, \-\-save\fR
@@ -48,10 +44,9 @@ Look in \fI/var/tmp/aurbuild/pkgbuilds/\fR, aurbuild's --save location, for the 
 \fB\-f, \-\-official\fR
 Build official packages using \fI/var/abs/\fR as the PKGBUILD root. NOTE: packages will only be as up to date as your abs tree is! To update it run the command \fBabs\fR. This is switch is also used when aurbuild finds community packages. See the section \fBCOMMUNITY PACKAGES\fR for more details.
 
-
 .TP
 \fB\-u, \-\-upgrade\fR
-Upgrade out-of-date packages installed from unsupported AUR. This will check aur's website for each aur package so it may take a while. Each package will be evaluated and upgraded one by one displaying a confirmation message. Use this as a modifier to --syncdeps or --builddeps. Additionally, --auto-build may be used to bypass the menu if detected safe.
+Upgrade out-of-date packages installed from unsupported AUR. This will check aur's website for each aur package so it may take a while. Each package will be evaluated and upgraded one by one displaying a confirmation message. Use this as a modifier to --syncdeps or --builddeps. Note: --auto-build may be used to bypass the menu, but is not generally recommended unless you know what you are doing.
 .TP
 \fBExample:\fR
 aurbuild -su
@@ -104,7 +99,7 @@ This will be the name of the package as defined in AUR minus any version numbers
 aurbuild -s foo1 foo2 foo3
 
 .SH "THE MENU"
-The menu will be displayed as text on your terminal indicating its safe status as per Trusted User. It will display a corresponding number to each build file extracted from the tarball to view or edit if desired. If a .install file is found \fBand\fR the package is not marked safe, you will be forced to view it in your editor. Once you are finished, you may choose to either build and/or install the package via makepkg and pacman, build and/or install through versionpkg (makepkg wrapper to handle SVN/CVS/Mercurial packages) and pacman, skip the package, or quit all together without building. Aurbuild will examine the variables in the PKGBUILD and try guess which builder to use. For instance, if CVS/SVN/MERCURIAL variables are found, a star will be placed next to versionpkg in the menu with [V] at the choice selection indicating versionpkg is preferred and preselected.
+The menu will be displayed as text on your terminal. It will display a corresponding number to each build file extracted from the tarball to view or edit if desired. If a .install file is found it will be displayed immediately for review. Once you are convinced all files are sound, you may choose to either build and/or install the package via makepkg and pacman, build and/or install through versionpkg (makepkg wrapper to handle SVN/CVS/Mercurial packages) and pacman, skip the package, or quit all together without building. Aurbuild will examine the variables in the PKGBUILD and try guess which builder to use. For instance, if CVS/SVN/MERCURIAL variables are found, a star will be placed next to versionpkg in the menu with [V] at the choice selection indicating versionpkg is preferred and preselected.
 
 .TP
 \fBWARNING:\fR Editing build files should \fIonly\fR be done by users who know what they are doing!
