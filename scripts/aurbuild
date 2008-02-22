@@ -163,7 +163,7 @@ def usage():
 	print '  -f, --official        build official packages found in `' + \
 					abs_root+'\''
 	print '                        instead of AUR'
-	print '  --auto-build      bypass menu and build ' + \
+	print '  --auto-build          bypass menu and build ' + \
 					'automatically (DANGEROUS)'
 	print '  -u, --upgrade         upgrade all packages installed ' + \
 					'from unsupported AUR'
@@ -213,7 +213,6 @@ BUILDER_OPTARGS	= ''
 OFFICIAL_PATH	= abs_root
 
 for opt, optarg in opts:
-	print opt
 	if opt in ['-h', '--help']: usage(); sys.exit(0)
 	if opt in ['-v', '--version']: VERSION = 1
 	if opt in ['--verbose']: VERBOSE = 1
@@ -1224,16 +1223,7 @@ def main():
 
 		# evaulate options and go to menu if needed
 		use_versionpkg = 0
-		if AUTO_BUILD and safe_status == 'NO':
-			select = menu(os.listdir(work_dir), argo)
-			if select == 's':
-				cleanup()
-				upgrade_ct += 1
-				continue
-			elif select == 'v': use_versionpkg = 1
-		elif AUTO_BUILD:
-			pass
-		else:
+		if not AUTO_BUILD:
 			select = menu(os.listdir(work_dir), argo)
 			if select == 's':
 				cleanup()
