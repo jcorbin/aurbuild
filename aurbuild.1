@@ -24,7 +24,9 @@ This will pass options directly to the builder of choice (currently makepkg or v
 
 .TP
 \fBExample:\fR
-makepkg -Bn --> aurbuild -so "-B -n --foo" -OR- aurbuild --syncdeps --builder-opts="-B -n --foo"
+makepkg -Bn --> aurbuild -so "-B -n --foo"
+
+aurbuild --syncdeps --builder-opts="-B -n --foo"
 
 .TP 
 \fB\-a, \-\-auto-build\fR
@@ -52,7 +54,7 @@ Build official packages using \fI/var/abs/\fR as the PKGBUILD root. NOTE: packag
 Upgrade out-of-date packages installed from unsupported AUR. This will check aur's website for each aur package so it may take a while. Each package will be evaluated and upgraded one by one displaying a confirmation message. Use this as a modifier to --syncdeps or --builddeps. Additionally, --auto-build may be used to bypass the menu if detected safe.
 .TP
 \fBExample:\fR
-aurbuild -sua
+aurbuild -su
 
 .TP
 \fB\-c, \-\-clean\fR
