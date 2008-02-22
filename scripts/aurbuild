@@ -162,10 +162,10 @@ def usage():
 	print '  -f, --official        build official packages found in `' + \
 					abs_root+'\''
 	print '                        instead of AUR'
-	print '  -a, --auto-build      bypass menu and build ' + \
-					'automatically (DANGEROUS)'
-	print '  -u, --upgrade         upgrade all packages installed ' + \
-					'from unsupported AUR'
+#	print '  -a, --auto-build      bypass menu and build ' + \
+#					'automatically (DANGEROUS)'
+#	print '  -u, --upgrade         upgrade all packages installed ' + \
+#					'from unsupported AUR'
 	print '  -n, --noconfirm       bypass any confirmation messages ' + \
 					'by answering yes'
 	print '  -x, --noinstall       do not install package after building'
@@ -175,8 +175,8 @@ def usage():
 	print '  -m, --rm-make-deps    remove uneeded make dependencies'
 	print '  -c  --clean           clean the build directory'
 	print '  -S, --search          search aur for single [keyword]'
-	print '  -V, --vote            vote for a package'
-	print '  -U, --unvote          unvote for a package'
+#	print '  -V, --vote            vote for a package'
+#	print '  -U, --unvote          unvote for a package'
 
 try:
 	opts, args = getopt.getopt(sys.argv[1:], 'hvbso:elfaunxrmcSVU',
@@ -220,16 +220,16 @@ for opt, optarg in opts:
 	if opt in ['-e', '--save']: SAVE = 1
 	if opt in ['-l', '--local']: LOCAL = 1
 	if opt in ['-f', '--official']: OFFICIAL = 1
-	if opt in ['-a', '--auto-build']: AUTO_BUILD = 1
-	if opt in ['-u', '--upgrade']: UPGRADE =1
+#	if opt in ['-a', '--auto-build']: AUTO_BUILD = 1
+#	if opt in ['-u', '--upgrade']: UPGRADE =1
 	if opt in ['-n', '--noconfirm']: NOCONFIRM = 1
 	if opt in ['-x', '--noinstall']: NOINSTALL = 1
 	if opt in ['-r', '--revision' ]: REVISION = 1
 	if opt in ['-m', '--rm-make-deps' ]: RM_MDEPS = 1
 	if opt in ['-c', '--clean' ]: CLEAN = 1
 	if opt in ['-S', '--search']: SEARCH = 1
-	if opt in ['-V', '--vote']: VOTE = 1
-	if opt in ['-U', '--unvote']: UNVOTE = 1
+#	if opt in ['-V', '--vote']: VOTE = 1
+#	if opt in ['-U', '--unvote']: UNVOTE = 1
 
 if VERSION:
 	print ''
@@ -412,7 +412,6 @@ def get_tarball(pkg, pkg_query = None):
 	if main_url == '':
 		if not aur_space in pkg_query:
 			# try again with a space
-			print "SPACE CONDITION"
 			return get_tarball(pkg, pkg_query=pkg+aur_space)
 		else:
 			if UPGRADE: 
@@ -1087,7 +1086,7 @@ def main():
 	if UPGRADE:
 		# set args to each potential AUR candidate
 		args, installed = Apacman.db_tools().get_foreign()
-	
+
 	upgrade_ct = 0
 	for argo in args:
 		global working_pkg, pkg_build_dir, aur_tarfile
