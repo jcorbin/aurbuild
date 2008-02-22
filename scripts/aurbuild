@@ -150,6 +150,7 @@ def usage():
 	print 'options:'
 	print '  -h, --help            show this help message and exit'
 	print '  -v, --version         display version and exit'
+	print '  --verbose             verbose search output'
 	print '  -b, --builddeps       build and install missing ' + \
 					'dependencies from abs'
 	print '  -s, --syncdeps        install missing dependencies with pacman'
@@ -179,8 +180,9 @@ def usage():
 	print '  -U, --unvote          unvote for a package'
 
 try:
-	opts, args = getopt.getopt(sys.argv[1:], 'hvbso:elfaunxrmcSVU',
-		['help', 'version', 'builddeps', 'syncdeps', 'builder-opts=',
+	opts, args = getopt.getopt(sys.argv[1:], 'hvbso:elfunxrmcSVU',
+		['help', 'version', 'verbose', 'builddeps', 'syncdeps',
+		'builder-opts=', 
 		'save', 'local', 'official', 'auto-build', 'upgrade',
 		'noconfirm', 'noinstall', 'revision', 'rm-make-deps', 'clean',
 		'search', 'vote', 'unvote'])
@@ -190,6 +192,7 @@ except getopt.GetoptError, e:
 	sys.exit(1)
 
 VERSION		= 0
+VERBOSE		= 0
 BUILDDEPS	= 0
 SYNCDEPS	= 0
 BUILDER_OPTS	= 0
@@ -210,8 +213,10 @@ BUILDER_OPTARGS	= ''
 OFFICIAL_PATH	= abs_root
 
 for opt, optarg in opts:
+	print opt
 	if opt in ['-h', '--help']: usage(); sys.exit(0)
 	if opt in ['-v', '--version']: VERSION = 1
+	if opt in ['--verbose']: VERBOSE = 1
 	if opt in ['-b', '--builddeps']: BUILDDEPS = 1
 	if opt in ['-s', '--syncdeps']: SYNCDEPS = 1
 	if opt in ['-o', '--builder-opts']: 
@@ -962,7 +967,14 @@ def search():
 			maintainer	= 'Maintainer:        ' + maintainers[num] + '\n'
 			_votes		= 'Votes:             ' + votes[num] + '\n\n'
 
-			view_list.append(name + description + location + maintainer + _votes)
+			pkg_info = name + description
+
+			if VERBOSE:
+				pkg_info += location + maintainer + _votes
+			else:
+				pkg_info += '\n'
+
+			view_list.append(pkg_info)
 
 		if not appcheck('less'):
 			for each in view_list:
