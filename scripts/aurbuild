@@ -162,7 +162,7 @@ def usage():
 	print '  -f, --official        build official packages found in `' + \
 					abs_root+'\''
 	print '                        instead of AUR'
-	print '  -a, --auto-build      bypass menu and build ' + \
+	print '  --auto-build      bypass menu and build ' + \
 					'automatically (DANGEROUS)'
 	print '  -u, --upgrade         upgrade all packages installed ' + \
 					'from unsupported AUR'
