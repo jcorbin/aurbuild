@@ -220,7 +220,7 @@ for opt, optarg in opts:
 	if opt in ['-e', '--save']: SAVE = 1
 	if opt in ['-l', '--local']: LOCAL = 1
 	if opt in ['-f', '--official']: OFFICIAL = 1
-	if opt in ['-a', '--auto-build']: AUTO_BUILD = 1
+	if opt in ['--auto-build']: AUTO_BUILD = 1
 	if opt in ['-u', '--upgrade']: UPGRADE =1
 	if opt in ['-n', '--noconfirm']: NOCONFIRM = 1
 	if opt in ['-x', '--noinstall']: NOINSTALL = 1
