@@ -30,7 +30,7 @@ from shutil import rmtree, copytree, copy
 from subprocess import Popen, PIPE
 
 # globals
-PROGRAM_VERSION = '1.8.0'
+PROGRAM_VERSION = '1.8.1'
 PROGRAM_NAME = os.path.basename(sys.argv[0])
 
 Apacman			= aurbuild.pacman
@@ -1193,8 +1193,11 @@ def main():
 						continue
 			elif result == 0:
 				status = 'up to date'
-				rjust_spaces = 60 - (int(len(argo)) + int(len(status)))
-				print argo + status.rjust(rjust_spaces, '.')
+				argline = argo + ' ' + installed[upgrade_ct]
+				argline += ' '
+				rjust_spaces = 80 - (int(len(argline)) + \
+					int(len(status)))
+				print argline + status.rjust(rjust_spaces, '.')
 				if SAVE: savefiles(argo, work_dir)
 				cleanup()
 				upgrade_ct += 1
