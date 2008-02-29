@@ -21,6 +21,7 @@
 
 import os, sys, re
 from aurbuild.version import vercmp
+from subprocess import Popen, PIPE
 
 class PacmanError(Exception):
 	# base excpetion
@@ -40,6 +41,20 @@ class db_tools:
 		self.installed_db 	= self.pacman_db + '/local'
 		self.pacman_config 	= '/etc/pacman.conf'
 		self.comparators 	= ['<=', '>=', '=']
+
+	def get_query(self, query):
+		command = "pacman"
+		output = Popen([command,query], stdout=PIPE).communicate()[0]
+		
+		names = []
+		versions = []
+		output = output.splitlines()
+		for line in output:
+			name, sep, version = line.partition(' ')
+			names.append(name)
+			versions.append(version)
+
+		return names, versions
 
 	def file_contents(self, file):
 		""" file_contents(file) -> contents
@@ -76,7 +91,8 @@ class db_tools:
 		pkgpath: False, string """
 
 		if not os.path.isdir(self.installed_db):
-			raise DatabaseError, 'pacman local database `' + self.installed_db + '\' was not found'
+			raise DatabaseError, 'pacman local database `' + \
+				self.installed_db + '\' was not found'
 
 		cans = os.listdir(self.installed_db)
 		for can in cans:
@@ -142,8 +158,10 @@ class db_tools:
 
 	def get_db_pkgpaths(self):
         	""" get_db_pkgpaths(self) -> pkgpaths
-		get a list of all package database paths according to specified repos in /etc/pacman.conf 
-	        pkgpaths = [], list"""
+		get a list of all package database paths according to
+		specified repos in /etc/pacman.conf"""
+
+		#pkgpaths = [], list
 
         	pkgpaths = []
 	        repo_names = self.get_repos()
@@ -179,57 +197,44 @@ class db_tools:
 	        return packages
 
 	def get_local(self):
-	        """ get_local(self) -> names, versions
-	        names, versions: [], list """
+	        """
+		" get_local(self) -> names, versions
+	        " Returns two dictionaries of pkgname and pkgver of all
+		" locally installed packages
+		"""
 
-	        if not os.path.isdir(self.installed_db):
-			raise DatabaseError, 'pacman local database `' + self.installed_db + '\' was not found'
+		query = "-Q"
 	        names = []
 	        versions = []
-	        for dir in os.listdir(self.installed_db):
-	                can = self.installed_db + '/' + dir
-	                if os.path.isdir(can) and not os.path.islink(can):
-				descfile = can + '/desc'
-	                        if os.path.isfile(descfile):
-					try:
-	                                	names.append(self.get_db_info(descfile, '%NAME%')[0])
-	                                	versions.append(self.get_db_info(descfile, '%VERSION%')[0])
-					except IndexError:
-						raise DatabaseError, 'Error: unable to parse NAME or VERSION information in local database ' \
-								'file `'+descfile+'\'. Possible corruption.\n'  \
-								'Try re-installing '+os.path.basename(can)+'.'
 						
+		try:
+			# Set these two dictionaries
+			names, versions = self.get_query(query) 
+		except IndexError:
+			raise DatabaseError, \
+				'ERROR: pacman failure or empty set'
 	
 	        return names, versions
 
 	def get_foreign(self):
-	        """ get_foreign(self) -> foreign_names, foreign_versions
-		compare local packages to those in the repo database and return those that are not present. Return pkgname, pkgver.
-	        foreign_names, foreign_versions: [], list """
+	        """
+		" get_foreign(self) -> names[], versions[]
+		" Returns two dictionaries of pkgname and pkgver of installed
+		" packages which aren't in the official repos.
+	        """
 
-	        installed_names, installed_versions = self.get_local()
-	        db_pkgpaths = self.get_db_pkgpaths()
+		query = "-Qm"
+	        names = []
+	        versions = []
 
-	        db_names = []
-	        db_versions = []
-	        for each in db_pkgpaths:
-			descfile = each + '/desc'
-	                if os.path.isfile(descfile):
-				try:
-	                        	db_names.append(self.get_db_info(descfile, '%NAME%')[0])
-	                        	db_versions.append(self.get_db_info(descfile, '%VERSION%')[0])
-				except IndexError:
-					raise DatabaseError, 'Error: unable to parse NAME or VERSION information from repo database file `'+ \
-							descfile+'\'. Possible corruption.\n'
+		try:
+			# Set these two dictionaries
+			names, versions = self.get_query(query) 
+		except IndexError:
+			raise DatabaseError, \
+				'ERROR: pacman failure or empty set'
 
-	        foreign_names = []
-	        foreign_versions = []
-	        for num in range(len(installed_names)):
-	                if not installed_names[num] in db_names:
-	                        foreign_names.append(installed_names[num])
-	                        foreign_versions.append(installed_versions[num])
-
-	        return foreign_names, foreign_versions
+	        return names, versions
 
 
 class operations(db_tools):
