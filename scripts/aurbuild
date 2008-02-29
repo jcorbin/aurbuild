@@ -30,6 +30,9 @@ from shutil import rmtree, copytree, copy
 from subprocess import Popen, PIPE
 
 # globals
+PROGRAM_VERSION = '1.8.0'
+PROGRAM_NAME = os.path.basename(sys.argv[0])
+
 Apacman			= aurbuild.pacman
 Aversion		= aurbuild.version
 Afind			= aurbuild.find
@@ -140,9 +143,6 @@ def handler(signo, frame):
 signal.signal(signal.SIGINT, handler)
 signal.signal(signal.SIGTERM, handler)
 
-PROGRAM_VERSION = '1.8.0'
-PROGRAM_NAME = os.path.basename(sys.argv[0])
-
 def usage():
 	print ''
 	print 'usage: %s [options] [package] <package>'%PROGRAM_NAME
@@ -236,13 +236,11 @@ for opt, optarg in opts:
 	if opt in ['-U', '--unvote']: UNVOTE = 1
 
 if VERSION:
-	print ''
 	print 'aurbuild v' + PROGRAM_VERSION
-	print 'Copyright (C) 2005-2007 Tyler Gates <TGates81@gmail.com>'
+	print 'Copyright (C) 2005-2008 Tyler Gates, etc'
 	print ''
 	print 'This program may be freely redistributed under'
 	print 'the terms of the GNU General Public License'
-	print ''
 	sys.exit(0)
 
 # check for no no's:
@@ -1027,9 +1025,11 @@ def main():
 		retcode = rm_dir_contents(build_dir)
 		if len(args) == 0:
 			sys.exit(retcode)
+	
 	if SEARCH: 
 		search()
 		sys.exit(0)
+	
 	if VOTE or UNVOTE:
 		import getpass, aurbuild.login
 
@@ -1098,7 +1098,7 @@ def main():
 	if UPGRADE:
 		# set args to each potential AUR candidate
 		args, installed = Apacman.db_tools().get_foreign()
-	
+
 	upgrade_ct = 0
 	for argo in args:
 		global working_pkg, pkg_build_dir, aur_tarfile

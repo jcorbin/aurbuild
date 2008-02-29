@@ -11,7 +11,7 @@ from distutils.core import setup
 
 DATAFILES = [('/usr/man/man1', ['aurbuild.1']),
 		('/usr/share/doc/aurbuild-'+VERSION,
-			['COPYING', 'README', 'AUTHORS', 'CHANGELOG'])]
+		['COPYING', 'README', 'AUTHORS', 'CHANGELOG'])]
 
 setup(name="aurbuild",
 	version=VERSION,

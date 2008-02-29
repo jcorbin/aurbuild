@@ -31,7 +31,6 @@ def get_app_path(app):
 	# must not be found, return none
 	return None
 
-
 def child_spawn(app, args, uid=None, gid=None, env={}):
 	original_uid = os.getuid()
 	original_gid = os.getgid()
@@ -40,8 +39,9 @@ def child_spawn(app, args, uid=None, gid=None, env={}):
 	try:
 		os.seteuid(uid)
 	except:
-		print >>sys.stderr.write('Error: unable to switch uid to '+str(uid)+'. This may result in root access to builds, \
-				proceed at your own risk!.')
+		print >>sys.stderr.write('Error: unable to switch uid to ' + \
+			str(uid)+'. This may result in root access to builds, \
+			proceed at your own risk!.')
 		pass
 	
 	if os.path.isabs(app) and os.access(app, os.F_OK | os.X_OK):
@@ -52,7 +52,8 @@ def child_spawn(app, args, uid=None, gid=None, env={}):
 		# find it's path
 		path = get_app_path(app)
 		if path == None:
-			print >>sys.stderr.write('Error: `'+app+'\' not found in PATH or is not accessible to uid '+str(uid)+'.')
+			print >>sys.stderr.write('Error: ' + app + \
+				' not found in PATH or is not accessible to uid '+str(uid))
 			sys.exit(1)
 		app = os.path.basename(path)
 	# set effective uid back
