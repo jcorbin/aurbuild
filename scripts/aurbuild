@@ -295,13 +295,13 @@ def prepare_work_dirs():
 		if not os.path.isdir(aurbuild_home):
 			os.mkdir(aurbuild_home)
 			os.chmod(aurbuild_home, 0775)
-			os.chown(aurbuild_home, 0, builduser_uid)
+			os.chown(aurbuild_home, builduser_uid, builduser_uid)
 
 		# build_dir should be the same as aurbuild_home
 		if not os.path.isdir(build_dir):
 			os.mkdir(build_dir)
 			os.chmod(build_dir, 0775)
-			os.chown(build_dir, 0, builduser_uid)
+			os.chown(build_dir, builduser_uid, builduser_uid)
 
 		# pkg_build_dir should be created by the builduser
 		autils.user_makedirs(pkg_build_dir, builduser_uid, builduser_gid)
@@ -854,9 +854,13 @@ def init():
 	# leave out prepare_work_dirs(), it should be called as needed
 
 def savefiles(pkg, old_dir):
+#	import pdb
+#	pdb.set_trace()
+
 	failed = 0
 	def abort_msg(msg):
-		print >>sys.stderr.write('Error saving ' + pkg + ' to ' + save_dir + ': ' + msg)
+		print >>sys.stderr.write('Error saving ' + pkg +  
+			' to ' + save_dir + ': ' + msg)
 		print >>sys.stderr.write('Aborting save...')
 		
 	savecan = os.path.join(save_dir, pkg)
@@ -864,7 +868,7 @@ def savefiles(pkg, old_dir):
 		try:
 			os.makedirs(save_dir)
 			os.chmod(save_dir, 0775)
-			os.chown(save_dir, 0, builduser_uid)
+			os.chown(save_dir, builduser_uid, builduser_uid)
 		except OSError, e:
 			abort_msg(str(e))
 			failed = 1
