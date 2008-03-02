@@ -30,7 +30,7 @@ from shutil import rmtree, copytree, copy
 from subprocess import Popen, PIPE
 
 # globals
-PROGRAM_VERSION = '1.8.1'
+PROGRAM_VERSION = '1.8.2'
 PROGRAM_NAME = os.path.basename(sys.argv[0])
 
 Apacman			= aurbuild.pacman
@@ -176,16 +176,16 @@ def usage():
 	print '  -m, --rm-make-deps    remove uneeded make dependencies'
 	print '  -c  --clean           clean the build directory'
 	print '  -S, --search          search aur for single [keyword]'
-	print '  -V, --vote            vote for a package'
-	print '  -U, --unvote          unvote for a package'
+#	print '  -V, --vote            vote for a package'
+#	print '  -U, --unvote          unvote for a package'
 
 try:
-	opts, args = getopt.getopt(sys.argv[1:], 'hvbso:elfunxrmcSVU',
+	opts, args = getopt.getopt(sys.argv[1:], 'hvbso:elfunxrmcS',
 		['help', 'version', 'verbose', 'builddeps', 'syncdeps',
 		'builder-opts=', 
 		'save', 'local', 'official', 'auto-build', 'upgrade',
 		'noconfirm', 'noinstall', 'revision', 'rm-make-deps', 'clean',
-		'search', 'vote', 'unvote'])
+		'search'])
 except getopt.GetoptError, e:
 	usage()
 	print 'Error: ' + str(e)
@@ -232,8 +232,8 @@ for opt, optarg in opts:
 	if opt in ['-m', '--rm-make-deps' ]: RM_MDEPS = 1
 	if opt in ['-c', '--clean' ]: CLEAN = 1
 	if opt in ['-S', '--search']: SEARCH = 1
-	if opt in ['-V', '--vote']: VOTE = 1
-	if opt in ['-U', '--unvote']: UNVOTE = 1
+#	if opt in ['-V', '--vote']: VOTE = 1
+#	if opt in ['-U', '--unvote']: UNVOTE = 1
 
 if VERSION:
 	print 'aurbuild v' + PROGRAM_VERSION
