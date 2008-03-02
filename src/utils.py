@@ -22,6 +22,7 @@
 
 import os, sys
 from subprocess import Popen, PIPE
+from shutil import copytree
 
 uid			= os.getuid()
 gid			= os.getgid()
