@@ -131,7 +131,6 @@ signal.signal(signal.SIGINT, handler)
 signal.signal(signal.SIGTERM, handler)
 
 def usage():
-	print ''
 	print 'usage: %s [options] [package] <package>'%PROGRAM_NAME
 	print ''
 	print 'options:'
