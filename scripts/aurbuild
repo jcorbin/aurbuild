@@ -28,7 +28,7 @@ import aurbuild.aurparse
 import aurbuild.execute
 import aurbuild.utils
 from shutil import rmtree, copytree, copy
-from subprocess import Popen, PIPE
+from subprocess import Popen
 
 # globals
 PROGRAM_VERSION = '1.8.2'
