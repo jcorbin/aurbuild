@@ -23,6 +23,9 @@
 import os, sys
 from subprocess import Popen, PIPE
 
+uid			= os.getuid()
+gid			= os.getgid()
+
 import aurbuild
 aaurparse = aurbuild.aurparse
 afind = aurbuild.find
