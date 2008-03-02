@@ -39,6 +39,7 @@ class db_tools:
 	def __init__(self):
 		self.pacman_db 		= '/var/lib/pacman'
 		self.installed_db 	= self.pacman_db + '/local'
+		self.pacman_db		= self.pacman_db + '/sync'
 		self.pacman_config 	= '/etc/pacman.conf'
 		self.comparators 	= ['<=', '>=', '=']
 
