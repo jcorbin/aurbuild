@@ -72,45 +72,6 @@ aursite 	= 'http://aur.archlinux.org'
 filtered	= []
 db_pkgs		= []
 db_paths	= []
-
-# examine makepkg.conf and set more globals
-if os.access(makepkg_config, os.F_OK|os.R_OK):
-	makepkg_v2 = False
-	makepkg_v3 = False
-	BUILDENV = autils.echo_bash_vars(makepkg_config, '${BUILDENV[@]}',
-			array=True)[0]
-	if BUILDENV != ['']:
-		makepkg_v3 = True
-		valid_buildenv = []
-		for var in BUILDENV:
-			if var[0] != '!':
-				valid_buildenv.append(var)
-		if 'color' in valid_buildenv: USE_COLOR = 'y'
-		else: USE_COLOR = 'n'
-
-		if 'fakeroot' in valid_buildenv: USE_FAKEROOT = 'y'
-		else: USE_FAKEROOT = 'n'
-
-	else:
-		makepkg_v2 = True
-		out = autils.echo_bash_vars(makepkg_config,
-				"$USE_COLOR:$USE_FAKEROOT", array=False)[0]
-		out = out.split(":")
-		USE_COLOR = out[0].lower()
-		USE_FAKEROOT = out[1].lower()
-		del(out)
-	
-	out = autils.echo_bash_vars(makepkg_config,
-			'$PKGDEST:$SRCDEST:$CARCH', array=False)[0]
-	out = out.split(':')
-	PKGDEST = out[0]
-	SRCDEST = out[1]
-	CARCH = out[2]
-	del(out)
-else:
-	print >>sys.stderr.write('Error: '+makepkg_config+
-			' is missing or read permissions are denied.')
-	sys.exit(1)
 		
 def cleanup():
 	if os.path.isdir(pkg_build_dir):
@@ -126,9 +87,6 @@ def handler(signo, frame):
 	elif signo == 15:
 		cleanup()
 		sys.exit(143)
-
-signal.signal(signal.SIGINT, handler)
-signal.signal(signal.SIGTERM, handler)
 
 def usage():
 	print 'usage: %s [options] [package] <package>'%PROGRAM_NAME
@@ -164,6 +122,37 @@ def usage():
 	print '  -S, --search          search aur for single [keyword]'
 #	print '  -V, --vote            vote for a package'
 #	print '  -U, --unvote          unvote for a package'
+
+# examine makepkg.conf and set more globals
+if os.access(makepkg_config, os.F_OK|os.R_OK):
+	BUILDENV = autils.echo_bash_vars(makepkg_config, '${BUILDENV[@]}',
+			array=True)[0]
+
+	valid_buildenv = []
+	for var in BUILDENV:
+		if var[0] != '!':
+			valid_buildenv.append(var)
+	if 'color' in valid_buildenv: USE_COLOR = 'y'
+	else: USE_COLOR = 'n'
+
+	if 'fakeroot' in valid_buildenv: USE_FAKEROOT = 'y'
+	else: USE_FAKEROOT = 'n'
+
+	
+	out = autils.echo_bash_vars(makepkg_config,
+			'$PKGDEST:$SRCDEST:$CARCH', array=False)[0]
+	out = out.split(':')
+	PKGDEST = out[0]
+	SRCDEST = out[1]
+	CARCH = out[2]
+	del(out)
+else:
+	print >>sys.stderr.write('Error: '+makepkg_config+
+			' is missing or read permissions are denied.')
+	sys.exit(1)
+
+signal.signal(signal.SIGINT, handler)
+signal.signal(signal.SIGTERM, handler)
 
 try:
 	opts, args = getopt.getopt(sys.argv[1:], 'hvbso:elfunxrmcS',
