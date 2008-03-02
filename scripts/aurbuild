@@ -278,12 +278,6 @@ def color(text, color_alias):
 	else:
 		return text
 
-def fakeroot_check():
-	if USE_FAKEROOT != 'y':
-		print '\nUSE_FAKEROOT variable in /etc/makepkg.conf is not set to \"y\". Refusing to proceed.\n'
-		sys.exit(1)
-		
-
 def prepare_work_dirs():
 	try:
 		cleanup()
@@ -847,8 +841,13 @@ def init():
 	if uid != 0:
 		print >>sys.stderr.write('requires root access.')
 		sys.exit(1)
+
 	# ensure we have fakeroot enabled
-	fakeroot_check()
+	if USE_FAKEROOT != 'y':
+		print "error: fakeroot is disabled in /etc/makepkg.conf\n" \
+			"Refusing to proceed."
+		sys.exit(1)
+
 	# set up build user
 	prepare_build_user()
 	# leave out prepare_work_dirs(), it should be called as needed
