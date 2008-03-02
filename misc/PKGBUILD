@@ -2,7 +2,7 @@
 # Contributor: Loui Chang <louipc.ist@gmail.com
 
 pkgname=aurbuild
-pkgver=1.8.1
+pkgver=1.8.2
 pkgrel=1
 pkgdesc="A utility to build and install packages from AUR."
 url="http://developer.berlios.de/projects/aurbuild/"

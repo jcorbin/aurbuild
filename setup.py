@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 NAME="aurbuild"
-VERSION="1.8.1"
+VERSION="1.8.2"
 DESC="An utility to build and install packages from Archlinux User Repository"
 AUTHOR="Tyler Gates, Loui Chang"
 EMAIL="TGates81@gmail.com, louipc.ist@gmail.com"
