@@ -286,21 +286,6 @@ def fakeroot_check():
 		sys.exit(1)
 		
 
-def user_copytree(target, des, u_uid, u_gid):
-		os.setegid(u_gid)
-		os.seteuid(u_uid)
-		copytree(target, des)
-		os.seteuid(uid)
-		os.setegid(gid)
-
-def user_makedirs(target, u_uid, u_gid):
-		os.setegid(u_gid)
-		os.seteuid(u_uid)
-		os.makedirs(target)
-		os.seteuid(uid)
-		os.setegid(gid)
-
-
 def prepare_work_dirs():
 	try:
 		cleanup()
@@ -321,7 +306,7 @@ def prepare_work_dirs():
 			os.chown(build_dir, 0, builduser_uid)
 
 		# pkg_build_dir should be created by the builduser
-		user_makedirs(pkg_build_dir, builduser_uid, builduser_gid)
+		autils.user_makedirs(pkg_build_dir, builduser_uid, builduser_gid)
 	except Exception, e:
 		print >>sys.stderr.write('\ncould not prepare for build: ' + str(e) + '\n')
 		sys.exit(1)
@@ -891,13 +876,13 @@ def savefiles(pkg, old_dir):
 		if NOCONFIRM or choice == 'y' or choice == 'yes' or choice == '':
 			try:
 				rmtree(savecan)
-				user_copytree(old_dir, savecan, builduser_uid, builduser_gid)
+				autils.user_copytree(old_dir, savecan, builduser_uid, builduser_gid)
 			except OSError, e:
 				abort_msg(str(e))
 				failed = 1
 	elif not os.path.isdir(savecan) and not failed:
 		try:
-			user_copytree(old_dir, savecan, builduser_uid, builduser_gid)
+			autils.user_copytree(old_dir, savecan, builduser_uid, builduser_gid)
 		except OSError, e:
 			abort_msg(str(e))
 
