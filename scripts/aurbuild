@@ -1113,10 +1113,13 @@ def main():
 				upgrade_ct += 1
 				continue
 		
-		# save files if --save is the only opt specified and exit or continue
+		# Save files
 		if SAVE:
+			savefiles(argo, work_dir)
+
+			# If --save is the only opt specified don't
+			# build or sync
 			if not BUILDDEPS and not SYNCDEPS:
-				savefiles(argo, work_dir)
 				if argo == args[len(args)-1]:
 					cleanup()
 					sys.exit(0)
@@ -1131,9 +1134,6 @@ def main():
 				upgrade_ct += 1
 				continue
 			elif select == 'v': use_versionpkg = 1
-	
-		# save files if requested
-		if SAVE: savefiles(argo, work_dir)
 	
 		# get dependencies
 		mdep_cans, dep_cans = autils.get_depends(work_dir + '/PKGBUILD', 'makedepends', 'depends')
