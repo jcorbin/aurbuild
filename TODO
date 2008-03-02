@@ -8,13 +8,6 @@ To Do List:
 
  * Add a switch to take pacman arguments.
 
- * Optional: parse for makepkg v3 and v2 and write to /tmp/aurbuild somewhere.
-   For v2 -w can be used, v3 an environment variable of PKGDEST= must be passed
-   instead. I stayed away from this because of my limited time and potentialy
-   unrealible (and ugly) parsing that would be involved. If it can be done
-   reliably, it should be. Currently it relies on PKGDEST in makepkg.conf to be
-   write and execute to aurbuild user or group.
-
  * Use the libalpm hooks in pacman3 for python. Only because it would be faster
    and easier to maintain than my manual flat file parsing module (pacman.py).
 

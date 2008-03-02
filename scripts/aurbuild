@@ -563,21 +563,17 @@ def get_pkgpath():
 	out = out.split('%')
 	pkgname, pkgver, pkgrel = out[0], out[1], out[2]
 
-	v2_pkgpath = os.path.join(_PKGDEST, pkgname+'-'+pkgver+'-'+pkgrel+'.'+PKGEXT)
-	v3_pkgpath = os.path.join(_PKGDEST, pkgname+'-'+pkgver+'-'+pkgrel+'-'+CARCH+'.'+PKGEXT)
+	pkgpath = os.path.join(_PKGDEST, pkgname+'-'+pkgver+'-'+pkgrel+'-'+CARCH+'.'+PKGEXT)
 
-	if os.path.exists(v2_pkgpath):
-		pkgpath = v2_pkgpath
-	elif os.path.exists(v3_pkgpath):
-		pkgpath = v3_pkgpath
+	if os.path.exists(pkgpath):
+		return pkgpath
 	else:
-		print >>sys.stderr.write('Error: could not find the built package.')
+		print >>sys.stderr.write('Error: could not find the built package in ' + pkgpath)
 		print >>sys.stderr.write('In some cases this might mean the PKGDEST location does not have write and execute permissions')
 		print >>sys.stderr.write('for the `aurbuild\' user or group.')
 		cleanup()
 		sys.exit(1)
 	
-	return pkgpath
 
 def makepkgf(dep):
 
