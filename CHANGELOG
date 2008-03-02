@@ -1,9 +1,10 @@
 
 AURBUILD
- -v1.8.2 (March 1, 2008)
+ -v1.8.2 (March 2, 2008)
 	* Fixed bug that prevented --sync from working properly
 	  Package repo database wasn't being found.
 	* Disabled --vote and --unvote again
+	* Moved a bunch of functions out of the main script
 
  -v1.8.1 (February 29, 2008)
 	* Fixed a lot of stuff in README and the man page
