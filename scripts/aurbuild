@@ -44,7 +44,6 @@ aurbuild_home		= '/var/tmp/aurbuild'
 makepkg_config		= '/etc/makepkg.conf'
 uid			= os.getuid()
 gid			= os.getgid()
-pid			= str(os.getpid())
 build_dir	 	= os.path.join(aurbuild_home, 'build')
 save_dir 		= os.path.join(aurbuild_home, 'pkgbuilds')
 editor			= os.getenv('EDITOR')
@@ -54,7 +53,7 @@ PKGEXT			= 'pkg.tar.gz'
 builduser_uid		= None
 builduser_gid		= None
 working_pkg		= None
-# this will be build_dir/working_pkg.pid
+# this will be build_dir/working_pkg
 pkg_build_dir		= 'dummy'
 aur_tarfile		= 'dummy'
 
@@ -224,7 +223,7 @@ for opt, optarg in opts:
 #	if opt in ['-U', '--unvote']: UNVOTE = 1
 
 if VERSION:
-	print 'aurbuild v' + PROGRAM_VERSION
+	print PROGRAM_NAME + ' v' + PROGRAM_VERSION
 	print 'Copyright (C) 2005-2008 Tyler Gates, etc'
 	print ''
 	print 'This program may be freely redistributed under'
