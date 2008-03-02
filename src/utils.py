@@ -21,10 +21,11 @@
 #
 
 import os, sys
-from subprocess import Popen
+from subprocess import Popen, PIPE
 
 import aurbuild
 aaurparse = aurbuild.aurparse
+afind = aurbuild.find
 
 def echo_bash_vars(path, value, array=False):
 	""" return a variable from a bash file """
@@ -91,7 +92,7 @@ def get_depends(pkgbuild, dep1, dep2):
 	dep2 = out[1].split(' ')
 	return dep1, dep2
 
-def get_dep_path(dep):
+def get_dep_path(abs_root, dep):
 	if not os.path.isdir(abs_root):
 		print >>sys.stderr.write('\n' + abs_root + 'not found in filesystem. Cannot build dependencies\n')
 		cleanup()

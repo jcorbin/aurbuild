@@ -74,20 +74,6 @@ filtered	= []
 db_pkgs		= []
 db_paths	= []
 
-def echo_bash_vars(path, value, array=False):
-	""" return a variable from a bash file """
-	
-	p = Popen('source '+path+'; echo '+value, shell=True,
-			stdout=PIPE, stderr=PIPE)
-	out = p.stdout.read()
-	out = out.strip()
-	if array:
-		out = out.split(' ')
-	p.stdout.close()
-	err = p.stderr.read()
-	p.stderr.close()
-	return out, err
-
 # examine makepkg.conf and set more globals
 if os.access(makepkg_config, os.F_OK|os.R_OK):
 	makepkg_v2 = False
@@ -299,23 +285,6 @@ def fakeroot_check():
 		print '\nUSE_FAKEROOT variable in /etc/makepkg.conf is not set to \"y\". Refusing to proceed.\n'
 		sys.exit(1)
 		
-def get_depends(pkgbuild, dep1, dep2):
-	# dep1 is makedepends. dep2 is depends
-	p = Popen('source ' + pkgbuild + '; echo "${' + dep1 + '[@]}:${' +
-			dep2 + '[@]}"', shell=True, stdout=PIPE, stderr=PIPE)
-	out = p.stdout.read()
-	err = p.stderr.read()
-	p.stdout.close()
-	p.stderr.close()
-	if err != '':
-		print >>sys.stderr.write('\nPKGBUILD syntax error:\n\n' + err)
-		cleanup()
-		sys.exit(1)
-	out = out.strip()
-	out = out.split(':')
-	dep1 = out[0].split(' ')
-	dep2 = out[1].split(' ')
-	return dep1, dep2
 
 def get_dep_path(dep):
 	if not os.path.isdir(abs_root):
@@ -549,10 +518,10 @@ def filter_deps(pkg, fd_ct, type):
 			print color('missing ' + type, 'red')
 			pkg = apacman.db_tools().strip_ver_cmps(pkg)[0]
 			if BUILDDEPS: 
-				dep_path = get_dep_path(pkg)
+				dep_path = autils.get_dep_path(abs_root, pkg)
 				if dep_path != None:
 					# a dependency is found, check it's deps and run this method again
-					mdep_cans, dep_cans = get_depends(dep_path + '/PKGBUILD', 'makedepends', 'depends')
+					mdep_cans, dep_cans = autils.get_depends(dep_path + '/PKGBUILD', 'makedepends', 'depends')
 					if mdep_cans or dep_cans != ['']: fd_ct += spaces
 					if mdep_cans != ['']:
 						for mdep_can in mdep_cans:
@@ -737,7 +706,7 @@ def builddeps(deplist):
         # for -b option
 	cwd = os.getcwd()
         for each in deplist:
-                dep_path = get_dep_path(each)
+                dep_path = autils.get_dep_path(abs_root, each)
                 if dep_path == None:
                         print >>sys.stderr.write('\naurbuild: dependency \"' + each + '\" not found in abs.')
                         cleanup()
@@ -1193,7 +1162,7 @@ def main():
 		if SAVE: savefiles(argo, work_dir)
 	
 		# get dependencies
-		mdep_cans, dep_cans = get_depends(work_dir + '/PKGBUILD', 'makedepends', 'depends')
+		mdep_cans, dep_cans = autils.get_depends(work_dir + '/PKGBUILD', 'makedepends', 'depends')
 		mdeps = []
 		deps = []
 		print color('==> ', 'blue') + color('Checking Buildtime Dependencies... \n', 'black')
