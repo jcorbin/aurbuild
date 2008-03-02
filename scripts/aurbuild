@@ -715,6 +715,11 @@ def builddeps(deplist):
 		des_dir = os.path.join(build_dir, each)
 		os.setegid(builduser_gid)
 		os.seteuid(builduser_uid)
+
+		# Remove build directory if it already exists
+		if os.path.isdir(des_dir):
+			rmtree(des_dir)
+
                 copytree(dep_path, des_dir)
 		os.seteuid(uid)
 		os.setegid(gid)
@@ -1027,7 +1032,7 @@ def main():
 	for argo in args:
 		global working_pkg, pkg_build_dir, aur_tarfile
 		working_pkg = argo
-		pkg_build_dir = os.path.join(build_dir, working_pkg +'.'+pid)
+		pkg_build_dir = os.path.join(build_dir, working_pkg)
 		prepare_work_dirs()
 		# a potential pkg work direcotory (after decompression)
 		p_work_dir = os.path.join(pkg_build_dir, working_pkg)

@@ -5,6 +5,9 @@ AURBUILD
 	  Package repo database wasn't being found.
 	* Disabled --vote and --unvote again
 	* Moved a bunch of functions out of the main script
+ 	* Fix bug that makes builddeps fail if the package has been previously
+	  been built by aurbuild
+	* Got rid of annoying pkgname.pid dirs in /var/tmp/aurbuild/build
 
  -v1.8.1 (February 29, 2008)
 	* Fixed a lot of stuff in README and the man page

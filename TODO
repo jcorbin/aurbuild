@@ -3,9 +3,6 @@ To Do List:
 
  * Look at raw_pkg_query to possibly improve search performance
 
- * Fix bug that makes builddeps fail if the package has been previously been
-   built by aurbuild (test with jumpnbump and sdl_mixer)
-
 In Progress:
  * Move functions out of main script and into appropriate modules
 
