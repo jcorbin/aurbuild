@@ -286,20 +286,6 @@ def fakeroot_check():
 		sys.exit(1)
 		
 
-def get_dep_path(dep):
-	if not os.path.isdir(abs_root):
-		print >>sys.stderr.write('\n' + abs_root + 'not found in filesystem. Cannot build dependencies\n')
-		cleanup()
-		sys.exit(1)
-	results = afind.find_dir(abs_root + '/', dep)[0]
-	if results != []:
-		for p in results:
-			if os.path.isfile(p + '/PKGBUILD'):
-				return p
-		return None
-	else:
-		return None
-
 def user_copytree(target, des, u_uid, u_gid):
 		os.setegid(u_gid)
 		os.seteuid(u_uid)
