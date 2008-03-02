@@ -940,6 +940,7 @@ def savefiles(pkg, old_dir):
 			abort_msg(str(e))
 
 def search():
+	import textwrap
 	try:
 		names, descriptions, locations, categories, maintainers, votes = Aaurparse.aursearch(args[0]) 
 	except Exception, e:
@@ -952,18 +953,28 @@ def search():
 	else:
 		view_list = []
 		for num in range(len(names)):
-			name 		= 'Name:              ' + names[num] + '\n'
-			description 	= 'Description:       ' + descriptions[num] + '\n'
-			location	= 'Location:          ' + locations[num] + '/' + categories[num] + '\n'
-			maintainer	= 'Maintainer:        ' + maintainers[num] + '\n'
-			_votes		= 'Votes:             ' + votes[num] + '\n\n'
+			name 		= names[num]
+			desc	 	= textwrap.wrap(descriptions[num]) 
+			location	= locations[num]
+			category	= categories[num]
+			maintainer	= 'Maintainer: ' + maintainers[num] 
+			_votes		= 'Votes: ' + votes[num] + '\n'
 
-			pkg_info = name + description
+
+			description = ''
+			for line in desc:
+				description += '\t' + line + '\n'
+
+			if category != '':
+				category = '(' + category + ')'
+
+			pkg_info = location + '/' + name + ' ' + category + \
+				'\n' + description 
 
 			if VERBOSE:
-				pkg_info += location + maintainer + _votes
-			else:
-				pkg_info += '\n'
+				pkg_info += '\t' + maintainer + '\n\t' + _votes
+
+			pkg_info += '\n'
 
 			view_list.append(pkg_info)
 
