@@ -20,6 +20,8 @@ To Do List:
 
  * Look at raw_pkg_query to possibly improve search performance
 
+ * Find what's causing a delay when building official packages 
+
  * Make sure root user is used for as few operations as possible
    Currently some directories in /var/tmp/aurbuild are owned by root
 
