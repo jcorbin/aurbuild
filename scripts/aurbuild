@@ -1111,7 +1111,7 @@ def main():
 				upgrade_ct += 1
 				continue
 			elif result == -1:
-				print ':: ' + argo + ': local (' + installed[upgrade_ct] + ') appears to be newer than aur (' + aur + ')'
+				print ':: local/%s %s seems newer than aur/%s %s'% (argo, installed[upgrade_ct], argo, aur) 
 				if SAVE: savefiles(argo, work_dir)
 				cleanup()
 				upgrade_ct += 1
