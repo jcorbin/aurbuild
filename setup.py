@@ -10,7 +10,7 @@ LICENSE="GPL"
 from distutils.core import setup
 
 DATAFILES = [('/usr/man/man1', ['aurbuild.1']),
-		('/usr/share/doc/aurbuild-'+VERSION,
+		('/usr/share/aurbuild-'+VERSION,
 		['COPYING', 'README', 'AUTHORS', 'CHANGELOG'])]
 
 setup(name="aurbuild",
