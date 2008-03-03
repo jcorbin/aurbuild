@@ -746,12 +746,11 @@ def menu(dir_list, package):
 		elif _hgrepo != '' and _hgroot != '': return 1
 		else: return 0
 
-	def title(status, _color):
-		display = package + ': ' + status
+	def title(display, _color):
 		len_disp = int(len(display))
 		if len_disp > sep_num: centerspaces = ''
 		else: centerspaces = ' '*((sep_num - len_disp) / 2)
-		return spaces + centerspaces + display.replace(status, '') + color(status, _color)
+		return spaces + centerspaces + color(display, _color)
 
 	versionpkg_preferred = versionpkg_pkg()
 	getout = False
@@ -759,7 +758,7 @@ def menu(dir_list, package):
 		default_choice = 'b'
 		code = Popen('clear').wait()
 		print '\n'
-		print title('UNSUPPORTED PACKAGE', 'red')
+		print title(package, 'white')
 		print '\n' + spaces + seperator
 		i=0
 		while i<file_num:
