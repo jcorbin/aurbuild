@@ -8,7 +8,7 @@ pkgdesc="A utility to build and install packages from AUR."
 url="http://developer.berlios.de/projects/aurbuild/"
 license="GPL"
 arch=('i686' 'x86_64')
-depends=('python' 'fakeroot' 'versionpkg')
+depends=('python' 'pacman>=3.1.0' 'fakeroot')
 
 build() {
 	cd $startdir/..

@@ -73,11 +73,6 @@ def color(text, color_alias):
 	else:
 		return text
 
-def fakeroot_check():
-	if USE_FAKEROOT != 'y':
-		print '\nUSE_FAKEROOT variable in /etc/makepkg.conf is not set to \"y\". Refusing to proceed.\n'
-		sys.exit(1)
-		
 def get_depends(pkgbuild, dep1, dep2):
 	# dep1 is makedepends. dep2 is depends
 	p = Popen('source ' + pkgbuild + '; echo "${' + dep1 + '[@]}:${' +
@@ -467,36 +462,6 @@ def makepkgf(dep):
 	
 	return get_pkgpath()
 
-def versionpkg(dep):
-
-	cwd = os.getcwd()
-	raw_sources, err = echo_bash_vars(os.path.join(cwd, 'PKGBUILD'), '${source[@]}', array=True)
-	if err != '':
-		print >>sys.stderr.write('PKGBUILD syntax error: '+err)
-		cleanup()
-		sys.exit(1)
-
-	app = 'versionpkg'
-	args = ['versionpkg', '-f', '-o=-f']
-	if BUILDER_OPTS and BUILDER_OPTARGS != '':
-		args.extend(BUILDER_OPTARGS.split(' '))
-	
-	# ccache needs a writable HOME, set it here.
-	env = os.environ
-	env['HOME'] = aurbuild_home
-	code = Aexec.child_spawn(app, args, builduser_uid, builduser_gid, env)
-
-	# copy src files over to cache
-	src_to_pm_cache(raw_sources)
-	
-	if code > 0:
-		print >>sys.stderr.write('\naurbuild: could not build \"' + dep + '\" with versionpkg.')
-		print 'build directory retained at `'+pkg_build_dir+'\''
-		print 'In some cases you may be able to cd into the directory, fix the problem and run versionpkg with success.'
-		sys.exit(1)
-	
-	return get_pkgpath()
-
 def install(pkgpath):
 	if os.path.isfile(pacman_lock):
 		print '\nPacman is detected running. Package cannot not be installed at this time.'
@@ -559,135 +524,6 @@ def appcheck(app):
 	for each in path:
 		if os.path.isfile(each + app): return True
 	return False
-
-def menu(dir_list, package):
-	files = []
-	editor_cmd = editor
-#	columns = int(os.getenv('COLUMNS'))
-#	if columns == None: columns = 80
-	columns = 80
-	sep_num = 51
-	seperator = '-'*sep_num
-	space_num = (columns - sep_num ) / 2
-	spaces = ' '*space_num
-	for each in dir_list:
-		if os.path.isfile(each):
-			files.append(each)
-	del(each)
-	file_num = len(files)
-	
-	if not NOINSTALL:
-		# open editor with .install file
-		for k in files:
-			extension = k.rsplit('.', 1)[1:]
-			if 'install' in extension:
-				editor_cmd.append(k)
-				code = Popen(editor_cmd).wait()
-				editor_cmd.remove(k)
-				break
-
-	def versionpkg_pkg():
-		# TODO: patch versionpkg to return true or false on a CVS/SVN/MERCURIAL PKGBUILD's
-		cwd = os.getcwd()
-		pc_out, pc_err = echo_bash_vars(os.path.join(cwd, 'PKGBUILD'),'${_cvsmod}%${_cvsroot}%${_svnmod}%${_svntrunk}%${_hgrepo}%${_hgroot}')
-		if pc_err != '': return 0
-		pc_out = pc_out.split('%')
-		_cvsmod 	= pc_out[0]
-		_cvsroot 	= pc_out[1]
-		_svnmod 	= pc_out[2]
-		_svntrunk	= pc_out[3]
-		_hgrepo		= pc_out[4]
-		_hgroot		= pc_out[5]
-		if _cvsmod != '' and _cvsroot != '': return 1
-		elif _svnmod != '' and _svntrunk != '': return 1
-		elif _hgrepo != '' and _hgroot != '': return 1
-		else: return 0
-
-	def title(status, _color):
-		display = package + ': ' + status
-		len_disp = int(len(display))
-		if len_disp > sep_num: centerspaces = ''
-		else: centerspaces = ' '*((sep_num - len_disp) / 2)
-		return spaces + centerspaces + display.replace(status, '') + color(status, _color)
-
-	versionpkg_preferred = versionpkg_pkg()
-	getout = False
-	while not getout:
-		default_choice = 'b'
-		code = Popen('clear').wait()
-		print '\n'
-		print title('UNSUPPORTED PACKAGE', 'red')
-		print '\n' + spaces + seperator
-		i=0
-		while i<file_num:
-			print spaces + '  ' + str(i+1) + ')  View/Edit ' + files[i]
-			i = i+1
-		print spaces + seperator
-		if NOINSTALL: 
-			if versionpkg_preferred:
-				print spaces + '  b)  Build with makepkg.'
-				print spaces + color('*', 'blue') + ' v)  Build with versionpkg.'
-				default_choice = 'v'
-			else:
-				print spaces + color('*', 'blue') + ' b)  Build with makepkg.'
-				print spaces + '  v)  Build with versionpkg.'
-				default_choice = 'b'
-		else:
-			if versionpkg_preferred:
-				print spaces + '  b)  Build and install with makepkg and pacman.'
-				print spaces + color('*', 'blue') + ' v)  Build and install with versionpkg and pacman.'
-				default_choice = 'v'
-			else:
-				print spaces + color('*', 'blue') + ' b)  Build and install with makepkg and pacman.'
-				print spaces + '  v)  Build and install with versionpkg and pacman.'
-				default_choice = 'b'
-		print spaces + '  s)  Skip this package.'
-		print spaces + '  q)  Quit without building.'
-		print spaces + seperator
-
-		display_choice = default_choice.upper()
-		choice = raw_input('\n' + spaces + 'Enter a selection: ['+ display_choice + '] ')
-		if choice == 'b':
-			return choice
-		elif choice == 'v':
-			return choice
-		elif choice == 'q':
-			cleanup()
-			sys.exit(0)
-		elif choice == 's':
-			return choice
-		elif choice.isdigit():
-			if int(choice) >= 1 and int(choice) <= file_num:
-				editor_cmd.append(files[int(choice)-1])
-				code = Popen(editor_cmd).wait()
-				editor_cmd.remove(files[int(choice)-1])
-				
-			else:
-				print '\n' + spaces + choice + ': Invalid entry.'
-				print spaces + 'Press enter to choose again.'
-				raw_input(spaces)
-		elif choice == '': return default_choice
-		else:
-			print '\n' + spaces + choice + ': Invalid entry.'
-			print spaces + 'Press enter to choose again.'
-			raw_input(spaces)
-
-def init():
-	# check that we have everything we need
-	prog_list = ['makepkg', 'pacman', 'versionpkg', 'fakeroot']
-	for prog in prog_list:
-		if not appcheck(prog):
-			print >>sys.stderr.write('\n' + prog + ' program not found in $PATH.\n')
-			sys.exit(1)
-	# must be root
-	if uid != 0:
-		print >>sys.stderr.write('requires root access.')
-		sys.exit(1)
-	# ensure we have fakeroot enabled
-	fakeroot_check()
-	# set up build user
-	prepare_build_user()
-	# leave out prepare_work_dirs(), it should be called as needed
 
 def savefiles(pkg, old_dir):
 	failed = 0

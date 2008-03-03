@@ -20,7 +20,7 @@ Sync missing dependencies using pacman to retrieve prebuilt *.pkg.tar.gz binarie
 
 .TP
 \fB\-o "OPTS", \-\-builder\-opts="OPTS"\fR
-This will pass options directly to the builder of choice (currently makepkg or versionpkg) as selected from the menu during the build process. Be sure to encapsulate your options in double quotes to ensure they are passed down correctly to the builder. Please note aurbuild will always pass -f to makepkg by default and some options will not work as an under-privileged build user. Also note the use of this switch is optional and normally not needed to build most packages. Below is an example:
+This will pass options directly to the builder of choice (currently makepkg) as selected from the menu during the build process. Be sure to encapsulate your options in double quotes to ensure they are passed down correctly to the builder. Please note aurbuild will always pass -f to makepkg by default and some options will not work as an under-privileged build user. Also note the use of this switch is optional and normally not needed to build most packages. Below is an example:
 
 .TP
 \fBExample:\fR
@@ -46,7 +46,7 @@ Build official packages using \fI/var/abs/\fR as the PKGBUILD root. NOTE: packag
 
 .TP
 \fB\-u, \-\-upgrade\fR
-Upgrade out of date packages installed from unsupported AUR. This will check aur's website for each aur package so it may take a while. Each package will be evaluated and upgraded one by one displaying a confirmation message. Use this as a modifier to --syncdeps or --builddeps. Note: --auto-build may be used to bypass the menu, but is not generally recommended unless you know what you are doing.
+Upgrade out of date packages installed from unsupported AUR. This will check AUR's website for each AUR package so it may take a while. Each package will be evaluated and upgraded one by one displaying a confirmation message. Use this as a modifier to --syncdeps or --builddeps. Note: --auto-build may be used to bypass the menu, but is not generally recommended unless you know what you are doing.
 .TP
 \fBExample:\fR
 aurbuild -su
@@ -65,7 +65,7 @@ Add this switch to not install the package after it has been built. Be sure you 
 
 .TP
 \fB\-r, \-\-revision\fR
-Check CVS/SVN/MERCURIAL servers for the latest revisions on qualified PKGBUILD's via versionpkg during an --upgrade session. Note this updates the PKGBUILD so choosing versionpkg over makepkg is not necessary.
+Check revision control servers for the latest revisions on qualified PKGBUILDs during an --upgrade session. Note this updates the PKGBUILD.
 
 .TP
 \fB\-m, \-\-rm\-make\-deps\fR
@@ -73,7 +73,7 @@ Remove unneeded make dependencies after a successful build. You will be prompted
 
 .TP 
 \fB\-S, \-\-search\fR 
-Use this to search AUR for a single [keyword]. Results are piped to the less viewer.
+Use this to search AUR for a single [keyword]. Results are piped to \fBless (1)\fR.
 
 .TP
 \fB\-\-verbose\fR
@@ -95,7 +95,7 @@ This will be the name of the package as defined in AUR minus any version numbers
 aurbuild -s foo1 foo2 foo3
 
 .SH "THE MENU"
-The menu will be displayed as text on your terminal. It will display a corresponding number to each build file extracted from the tarball to view or edit if desired. If a .install file is found it will be displayed immediately for review. Once you are convinced all files are sound, you may choose to either build and/or install the package via makepkg and pacman, build and/or install through versionpkg (makepkg wrapper to handle SVN/CVS/Mercurial packages) and pacman, skip the package, or quit all together without building. Aurbuild will examine the variables in the PKGBUILD and try guess which builder to use. For instance, if CVS/SVN/MERCURIAL variables are found, a star will be placed next to versionpkg in the menu with [V] at the choice selection indicating versionpkg is preferred and preselected.
+The menu will be displayed as text on your terminal. It will display a corresponding number to each build file extracted from the tarball to view or edit if desired. If a .install file is found it will be displayed immediately for review. Once you are convinced all files are sound, you may choose to either build via makepkg (and install via pacman), skip the package, or quit all together without building.
 
 .TP
 \fBWARNING:\fR Editing build files should \fIonly\fR be done by users who know what they are doing!
@@ -114,13 +114,13 @@ aurbuild utilizes the EDITOR environment variable as the editor to be use in the
 The logic behind building packages as an under privilege user is safety. If for example during the build process a file wants to be moved into the root file system i.e. from a poor PKGBUILD, makepkg will catch the permission error and exit. As you may or may not know, makepkg needs to install\fB all\fR of it's files into $startdir/pkg/ so that it may be compressed and given to pacman to install and keep track of. Had it been run as root user and  a file was moved into the root file system during build, the package would still have been built and pacman would not be able to track that one file. The problem with building a package as regular user however, is that permissions of the files may inherit those of the user. This is where \fBfakeroot\fR comes into play. fakeroot allows a package to be built resembling the root user so that files may be owned by root, yet regular root permissions are denied. fakeroot is a required dependency. Aurbuild solves this by temporarily dropping down to a designated and under privileged build user and returning to root once the build has been complete.
 
 .SH "FAILED BUILDS"
-Should a package fail to build, aurbuild will retain the build directory in /var/tmp/aurbuild/build/<pkgname>.<pid> by default. In some cases the package can be fixed and makepkg can be run manually with success. When a package builds success fully under aurbuild it's build files are deleted automatically.
+Should a package fail to build, aurbuild will retain the build directory in /var/tmp/aurbuild/build/<pkgname> by default. In some cases the package can be fixed and makepkg can be run manually with success. When a package builds success fully under aurbuild it's build files are deleted automatically.
 
 .SH "PACKAGE LOCATION"
 aurbuild closely adheres to \fBmakepkg\fR configurations and behavior. So if you wish to keep the package you built, uncomment and set the \fBexport PKGDEST=\fR variable in \fI/etc/makepkg.conf\fR to the location you wish to store the packages. A generally accepted location is \fI/home/pkgs\fR although it is purely a matter of preference. Appropriate write and execute permissions to this directory will be necessary to the aurbuild user or group. If this variable is not set, aurbuild will delete the package along with its temporary work directory in which it was built in \fI/var/tmp/aurbuild/build/<pkgname>.<pid>\fR.
 
 .SH "PACKAGE INSTALLATION"
-If a package is built successfully, it is installed via pacman -U. If you do not wish for this behavior, set the --no-install switch. Note if you do not have PKGDEST set in /etc/makepkg.conf, the package and it's build directory will be deleted.
+If a package is built successfully, it is installed via pacman -U. If you do not wish for this behavior, set the --no-install switch. Note if you do not have PKGDEST set in /etc/makepkg.conf, the package and its build directory will be deleted.
 
 .SH "SOURCE FILES"
 If possible, aurbuild will attempt to copy any source files used for the build into pacman's src directory in /var/cache/pacman/src. This will prevent unnecessary multiple download sessions if the package needs to be built again in the future.
@@ -129,7 +129,7 @@ If possible, aurbuild will attempt to copy any source files used for the build i
 Because the AUR has the same database for unsupported packages as well as community, aurbuild is often able to detect either one. If a community package is found, aurbuild will prompt and propose to build the package via \fBaurbuild <CURRENT DEP RESOLVE OPT> --official <PKGNAME>\fR. This will force aurbuild to look in /var/abs/ for the desired PKGBUILD instead of AUR's website. NOTE: packages built using --official will only be as up to date as your abs tree is! Run the command \fBabs\fR to update it.
 
 .SH "COLOR OUTPUT"
-The use of color is determined by setting color in the BUILDENV array in \fI/etc/makepkg.conf\fR in makepkg version 3.X or the \fBUSE_COLOR=\fR variable in makepkg version 2.X. If you wish to turn it off, prefix it with a ! or set it to 'n'.
+The use of color is determined by setting color in the BUILDENV array in \fI/etc/makepkg.conf\fR. If you wish to turn it off prefix with an exclamation point (!).
 
 .SH "SEE ALSO"
 .B pacman

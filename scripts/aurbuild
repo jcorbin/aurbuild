@@ -99,8 +99,7 @@ def usage():
 					'dependencies from abs'
 	print '  -s, --syncdeps        install missing dependencies with pacman'
 	print '  -o \"OPTS\", --builder-opts=\"OPTS\"'
-	print '                        pass OPTS to makepkg ' + \
-					'or versionpkg during build'
+	print '                        pass OPTS to makepkg during build'
 	print '  -e, --save            save build files in `'+save_dir+'\''
 	print '  -l, --local           use build files found in `'+save_dir+'\''
 	print '                        instead of AUR'
@@ -605,36 +604,6 @@ def makepkgf(dep):
 	
 	return get_pkgpath()
 
-def versionpkg(dep):
-
-	cwd = os.getcwd()
-	raw_sources, err = autils.echo_bash_vars(os.path.join(cwd, 'PKGBUILD'), '${source[@]}', array=True)
-	if err != '':
-		print >>sys.stderr.write('PKGBUILD syntax error: '+err)
-		cleanup()
-		sys.exit(1)
-
-	app = 'versionpkg'
-	args = ['versionpkg', '-f', '-o=-f']
-	if BUILDER_OPTS and BUILDER_OPTARGS != '':
-		args.extend(BUILDER_OPTARGS.split(' '))
-	
-	# ccache needs a writable HOME, set it here.
-	env = os.environ
-	env['HOME'] = aurbuild_home
-	code = aexec.child_spawn(app, args, builduser_uid, builduser_gid, env)
-
-	# copy src files over to cache
-	src_to_pm_cache(raw_sources)
-	
-	if code > 0:
-		print >>sys.stderr.write('\naurbuild: could not build \"' + dep + '\" with versionpkg.')
-		print 'build directory retained at `'+pkg_build_dir+'\''
-		print 'In some cases you may be able to cd into the directory, fix the problem and run versionpkg with success.'
-		sys.exit(1)
-	
-	return get_pkgpath()
-
 def install(pkgpath):
 	if os.path.isfile(pacman_lock):
 		print '\nPacman is detected running. Package cannot not be installed at this time.'
@@ -729,30 +698,12 @@ def menu(dir_list, package):
 				editor_cmd.remove(k)
 				break
 
-	def versionpkg_pkg():
-		# TODO: patch versionpkg to return true or false on a CVS/SVN/MERCURIAL PKGBUILD's
-		cwd = os.getcwd()
-		pc_out, pc_err = autils.echo_bash_vars(os.path.join(cwd, 'PKGBUILD'),'${_cvsmod}%${_cvsroot}%${_svnmod}%${_svntrunk}%${_hgrepo}%${_hgroot}')
-		if pc_err != '': return 0
-		pc_out = pc_out.split('%')
-		_cvsmod 	= pc_out[0]
-		_cvsroot 	= pc_out[1]
-		_svnmod 	= pc_out[2]
-		_svntrunk	= pc_out[3]
-		_hgrepo		= pc_out[4]
-		_hgroot		= pc_out[5]
-		if _cvsmod != '' and _cvsroot != '': return 1
-		elif _svnmod != '' and _svntrunk != '': return 1
-		elif _hgrepo != '' and _hgroot != '': return 1
-		else: return 0
-
 	def title(display, _color):
 		len_disp = int(len(display))
 		if len_disp > sep_num: centerspaces = ''
 		else: centerspaces = ' '*((sep_num - len_disp) / 2)
 		return spaces + centerspaces + color(display, _color)
 
-	versionpkg_preferred = versionpkg_pkg()
 	getout = False
 	while not getout:
 		default_choice = 'b'
@@ -760,29 +711,24 @@ def menu(dir_list, package):
 		print '\n'
 		print title(package, 'white')
 		print '\n' + spaces + seperator
-		i=0
-		while i<file_num:
+
+		i = 0
+		while i < file_num:
 			print spaces + '  ' + str(i+1) + ')  View/Edit ' + files[i]
-			i = i+1
+			i = i + 1
 		print spaces + seperator
-		if NOINSTALL: 
-			if versionpkg_preferred:
-				print spaces + '  b)  Build with makepkg.'
-				print spaces + color('*', 'blue') + ' v)  Build with versionpkg.'
-				default_choice = 'v'
-			else:
-				print spaces + color('*', 'blue') + ' b)  Build with makepkg.'
-				print spaces + '  v)  Build with versionpkg.'
-				default_choice = 'b'
-		else:
-			if versionpkg_preferred:
-				print spaces + '  b)  Build and install with makepkg and pacman.'
-				print spaces + color('*', 'blue') + ' v)  Build and install with versionpkg and pacman.'
-				default_choice = 'v'
-			else:
-				print spaces + color('*', 'blue') + ' b)  Build and install with makepkg and pacman.'
-				print spaces + '  v)  Build and install with versionpkg and pacman.'
-				default_choice = 'b'
+
+		menu_op = "Build"
+		menu_app = "makepkg"
+
+		if not NOINSTALL:
+			menu_op += " and install"
+			menu_app += " and pacman"
+
+		# Build (and install) with makepkg (and pacman)
+		print spaces + color('*', 'blue') + ' b)  %s with %s.'% (menu_op, menu_app)
+		default_choice = 'b'
+
 		print spaces + '  s)  Skip this package.'
 		print spaces + '  q)  Quit without building.'
 		print spaces + seperator
@@ -816,7 +762,7 @@ def menu(dir_list, package):
 
 def init():
 	# check that we have everything we need
-	prog_list = ['makepkg', 'pacman', 'versionpkg', 'fakeroot']
+	prog_list = ['makepkg', 'pacman', 'fakeroot']
 	for prog in prog_list:
 		if not appcheck(prog):
 			print >>sys.stderr.write('\n' + prog + ' program not found in $PATH.\n')
@@ -1058,8 +1004,8 @@ def main():
 		# for --upgrade. compare versions and confirm upgrade with user
 		if UPGRADE:
 			if REVISION:
-				# check for latest revision using versionpkg. Use shell to supress output and obtain return code.
-				versionpkg_code = Popen('versionpkg --modify-only &>/dev/null', shell=True).wait()
+				# check for latest revision using makepkg. Use shell to supress output and obtain return code.
+				pkg_code = Popen('makepkg -oe &>/dev/null', shell=True).wait()
 
 			pkgbuild_path = os.path.join(os.getcwd(), 'PKGBUILD')
 			package, err = autils.echo_bash_vars(pkgbuild_path, '${pkgname}')
@@ -1113,14 +1059,12 @@ def main():
 				else: continue
 
 		# evaulate options and go to menu if needed
-		use_versionpkg = 0
 		if not AUTO_BUILD:
 			select = menu(os.listdir(work_dir), argo)
 			if select == 's':
 				cleanup()
 				upgrade_ct += 1
 				continue
-			elif select == 'v': use_versionpkg = 1
 	
 		# get dependencies
 		mdep_cans, dep_cans = autils.get_depends(work_dir + '/PKGBUILD', 'makedepends', 'depends')
@@ -1166,8 +1110,7 @@ def main():
 						if 'make' in zdict[zct].lower():
 							rm_packages.extend(deps_type)
 	
-		if use_versionpkg: pkgname = versionpkg(argo)
-		else: pkgname = makepkgf(argo)
+		pkgname = makepkgf(argo)
 		if not NOINSTALL: install(pkgname)
 
 		upgrade_ct += 1
