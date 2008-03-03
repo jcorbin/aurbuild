@@ -654,14 +654,6 @@ def syncdeps(deplist):
 		cleanup()
 		sys.exit(1)
 
-def appcheck(app):
-	path = os.getenv('PATH')
-	path = path.replace(':', '/ ')
-	path = path.split(' ')
-	for each in path:
-		if os.path.isfile(each + app): return True
-	return False
-
 def menu(dir_list, package):
 	files = []
 	editor_cmd = editor
@@ -754,7 +746,7 @@ def init():
 	# check that we have everything we need
 	prog_list = ['makepkg', 'pacman', 'fakeroot']
 	for prog in prog_list:
-		if not appcheck(prog):
+		if not autils.appcheck(prog):
 			print >>sys.stderr.write('\n' + prog + ' program not found in $PATH.\n')
 			sys.exit(1)
 	# must be root
@@ -911,7 +903,7 @@ def main():
 		time.sleep(3)
 		editor = ['nano']
 	editor_no_args = editor[0]
-	if not appcheck(editor_no_args) and not os.path.isfile(editor_no_args):
+	if not autils.appcheck(editor_no_args) and not os.path.isfile(editor_no_args):
 		print >>sys.stderr.write('Error: editor value \"' + editor_no_args + '\" not found on system.')
 		cleanup()
 		sys.exit(1)
@@ -1004,13 +996,16 @@ def main():
 			aur = autils.echo_bash_vars(pkgbuild_path, '${pkgver}-${pkgrel}')[0]
 			
 			result = aversion.vercmp().vercmp(aur, installed[upgrade_ct])
+
+			if SAVE: 
+				savefiles(argo, work_dir)
+
 			if result == 1:
 				print '\n  Target: '+package+'-'+aur+'\n'
 				if not NOCONFIRM:
-					choice = raw_input('  Proceed with upgrade?  [Y/n] ').lower()
+					choice = raw_input('\tProceed with upgrade?  [Y/n] ').lower()
 					print ''
 					if choice != 'y' and choice != 'yes' and choice != '':
-						if SAVE: savefiles(argo, work_dir)
 						cleanup()
 						upgrade_ct += 1
 						continue
@@ -1021,13 +1016,11 @@ def main():
 				rjust_spaces = 80 - (int(len(argline)) + \
 					int(len(status)))
 				print argline + status.rjust(rjust_spaces, '.')
-				if SAVE: savefiles(argo, work_dir)
 				cleanup()
 				upgrade_ct += 1
 				continue
 			elif result == -1:
 				print ':: local/%s %s seems newer than aur/%s %s'% (argo, installed[upgrade_ct], argo, aur) 
-				if SAVE: savefiles(argo, work_dir)
 				cleanup()
 				upgrade_ct += 1
 				continue
