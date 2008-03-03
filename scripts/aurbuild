@@ -113,9 +113,6 @@ def usage():
 	print '  -n, --noconfirm       bypass any confirmation messages ' + \
 					'by answering yes'
 	print '  -x, --noinstall       do not install package after building'
-	print '  -r, --revision        check for latest CVS/SVN/MERCURIAL ' + \
-					'revisions during'
-	print '                        --upgrade'
 	print '  -m, --rm-make-deps    remove uneeded make dependencies'
 	print '  -c  --clean           clean the build directory'
 	print '  -S, --search          search aur for single [keyword]'
@@ -154,11 +151,11 @@ signal.signal(signal.SIGINT, handler)
 signal.signal(signal.SIGTERM, handler)
 
 try:
-	opts, args = getopt.getopt(sys.argv[1:], 'hvbso:elfunxrmcS',
+	opts, args = getopt.getopt(sys.argv[1:], 'hvbso:elfunxmcS',
 		['help', 'version', 'verbose', 'builddeps', 'syncdeps',
 		'builder-opts=', 
 		'save', 'local', 'official', 'auto-build', 'upgrade',
-		'noconfirm', 'noinstall', 'revision', 'rm-make-deps', 'clean',
+		'noconfirm', 'noinstall', 'rm-make-deps', 'clean',
 		'search'])
 except getopt.GetoptError, e:
 	usage()
@@ -177,7 +174,6 @@ AUTO_BUILD	= 0
 UPGRADE		= 0
 NOCONFIRM	= 0
 NOINSTALL	= 0
-REVISION	= 0
 CLEAN		= 0
 SEARCH		= 0
 VOTE		= 0
@@ -202,7 +198,6 @@ for opt, optarg in opts:
 	if opt in ['-u', '--upgrade']: UPGRADE =1
 	if opt in ['-n', '--noconfirm']: NOCONFIRM = 1
 	if opt in ['-x', '--noinstall']: NOINSTALL = 1
-	if opt in ['-r', '--revision' ]: REVISION = 1
 	if opt in ['-m', '--rm-make-deps' ]: RM_MDEPS = 1
 	if opt in ['-c', '--clean' ]: CLEAN = 1
 	if opt in ['-S', '--search']: SEARCH = 1
@@ -246,11 +241,6 @@ if LOCAL or OFFICIAL or AUTO_BUILD or UPGRADE:
 if VOTE and UNVOTE:
 	print PROGRAM_NAME + ': -V, --vote and ' + \
 			'-U, --unvote cannot be used together'
-	sys.exit(1)
-
-# --revision must be used with upgrade
-if REVISION and not UPGRADE:
-	print PROGRAM_NAME + ': -r, --revision must be used with -u, --upgrade'
 	sys.exit(1)
 
 def msg(text):
@@ -1003,10 +993,6 @@ def main():
 
 		# for --upgrade. compare versions and confirm upgrade with user
 		if UPGRADE:
-			if REVISION:
-				# check for latest revision using makepkg. Use shell to supress output and obtain return code.
-				pkg_code = Popen('makepkg -oe &>/dev/null', shell=True).wait()
-
 			pkgbuild_path = os.path.join(os.getcwd(), 'PKGBUILD')
 			package, err = autils.echo_bash_vars(pkgbuild_path, '${pkgname}')
 			if err != '':
