@@ -1,0 +1,6 @@
+
+BUGS
+----
+
+ * Crashes if PKGBUILD has custom variables that don't begin with an underscore
+
