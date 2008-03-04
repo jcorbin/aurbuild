@@ -994,6 +994,19 @@ def main():
 			
 		os.chdir(work_dir)
 
+		# Save files
+		if SAVE:
+			savefiles(argo, work_dir)
+
+			# If --save is the only opt specified don't build or
+			# sync. It's OK to exit here because --upgrade (which
+			# follows) requires -b or -s
+			if not BUILDDEPS and not SYNCDEPS:
+				if argo == args[len(args)-1]:
+					cleanup()
+					sys.exit(0)
+				else: continue
+
 		# for --upgrade. compare versions and confirm upgrade with user
 		if UPGRADE:
 			pkgbuild_path = os.path.join(os.getcwd(), 'PKGBUILD')
@@ -1007,9 +1020,6 @@ def main():
 			aur = autils.echo_bash_vars(pkgbuild_path, '${pkgver}-${pkgrel}')[0]
 			
 			result = aversion.vercmp().vercmp(aur, installed[upgrade_ct])
-
-			if SAVE: 
-				savefiles(argo, work_dir)
 
 			if result == 1:
 				print '\n  Target: '+package+'-'+aur+'\n'
@@ -1036,18 +1046,6 @@ def main():
 				upgrade_ct += 1
 				continue
 		
-		# Save files
-		if SAVE:
-			savefiles(argo, work_dir)
-
-			# If --save is the only opt specified don't
-			# build or sync
-			if not BUILDDEPS and not SYNCDEPS:
-				if argo == args[len(args)-1]:
-					cleanup()
-					sys.exit(0)
-				else: continue
-
 		# evaulate options and go to menu if needed
 		if not AUTO_BUILD:
 			select = menu(os.listdir(work_dir), argo)
