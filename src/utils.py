@@ -60,19 +60,6 @@ def handler(signo, frame):
 		cleanup()
 		sys.exit(143)
 
-def msg(text):
-	if USE_COLOR == 'y':
-		return '\033[1;32m==>\033[1;0m \033[1;1m' + text + '\033[1;0m'
-	else:
-		return '==> ' + text
-
-def color(text, color_alias):
-	if USE_COLOR == 'y':
-		color_dict = {'grey':'0', 'red':'1', 'green':'2', 'yellow':'3', 'blue':'4', 'magenta':'5', 'cyan':'6', 'white':'7', 'black': '8'}
-		return '\033[1;3' + color_dict[color_alias] + 'm' + text + '\033[1;0m'
-	else:
-		return text
-
 def get_depends(pkgbuild, dep1, dep2):
 	# dep1 is makedepends. dep2 is depends
 	p = Popen('source ' + pkgbuild + '; echo "${' + dep1 + '[@]}:${' +
@@ -306,84 +293,6 @@ def get_PKGBUILD_path(parent_dir):
 		cleanup()
 		sys.exit(1)
 
-def filter_deps(pkg, fd_ct, type):
-	""" give required dependency and return it if it needs to be installed or return group packages if it is that keyword
-	filtered = [], list """
-	# for tabbing over tree branch symbols
-	pre_space  = 2
-	# spaces must be greater than pre_space
-	spaces = 3
-	v = fd_ct/spaces
-	indents = ' '*pre_space + ('|' + ' '*spaces)*v
-	sys.stdout.write(color(indents + '`- ', 'blue') + color(pkg + ': ', 'black'))
-	sys.stdout.flush()
-	code = Apacman.operations().pacmanT(pkg)
-	if code == 127:
-		# see if its a group name
-		group_pkgs = Apacman.db_tools().get_group(pkg)
-		if group_pkgs == []:
-			print color('missing ' + type, 'red')
-			pkg = Apacman.db_tools().strip_ver_cmps(pkg)[0]
-			if BUILDDEPS: 
-				dep_path = get_dep_path(pkg)
-				if dep_path != None:
-					# a dependency is found, check it's deps and run this method again
-					mdep_cans, dep_cans = get_depends(dep_path + '/PKGBUILD', 'makedepends', 'depends')
-					if mdep_cans or dep_cans != ['']: fd_ct += spaces
-					if mdep_cans != ['']:
-						for mdep_can in mdep_cans:
-							filter_deps(mdep_can, fd_ct, type='[M]')
-					if dep_cans != ['']: 
-						for dep_can in dep_cans:
-							filter_deps(dep_can, fd_ct, type='[D]')
-				else:
-					print >>sys.stderr.write('\n' + pkg + ': not found in ABS.\n')
-					cleanup()
-					sys.exit(1)
-			elif SYNCDEPS:
-				# follows steps of BUILDDEPS omitting make dependencies
-				if db_paths == []:
-					# generate list to global
-					db_paths.extend(Apacman.db_tools().get_db_pkgpaths())
-				if db_pkgs == []:
-					# generate list to global
-					for db_path in db_paths:
-						descfile = db_path + '/desc'
-						if os.path.isfile(descfile):
-							db_pkg = Apacman.db_tools().get_db_info(descfile, '%NAME%')[0]
-							if db_pkg != []: db_pkgs.append(db_pkg)
-				found = 0
-				for db_pkg in db_pkgs:
-					db_path = db_paths[db_pkgs.index(db_pkg)]
-					if db_pkg != [] and pkg == db_pkg:
-						found = 1
-						dependsfile = db_path + '/depends'
-						dep_cans = Apacman.db_tools().get_db_info(dependsfile, '%DEPENDS%')
-						if dep_cans != []: 
-							fd_ct += spaces
-							for dep_can in dep_cans:
-								filter_deps(dep_can, fd_ct, type='[D]')
-				if not found:
-					print >>sys.stderr.write('\n' + pkg + ': not found in database.\n')
-					cleanup()
-					sys.exit(1)
-			# there must be no remaining deps of deps, add to list
-			if not pkg in filtered: filtered.append(pkg)
-		else:
-			print color('group', 'cyan')
-			fd_ct += 4
-			for group_pkg in group_pkgs:
-				filter_deps(group_pkg, fd_ct, type='[D]')
-	elif code == 0:
-		print color('ok ' + type, 'green')
-		
-	elif code != 127 and code != 0:
-		sys.stderr.write('\naurbuild: fatal error while testing dependencies.\n')
-		cleanup()
-		sys.exit(1)
-	return filtered
-
-
 def src_to_pm_cache(sources):
 	""" copy the sources in raw format (from sources array) to pacman cache """
 
@@ -464,20 +373,6 @@ def makepkgf(dep):
 	
 	return get_pkgpath()
 
-def install(pkgpath):
-	if os.path.isfile(pacman_lock):
-		print '\nPacman is detected running. Package cannot not be installed at this time.'
-		print 'Once pacman exits, you may press enter to install this package. Control + C exits.'
-		raw_input()	
-	print msg('Leaving fakeroot environment...')
-	# (makepkg will do it)
-		
-	print msg('Running pacman -U...')
-	code = Popen(['pacman', '-U', pkgpath]).wait()
-	if code > 0:
-		print >>sys.stderr.write('\naurbuild: could not install package through pacman --upgrade.')
-		cleanup()
-		sys.exit(1)
 			
 def builddeps(deplist):
         # for -b option
@@ -601,7 +496,6 @@ def search(args, verbose):
 			for each in view_list:
 				print each
 		else:
-			# ripped off from pydoc.py
 			pipe = os.popen('less', 'w')
 			try:
 				for line in view_list:
@@ -611,33 +505,4 @@ def search(args, verbose):
 				# Ignore broken pipes caused be quitting less
 				pass
 
-def rm_dir_contents(dir):
-	""" same as a rm -r dir/* """
-	
-	if not os.path.isdir(dir):
-		return 1
-	start_dir = dir.rstrip('/')
-	
-	# by starting a seperate function like this we will know when to stop the recursion by 
-	# examining the 'static' start_dir variable from the parent function at each pass.
-	def _rm_dir_contents(_dir):
-		try:
-			one_back = os.path.dirname(_dir)
-			for each in os.listdir(_dir):
-				object_path = os.path.join(_dir, each)
-				if os.path.isdir(object_path) and not os.path.islink(object_path):
-					if len(os.listdir(object_path)) == 0:
-						os.rmdir(object_path)
-					else:
-						_rm_dir_contents(object_path)
-				elif os.path.isfile(object_path) or os.path.islink(object_path):
-					os.remove(object_path)
-			if _dir == start_dir:
-				return 0
-			elif os.path.exists(one_back):
-				_rm_dir_contents(one_back)
-		except Exception, e:
-			print >>sys.stderr.write('Error: unable to remove directory contents: '+str(e))
-			return 1
-	return _rm_dir_contents(start_dir)
 
