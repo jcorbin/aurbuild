@@ -543,7 +543,8 @@ def get_pkgpath():
 	else:
 		_PKGDEST = PKGDEST
 	
-	out, err = autils.echo_bash_vars(os.path.join(cwd, 'PKGBUILD'), '${pkgname}%${pkgver}%${pkgrel}')
+	out, err = autils.echo_bash_vars(os.path.join(cwd, 'PKGBUILD'),
+		'${pkgname}%${pkgver}%${pkgrel}')
 	if err != '':
 		print >>sys.stderr.write('PKGBUILD syntax error: '+err)
 		cleanup()
@@ -552,13 +553,17 @@ def get_pkgpath():
 	out = out.split('%')
 	pkgname, pkgver, pkgrel = out[0], out[1], out[2]
 
-	pkgpath = os.path.join(_PKGDEST, pkgname+'-'+pkgver+'-'+pkgrel+'-'+CARCH+'.'+PKGEXT)
+	pkgpath = os.path.join(_PKGDEST, pkgname + '-' + pkgver +
+			'-' + pkgrel + '-' + CARCH + '.' + PKGEXT)
 
 	if os.path.exists(pkgpath):
 		return pkgpath
 	else:
-		print >>sys.stderr.write('Error: could not find the built package in ' + pkgpath)
-		print >>sys.stderr.write('In some cases this might mean the PKGDEST location does not have write and execute permissions')
+		print >>sys.stderr.write('Error: could not find the built '
+				'package in ' + pkgpath)
+		print >>sys.stderr.write('In some cases this might mean the '
+			'PKGDEST location does not have write and execute '
+			'permissions')
 		print >>sys.stderr.write('for the `aurbuild\' user or group.')
 		cleanup()
 		sys.exit(1)
@@ -587,17 +592,22 @@ def makepkgf(dep):
 	src_to_pm_cache(raw_sources)
 
 	if code > 0:
-		print >>sys.stderr.write('\naurbuild: could not build \"' + dep + '\" with makepkg.')
-		print 'build directory retained at `'+pkg_build_dir+'\''
-		print 'In some cases you may be able to cd into the directory, fix the problem and run makepkg with success.'
+		print >>sys.stderr.write('\naurbuild: could not build \"' + 
+			dep + '\" with makepkg.')
+		print 'build directory retained at `' + pkg_build_dir + '\''
+		print 'In some cases you may be able to cd into ' \
+			'the directory, fix the problem and run makepkg' \
+			'with success.'
 		sys.exit(1)
 	
 	return get_pkgpath()
 
 def install(pkgpath):
 	if os.path.isfile(pacman_lock):
-		print '\nPacman is detected running. Package cannot not be installed at this time.'
-		print 'Once pacman exits, you may press enter to install this package. Control + C exits.'
+		print '\nPacman is detected running. Package cannot not be' \
+			'installed at this time.'
+		print 'Once pacman exits, you may press enter to install' \
+			'this package. Control + C exits.'
 		raw_input()	
 	print msg('Leaving fakeroot environment...')
 	# (makepkg will do it)
@@ -605,7 +615,8 @@ def install(pkgpath):
 	print msg('Running pacman -U...')
 	code = Popen(['pacman', '-U', pkgpath]).wait()
 	if code > 0:
-		print >>sys.stderr.write('\naurbuild: could not install package through pacman --upgrade.')
+		print >>sys.stderr.write('\naurbuild: could not install'
+				'package through pacman --upgrade.')
 		cleanup()
 		sys.exit(1)
 			
