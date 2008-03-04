@@ -21,6 +21,12 @@ To Do List:
  * Make sure user_makedirs and user_copytree switch user effectively
    (Get rid of global variables)
 
+ * Move cleanup() to utils. Should be able to take a variable number of
+   arguments. cleanup() is used in a lot of functions in the main
+   script and in utils. It probably is being called more than it is needed.
+   It also uses global variables which should be gotten rid of if possible.
+   Maybe it can be put into a class.
+
 In Progress:
  * Move functions out of main script and into appropriate modules
 
