@@ -394,7 +394,7 @@ def extract(file):
 		if os.path.isdir(extract_dir): rmtree(extract_dir)
 		os.mkdir(extract_dir)
 		os.chmod(extract_dir, 0775)
-		os.chown(extract_dir, 0, builduser_gid) 
+		os.chown(extract_dir, builduser_uid, builduser_gid) 
 	except Exception, e:
 		print >>sys.stderr.write('could not create temporary extraction point:')
 		print >>sys.stderr.write(str(e))
@@ -945,7 +945,7 @@ def main():
 					sys.exit(1)
 			
 				copytree(results, p_work_dir)
-				os.chown(p_work_dir, 0, builduser_uid)
+				os.chown(p_work_dir, builduser_uid, builduser_uid)
 				os.chmod(p_work_dir, 0775)
 				work_dir = get_PKGBUILD_path(p_work_dir)
 		else:

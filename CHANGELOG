@@ -15,6 +15,8 @@ AURBUILD
 	* Remove all uses of versionpkg. (makepkg has assimilated its function)
 	* --revision removed. It's made obsolete by makepkg
 	* Added BUGS file to help keep track of bugs
+	* Made more files in /var/tmp/aurbuild owned by aurbuild
+	  rather than root
 
  -v1.8.1 (February 29, 2008)
 	* Fixed a lot of stuff in README and the man page
