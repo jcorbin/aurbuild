@@ -108,32 +108,6 @@ def user_makedirs(target, u_uid, u_gid):
 	os.seteuid(uid)
 	os.setegid(gid)
 
-
-def prepare_work_dirs():
-	try:
-		cleanup()
-		# parent directory of aurbuild_home should exist and owned by root
-		if not os.path.isdir(os.path.dirname(aurbuild_home)):
-			os.makedirs(os.path.dirname(aurbuild_home))
-
-		# aurbuild_home should be root:aurbuild with 0775	
-		if not os.path.isdir(aurbuild_home):
-			os.mkdir(aurbuild_home)
-			os.chmod(aurbuild_home, 0775)
-			os.chown(aurbuild_home, 0, builduser_uid)
-
-		# build_dir should be the same as aurbuild_home
-		if not os.path.isdir(build_dir):
-			os.mkdir(build_dir)
-			os.chmod(build_dir, 0775)
-			os.chown(build_dir, 0, builduser_uid)
-
-		# pkg_build_dir should be created by the builduser
-		user_makedirs(pkg_build_dir, builduser_uid, builduser_gid)
-	except Exception, e:
-		print >>sys.stderr.write('\ncould not prepare for build: ' + str(e) + '\n')
-		sys.exit(1)
-
 def prepare_build_user():
 	global builduser_uid, builduser_gid
 	try:
@@ -229,59 +203,6 @@ def get_tarball(pkg, pkg_query = None):
 		cleanup()
 		sys.exit(1)
 
-def extract(file):
-	extract_dir = pkg_build_dir
-	# split off the extension at `.'. Up to two allowed
-	file_extension = file.rsplit('.', 2)[1:]
-	if 'gz' in file_extension: ext = 'gz'
-	elif 'tgz' in file_extension: ext = 'gz'
-	elif 'bz2' in file_extension: ext = 'bz2'
-	else:
-		print >>sys.stderr.write('\n' + file + ': unsupported compression. Cannot extract.\n')
-		cleanup()
-		if os.path.exists(file): os.remove(file)
-		cleanup()
-		sys.exit(1)
-	
-	try:
-		if os.path.isdir(extract_dir): rmtree(extract_dir)
-		os.mkdir(extract_dir)
-		os.chmod(extract_dir, 0775)
-		os.chown(extract_dir, 0, builduser_gid) 
-	except Exception, e:
-		print >>sys.stderr.write('could not create temporary extraction point:')
-		print >>sys.stderr.write(str(e))
-		cleanup()
-		sys.exit(1)
-
-	try:
-		tar_f = tarfile.open(file, 'r:' + ext)
-		for member in tar_f.getmembers():
-			tar_f.extract(member, extract_dir)
-	except tarfile.TarError, e:
-		print >>sys.stderr.write('\ncould not extract tarfile: ' + str(e) + '\n')
-		if os.path.exists(file): os.remove(file)
-		cleanup()
-		sys.exit(1)
-
-	# aur gives us fucked tarballs with nobody:nobody ownership... this will fix it
-	def mod_extracted(dir):
-		for d in os.listdir(dir):
-			v = os.path.join(dir, d)
-			os.chown(v, builduser_uid, builduser_gid)
-			if os.path.isdir(v):
-				mod_extracted(v)
-
-	# the parent directory of the extracted tarball has a setgroup id bit set from AUR. This needs to be removed:
-	for j in os.listdir(extract_dir):
-		jf = os.path.join(extract_dir, j)
-		if os.path.isdir(jf):
-			os.chmod(jf, 0755)
-
-	mod_extracted(extract_dir)
-
-	tar_f.close()
-	os.remove(file)
 
 def get_PKGBUILD_path(parent_dir):
 	results = Afind.find_file(parent_dir, 'PKGBUILD')[0]
