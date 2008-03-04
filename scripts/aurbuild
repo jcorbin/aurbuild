@@ -243,18 +243,18 @@ if VOTE and UNVOTE:
 			'-U, --unvote cannot be used together'
 	sys.exit(1)
 
-def msg(text):
-	if USE_COLOR == 'y':
-		return '\033[1;32m==>\033[1;0m \033[1;1m' + text + '\033[1;0m'
-	else:
-		return '==> ' + text
-
 def color(text, color_alias):
 	if USE_COLOR == 'y':
 		color_dict = {'grey':'0', 'red':'1', 'green':'2', 'yellow':'3', 'blue':'4', 'magenta':'5', 'cyan':'6', 'white':'7', 'black': '8'}
 		return '\033[1;3' + color_dict[color_alias] + 'm' + text + '\033[1;0m'
 	else:
 		return text
+
+def msg(text):
+	if USE_COLOR == 'y':
+		return color('==> ', 'green') + color(text, 'white')
+	else:
+		return '==> ' + text
 
 def prepare_work_dirs():
 	try:
@@ -609,10 +609,8 @@ def install(pkgpath):
 		print 'Once pacman exits, you may press enter to install' \
 			'this package. Control + C exits.'
 		raw_input()	
-	print msg('Leaving fakeroot environment...')
-	# (makepkg will do it)
 		
-	print msg('Running pacman -U...')
+	print msg('Installing package...')
 	code = Popen(['pacman', '-U', pkgpath]).wait()
 	if code > 0:
 		print >>sys.stderr.write('\naurbuild: could not install'
@@ -808,43 +806,18 @@ def savefiles(pkg, old_dir):
 		except OSError, e:
 			abort_msg(str(e))
 
-
-def rm_dir_contents(dir):
-	""" same as a rm -r dir/* """
-	
-	if not os.path.isdir(dir):
-		return 1
-	start_dir = dir.rstrip('/')
-	
-	# by starting a seperate function like this we will know when to stop the recursion by 
-	# examining the 'static' start_dir variable from the parent function at each pass.
-	def _rm_dir_contents(_dir):
-		try:
-			one_back = os.path.dirname(_dir)
-			for each in os.listdir(_dir):
-				object_path = os.path.join(_dir, each)
-				if os.path.isdir(object_path) and not os.path.islink(object_path):
-					if len(os.listdir(object_path)) == 0:
-						os.rmdir(object_path)
-					else:
-						_rm_dir_contents(object_path)
-				elif os.path.isfile(object_path) or os.path.islink(object_path):
-					os.remove(object_path)
-			if _dir == start_dir:
-				return 0
-			elif os.path.exists(one_back):
-				_rm_dir_contents(one_back)
-		except Exception, e:
-			print >>sys.stderr.write('Error: unable to remove directory contents: '+str(e))
-			return 1
-	return _rm_dir_contents(start_dir)
-
 def main():
 	global editor, args
 	rm_packages = []
 
 	if CLEAN:
-		retcode = rm_dir_contents(build_dir)
+		retcode = 0
+		try:
+			rmtree(build_dir)
+		except:
+			retcode = 1
+			print "Nothing to clean"
+
 		if len(args) == 0:
 			sys.exit(retcode)
 	
