@@ -259,11 +259,11 @@ def color(text, color_alias):
 def prepare_work_dirs():
 	try:
 		cleanup()
-		# parent directory of aurbuild_home should exist and owned by root
+	# parent directory of aurbuild_home should exist and owned by root
 		if not os.path.isdir(os.path.dirname(aurbuild_home)):
 			os.makedirs(os.path.dirname(aurbuild_home))
 
-		# aurbuild_home should be root:aurbuild with 0775	
+		# aurbuild_home should be aurbuild:aurbuild with 0775	
 		if not os.path.isdir(aurbuild_home):
 			os.mkdir(aurbuild_home)
 			os.chmod(aurbuild_home, 0775)
@@ -776,8 +776,6 @@ def init():
 	# leave out prepare_work_dirs(), it should be called as needed
 
 def savefiles(pkg, old_dir):
-#	import pdb
-#	pdb.set_trace()
 
 	failed = 0
 	def abort_msg(msg):

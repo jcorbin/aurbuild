@@ -106,18 +106,20 @@ def get_dep_path(abs_root, dep):
 		return None
 
 def user_copytree(target, des, u_uid, u_gid):
-		os.setegid(u_gid)
-		os.seteuid(u_uid)
-		copytree(target, des)
-		os.seteuid(uid)
-		os.setegid(gid)
+	os.setegid(u_gid)
+	os.seteuid(u_uid)
+	copytree(target, des)
+	os.seteuid(uid)
+	os.setegid(gid)
 
+# Only use this function for individual pkg build directories
 def user_makedirs(target, u_uid, u_gid):
-		os.setegid(u_gid)
-		os.seteuid(u_uid)
-		os.makedirs(target)
-		os.seteuid(uid)
-		os.setegid(gid)
+	os.setegid(u_gid)
+	os.seteuid(u_uid)
+
+	os.makedirs(target)
+	os.seteuid(uid)
+	os.setegid(gid)
 
 
 def prepare_work_dirs():
