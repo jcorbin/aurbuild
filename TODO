@@ -27,6 +27,8 @@ To Do List:
    It also uses global variables which should be gotten rid of if possible.
    Maybe it can be put into a class.
 
+ * Utilise AUR's JSON interface for search info (simplejson)
+
 In Progress:
  * Move functions out of main script and into appropriate modules
 
