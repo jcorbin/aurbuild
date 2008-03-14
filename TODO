@@ -33,6 +33,8 @@ To Do List:
    It also uses global variables which should be gotten rid of if possible.
    Maybe it can be put into a class.
 
+ * filter_deps() and main() in scripts/aurbuild need serious rework
+
  * Utilise AUR's JSON interface for search info (simplejson)
 
 In Progress:
