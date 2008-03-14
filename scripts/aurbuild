@@ -31,7 +31,7 @@ from shutil import rmtree, copytree, copy
 from subprocess import Popen
 
 # globals
-PROGRAM_VERSION = '1.8.2'
+PROGRAM_VERSION = '1.8.3'
 PROGRAM_NAME = os.path.basename(sys.argv[0])
 
 apacman			= aurbuild.pacman
