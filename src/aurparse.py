@@ -32,7 +32,18 @@ def raw_pkg_query(keyword):
 	lines = f.readlines()
 	return lines
 
-def pkg_main_url(raw_text, pkg):
+def pkg_main_url(pkg):
+	raw_text = []
+
+	try:
+		raw_text = raw_pkg_query(pkg)
+	except Exception, e:
+		print >>sys.stderr.write('\ncould not retrieve needed data' +
+			'from aur: ' + str(e))
+		cleanup()
+		sys.exit(1)
+
+
         url = '' 
         for line in raw_text:
                 if 'packages.php?ID' in line and '>'+pkg+' ' in line:

@@ -310,18 +310,9 @@ def prepare_build_user():
 		prepare_build_user()
 	
 
-def get_tarball(pkg, pkg_query = None):
-	if pkg_query == None: pkg_query = pkg
+def get_tarball(pkg):
 	
-	try:
-		raw_text = aaurparse.raw_pkg_query(pkg_query)
-	except Exception, e:
-		print >>sys.stderr.write('\ncould not retrieve needed data' +
-			'from aur: ' + str(e))
-		cleanup()
-		sys.exit(1)
-
-	main_url = aaurparse.pkg_main_url(raw_text, pkg)
+	main_url = aaurparse.pkg_main_url(pkg)
 
 	if main_url == '':
 		print >>sys.stderr.write(pkg + ': not found in AUR')
@@ -343,8 +334,10 @@ def get_tarball(pkg, pkg_query = None):
 	try:
 		tarball_url = aaurparse.pkg_tarball_url(raw_text)
 	except:
-		print >>sys.stderr.write('\nUnable to parse tarball info. If you see this message rarely, it is\n' + 
-						'possible user comments have skewed the parsing results on the web page.\n')
+		print >>sys.stderr.write('\nUnable to parse tarball info. If '
+			'you see this message rarely, it is\n'  
+			'possible user comments have skewed the parsing '
+			'results on the web page.\n')
 		cleanup()
 		sys.exit(1)
 	
