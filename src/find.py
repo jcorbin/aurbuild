@@ -19,59 +19,34 @@
 #   USA.
 #
 
+
+'''
+' Uses unix `find` to find files and/or directories
+' Pass parameters according to standard find usage
+'	find dir -type type -name name
+'''
+def find_it(dir, name, type):
+	from subprocess import Popen, PIPE
+	output, error = Popen(
+		['find', dir, '-type', type, '-name', name],
+		stdout=PIPE).communicate()
+	result = output.splitlines()
+
+	return result, [error]
+
+'''
+' find_dir(dir, name) -> results, errors 
+' searches recursively in directory dir for directory name.
+' Symlinks are omitted.
+'''
 def find_dir(dir, name):
-	""" find_dir(dir, name) -> results, errors 
-    	searches recursively in directory dir for directory name. Symlinks are omitted."""
-
-	def findit(dir, name):
-		cans = []
-		# add the trailing `/' now if it doesn't exist. This is about 25% faster than using os.path.join()
-		if dir[-1:] != '/': dir = dir + '/'
-		if os.path.isdir(dir) and not os.path.islink(dir):
-			try:
-				cans = os.listdir(dir)
-			except Exception, e:
-				errors.append(str(e))
-
-			if cans != []:
-				for can in cans:
-					fullpath = dir + can
-					if os.path.islink(fullpath): continue
-					elif os.path.isdir(fullpath):
-						if can == name: results.append(fullpath)
-						findit(fullpath, name)
-	
-		return results, errors
-	import os
-	results	= []
-	errors	= []
-	return findit(dir, name)
+	return find_it(dir, name, 'd');
 	
 
+'''
+' find_file(dir, name) -> results, errors
+' searches recursively in directory dir for file name. Symlinks are omitted.
+'''
 def find_file(dir, name):
-	""" find_file(dir, name) -> results, errors
-	searches recursively in directory dir for file name. Symlinks are omitted."""
-
-	def findit(dir, name):
-		cans = []
-		if dir[-1:] != '/': dir = dir + '/'
-		if os.path.isdir(dir) and not os.path.islink(dir): 
-			try:
-				cans = os.listdir(dir)
-			except Exception, e:
-				errors.append(str(e))
-			if cans != []:
-				for can in cans:
-					fullpath = dir + can
-					if os.path.islink(fullpath): continue
-					elif os.path.isfile(fullpath):
-						if can == name: results.append(fullpath)
-					else:
-						findit(fullpath, name)
-
-		return results, errors
-	import os
-	results	= []
-	errors	= []
-	return findit(dir, name)
+	return find_it(dir, name, 'f')
 
