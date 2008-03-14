@@ -1,8 +1,7 @@
 
 To Do List:
- * Fix dependencies pulled in from aurbuild to be recognized as dependencies
-   for the target package not as explicity installed.
-   pacman -S --noconfirm -> pacman -D ?
+ * Make builddeps properly register themselves as deps rather than explicitly
+   installed. (Done with syncdeps)
 
  * Add a switch to view user comments.
 

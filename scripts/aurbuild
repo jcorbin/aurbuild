@@ -647,7 +647,7 @@ def syncdeps(deplist):
 			pkg = apacman.db_tools().strip_ver_cmps(pkg)[0]
 			pkglist.append(pkg)
 	
-	cmd = ['pacman', '-S', '--noconfirm']
+	cmd = ['pacman', '-S', '--asdeps', '--noconfirm']
 	cmd.extend(pkglist)
 			
 	code = Popen(cmd).wait()
