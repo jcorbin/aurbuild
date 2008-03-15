@@ -837,10 +837,8 @@ def main():
 
 		login = aurbuild.login
 		
-		print ''
 		username = raw_input('AUR Username: ')
 		password = getpass.getpass('AUR Password: ')
-		print ''
 
 		code = []
 		code2 = []
