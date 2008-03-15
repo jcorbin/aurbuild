@@ -20,7 +20,7 @@
 #   USA.
 #
 
-import os, sys
+import os, sys, pwd
 from subprocess import Popen, PIPE
 from shutil import copytree
 
@@ -108,15 +108,23 @@ def user_makedirs(target, u_uid, u_gid):
 	os.seteuid(uid)
 	os.setegid(gid)
 
+'''
+' Prepare aurbuild user
+' Returns a tuple: aurbuild uid, and gid
+'''
 def prepare_build_user():
-	global builduser_uid, builduser_gid
 	try:
 		builduser_uid = pwd.getpwnam('aurbuild')[2]
 		builduser_gid = pwd.getpwnam('aurbuild')[3]
+		return builduser_uid, builduser_gid  
 	except:
 		# setup an account
 		print 'creating designated build user... ',
-		code = Popen(['useradd', '-s', '/bin/false', '-d', '/var/tmp/aurbuild', '-u', '360', '-c', 'aurbuild', 'aurbuild']).wait()
+		code = Popen(['useradd', 
+			'-s', '/bin/false',
+			'-d', '/var/tmp/aurbuild',
+			'-u', '360',
+			'-c', 'aurbuild', 'aurbuild']).wait()
 		if code != 0:
 			print >>sys.stderr.write('Error: could not create designated build user. Reports exit status '+str(code)+'. ')
 			sys.exit(1)
@@ -134,7 +142,7 @@ def prepare_build_user():
 		# prepare_work_dirs() will handle the proper build directories
 		
 		# try again
-		prepare_build_user()
+		return prepare_build_user()
 	
 
 def get_PKGBUILD_path(parent_dir):

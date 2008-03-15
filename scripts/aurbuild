@@ -291,38 +291,6 @@ def prepare_work_dirs():
 		print >>sys.stderr.write('\ncould not prepare for build: ' + str(e) + '\n')
 		sys.exit(1)
 
-def prepare_build_user():
-	try:
-		builduser_uid = pwd.getpwnam('aurbuild')[2]
-		builduser_gid = pwd.getpwnam('aurbuild')[3]
-		return builduser_uid, builduser_gid  
-	except:
-		# setup an account
-		print 'creating designated build user... ',
-		code = Popen(['useradd', 
-			'-s', '/bin/false',
-			'-d', '/var/tmp/aurbuild',
-			'-u', '360',
-			'-c', 'aurbuild', 'aurbuild']).wait()
-		if code != 0:
-			print >>sys.stderr.write('Error: could not create designated build user. Reports exit status '+str(code)+'. ')
-			sys.exit(1)
-		else: print 'done.'
-		
-		# lock password
-		print 'locking password... ',
-		code = Popen(['passwd', '-l', '-q', 'aurbuild']).wait()
-		if code != 0:
-			print >>sys.stderr.write('Error: could not lock password. Reports exit status of '+str(code))
-			sys.exit(1)
-		else:
-			print 'done.'
-		
-		# prepare_work_dirs() will handle the proper build directories
-		
-		# try again
-		return prepare_build_user()
-	
 
 def get_tarball(pkg):
 	
@@ -779,7 +747,7 @@ def init():
 	# set up build user
 	global builduser_uid
 	global builduser_gid
-	builduser_uid, builduser_gid = prepare_build_user()
+	builduser_uid, builduser_gid = autils.prepare_build_user()
 	# leave out prepare_work_dirs(), it should be called as needed
 
 def savefiles(pkg, old_dir):
