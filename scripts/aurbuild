@@ -355,7 +355,7 @@ def get_tarball(pkg):
 			'results on the web page.\n')
 		cleanup()
 		sys.exit(1)
-	
+
 	if tarball_url == '' and UPGRADE:
 		return None
 	elif tarball_url == '':
@@ -393,7 +393,6 @@ def extract(file):
 	elif 'bz2' in file_extension: ext = 'bz2'
 	else:
 		print >>sys.stderr.write('\n' + file + ': unsupported compression. Cannot extract.\n')
-		cleanup()
 		if os.path.exists(file): os.remove(file)
 		cleanup()
 		sys.exit(1)
@@ -958,16 +957,13 @@ def main():
 				work_dir = get_PKGBUILD_path(p_work_dir)
 		else:
 			aur_tarfile = get_tarball(argo)
-			if aur_tarfile == None and UPGRADE:
-				cleanup()
-				upgrade_ct += 1
-				continue
 			if aur_tarfile == None:
 				# Probably built a community package.
 				# At any rate, the loop needs to continue.
 				cleanup()
 				upgrade_ct += 1
 				continue
+
 			extract(aur_tarfile)
 			work_dir = get_PKGBUILD_path(p_work_dir)
 			
