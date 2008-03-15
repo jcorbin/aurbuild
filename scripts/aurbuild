@@ -286,16 +286,16 @@ def prepare_work_dirs():
 			os.chown(build_dir, builduser_uid, builduser_uid)
 
 		# pkg_build_dir should be created by the builduser
-		autils.user_makedirs(pkg_build_dir, builduser_uid, builduser_gid)
+		autils.user_makedirs(pkg_build_dir, builduser_uid, builduser_uid)
 	except Exception, e:
 		print >>sys.stderr.write('\ncould not prepare for build: ' + str(e) + '\n')
 		sys.exit(1)
 
 def prepare_build_user():
-	global builduser_uid, builduser_gid
 	try:
 		builduser_uid = pwd.getpwnam('aurbuild')[2]
 		builduser_gid = pwd.getpwnam('aurbuild')[3]
+		return builduser_uid, builduser_gid  
 	except:
 		# setup an account
 		print 'creating designated build user... ',
@@ -321,7 +321,7 @@ def prepare_build_user():
 		# prepare_work_dirs() will handle the proper build directories
 		
 		# try again
-		prepare_build_user()
+		return prepare_build_user()
 	
 
 def get_tarball(pkg):
@@ -777,7 +777,9 @@ def init():
 		sys.exit(1)
 
 	# set up build user
-	prepare_build_user()
+	global builduser_uid
+	global builduser_gid
+	builduser_uid, builduser_gid = prepare_build_user()
 	# leave out prepare_work_dirs(), it should be called as needed
 
 def savefiles(pkg, old_dir):
