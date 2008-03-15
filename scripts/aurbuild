@@ -853,7 +853,7 @@ def main():
 						print 'success'
 				except login.LoginError, e:
 					print'failed: ' + str(e)
-					code2++
+					code2 += 1
 				except:
 					print 'failed'
 					raise
@@ -869,7 +869,7 @@ def main():
 						print 'success'
 				except login.LoginError, e:
 					print 'failed: ' + str(e)
-					code2++
+					code2 += 1
 				except:
 					print 'failed'
 					raise
