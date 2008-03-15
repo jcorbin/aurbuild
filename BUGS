@@ -6,6 +6,6 @@ Python debugger:
 BUGS
 ----
 
- * Crashes if PKGBUILD has custom variables that don't begin with an underscore
+ * Not all files in aurbuild HOME are owned by aurbuild
 
 
