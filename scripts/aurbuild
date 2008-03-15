@@ -620,24 +620,6 @@ def builddeps(deplist):
 
         os.chdir(cwd)
 	
-def syncdeps(deplist):
-	# for -s option
-	pkglist = []
-	pkgstring = ''
-	for pkg in deplist:
-		if pkg != '':
-			pkg = apacman.db_tools().strip_ver_cmps(pkg)[0]
-			pkglist.append(pkg)
-	
-	cmd = ['pacman', '-S', '--asdeps', '--noconfirm']
-	cmd.extend(pkglist)
-			
-	code = Popen(cmd).wait()
-	if code == 127:
-		sys.stderr.write('\naurbuild: pacman could not install dependencies.\n')
-		cleanup()
-		sys.exit(1)
-
 def menu(dir_list, package):
 	files = []
 	editor_cmd = editor
@@ -1031,7 +1013,13 @@ def main():
 					dep_choice = 'y'
 				if dep_choice == 'y' or dep_choice == 'yes' or dep_choice == '':
 					if BUILDDEPS: builddeps(deps_type)
-					elif SYNCDEPS: syncdeps(deps_type)
+					elif SYNCDEPS:
+						try:
+							apacman.syncdeps(deps_type)
+						except:
+							print >>sys.stderr.write(str(e))
+							sys.exit(1)
+							cleanup()
 					if RM_MDEPS:
 						if 'make' in zdict[zct].lower():
 							rm_packages.extend(deps_type)

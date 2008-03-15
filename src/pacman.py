@@ -237,6 +237,24 @@ class db_tools:
 
 	        return names, versions
 
+'''
+' This function is for installing dependencies before starting the build
+' --syncdeps switch in aurbuild
+'''
+def syncdeps(deplist):
+	pkglist = []
+	pkgstring = ''
+	for pkg in deplist:
+		if pkg != '':
+			pkg = db_tools().strip_ver_cmps(pkg)[0]
+			pkglist.append(pkg)
+	
+	cmd = ['pacman', '-S', '--asdeps', '--noconfirm']
+	cmd.extend(pkglist)
+			
+	code = Popen(cmd).wait()
+	if code == 127:
+		raise PacmanError, '\naurbuild: pacman could not install dependencies.\n'
 
 class operations(db_tools):
 	def pacmanT(db_tools, dependency):
