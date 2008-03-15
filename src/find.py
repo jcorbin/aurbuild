@@ -1,7 +1,7 @@
 #
 #   find.py
 #
-#   Copyright (C) 2005-2007 by Tyler Gates <TGates81@gmail.com>
+#   Copyright (C) 2008 Loui Chang <louipc.ist@gmail.com>
 #  
 #   This program is free software; you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -35,17 +35,18 @@ def find_it(dir, name, type):
 	return result, [error]
 
 '''
-' find_dir(dir, name) -> results, errors 
-' searches recursively in directory dir for directory name.
-' Symlinks are omitted.
+' Recursively search for directories from a starting directory
+' dir: starting directory
+' name: name of directory
 '''
 def find_dir(dir, name):
 	return find_it(dir, name, 'd');
 	
 
 '''
-' find_file(dir, name) -> results, errors
-' searches recursively in directory dir for file name. Symlinks are omitted.
+' Recursively search for files from a starting directory
+' dir: starting directory
+' name: name of file
 '''
 def find_file(dir, name):
 	return find_it(dir, name, 'f')
