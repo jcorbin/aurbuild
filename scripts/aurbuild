@@ -21,7 +21,7 @@
 #   USA.
 #
 
-import os, sys, tarfile, urllib, signal, getopt, time, pwd, glob 
+import os, sys, tarfile, urllib, signal, getopt, time, glob 
 import aurbuild.pacman
 import aurbuild.version
 import aurbuild.find
