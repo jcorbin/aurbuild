@@ -68,7 +68,6 @@ abs_root 	= '/var/abs'
 pm_db_root 	= '/var/lib/pacman'
 pm_cache	= '/var/cache/pacman'
 installed_dir 	= pm_db_root + '/local'
-pacman_lock	= '/tmp/pacman.lck'
 aursite 	= 'http://aur.archlinux.org'
 # for filter_deps
 filtered	= []
@@ -610,6 +609,7 @@ def makepkgf(dep):
 	return get_pkgpath()
 
 def install(pkgpath):
+	pacman_lock	= '/tmp/pacman.lck'
 	if os.path.isfile(pacman_lock):
 		print '\nPacman is detected running. Package cannot not be' \
 			'installed at this time.'
