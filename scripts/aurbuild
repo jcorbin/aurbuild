@@ -840,8 +840,7 @@ def main():
 		username = raw_input('AUR Username: ')
 		password = getpass.getpass('AUR Password: ')
 
-		code = []
-		code2 = []
+		code2 = 0
 		for arg in args:
 			if VOTE:
 				print 'casting vote for ' + arg + '... ',
@@ -850,13 +849,11 @@ def main():
 					code = login.aurlogin().vote(username, password, cookiefile, arg)
 					if code == 2:
 						print 'vote previously cast!'
-						code2.append(0)
 					else:
 						print 'success'
-						code2.append(0)
 				except login.LoginError, e:
 					print'failed: ' + str(e)
-					code2.append(1)
+					code2++
 				except:
 					print 'failed'
 					raise
@@ -868,19 +865,17 @@ def main():
 					code = login.aurlogin().unvote(username, password, cookiefile, arg)
 					if code == 2:
 						print 'no vote cast!'
-						code2.append(0)
 					else:
 						print 'success'
-						code2.append(0)
 				except login.LoginError, e:
 					print 'failed: ' + str(e)
-					code2.append(1)
+					code2++
 				except:
 					print 'failed'
 					raise
 					
 		# if one fails, exit with error
-		if 1 in code2: sys.exit(1)
+		if code2 > 0: sys.exit(1)
 		else: sys.exit(0)
 
 	init()
