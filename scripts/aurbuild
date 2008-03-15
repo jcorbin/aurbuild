@@ -2,7 +2,8 @@
 #
 #   aurbuild
 #
-#   Copyright (C) 2005-2007 by Tyler Gates <TGates81@gmail.com>
+#   Copyright (C) 2005-2008 by Tyler Gates <TGates81@gmail.com>
+#				and Loui Chang <louipc.ist@gmail.com>
 #  
 #   This program is free software; you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -33,6 +34,7 @@ from subprocess import Popen
 # globals
 PROGRAM_VERSION = '1.8.3'
 PROGRAM_NAME = os.path.basename(sys.argv[0])
+AUTHORS = 'Tyler Gates, Loui Chang'
 
 apacman			= aurbuild.pacman
 aversion		= aurbuild.version
@@ -206,7 +208,7 @@ for opt, optarg in opts:
 
 if VERSION:
 	print PROGRAM_NAME + ' v' + PROGRAM_VERSION
-	print 'Copyright (C) 2005-2008 Tyler Gates, etc'
+	print 'Copyright (C) 2005-2008 ' + AUTHORS
 	print ''
 	print 'This program may be freely redistributed under'
 	print 'the terms of the GNU General Public License'
