@@ -24,6 +24,10 @@
 ' Uses unix `find` to find files and/or directories
 ' Pass parameters according to standard find usage
 '	find dir -type type -name name
+'
+' Returns a tuplet of two arrays
+'	search results
+'	any error messages
 '''
 def find_it(dir, name, type):
 	from subprocess import Popen, PIPE
