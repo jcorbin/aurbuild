@@ -8,4 +8,6 @@ BUGS
 
  * Not all files in aurbuild HOME are owned by aurbuild
 
+ * --builddeps --official considers any PKGBUILD under /var/abs/ to be official
+
 
