@@ -37,6 +37,9 @@ To Do List:
 
  * Utilise AUR's JSON interface for search info (simplejson)
 
+ * Change menu appearance
+ * Change output when resolving dependencies
+
 In Progress:
  * Move functions out of main script and into appropriate modules
 
