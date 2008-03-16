@@ -569,9 +569,8 @@ def makepkgf(dep):
 		print >>sys.stderr.write('\naurbuild: could not build \"' + 
 			dep + '\" with makepkg.')
 		print 'build directory retained at `' + pkg_build_dir + '\''
-		print 'In some cases you may be able to cd into ' \
-			'the directory, fix the problem and run makepkg' \
-			'with success.'
+		print 'You may be able to visit the directory, fix the '
+			'problem and run makepkg with success.'
 		sys.exit(1)
 	
 	return get_pkgpath()
