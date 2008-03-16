@@ -257,10 +257,15 @@ def syncdeps(deplist):
 		raise PacmanError, '\naurbuild: pacman could not install dependencies.\n'
 
 class operations(db_tools):
+
+	''' pacmanT(dependency) -> int
+	' test if the dependency needs to be installed.
+	' Returns
+	'	0: satisfied
+	'	2: something bad happened
+	'	127: missing
+	'''
 	def pacmanT(db_tools, dependency):
-		""" pacmanT(dependency) -> int
-		test if the dependency needs to be installed. 127: missing 0: satisfied
-		int: 0, 2, 127 """
 		
 		pkgname, comp, req_version = db_tools.strip_ver_cmps(dependency)
 		pkgpath = db_tools.check_installed(pkgname)
