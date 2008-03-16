@@ -5,7 +5,7 @@ pkgname=aurbuild
 pkgver=1.8.3
 pkgrel=1
 pkgdesc="A utility to build and install packages from AUR."
-url="http://developer.berlios.de/projects/aurbuild/"
+url="http://aurbuild.berlios.de/"
 license="GPL"
 arch=('i686' 'x86_64')
 depends=('python' 'pacman>=3.1.0' 'fakeroot')
