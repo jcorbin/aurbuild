@@ -1,5 +1,10 @@
 
 To Do List:
+ * Improve search
+	- Support for multiple keywords
+	- Narrowing down results by location, category, maintainer
+	- Narrowing results by votes
+
  * Make builddeps properly register themselves as deps rather than explicitly
    installed. (Done with syncdeps)
 
