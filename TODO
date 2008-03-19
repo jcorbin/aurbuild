@@ -5,6 +5,14 @@ To Do List:
 	- Narrowing down results by location, category, maintainer
 	- Narrowing results by votes
 
+ * Make builddeps/syncdeps more sophisticated
+	I'd like to be able to select whether to sync or build the deps
+	individually. The logic for selecting to build then reviewing pkgbuild
+	can be applied to building deps from [unsupported] as well.
+
+ * Add support to build deps from [unsupported] more easily (Without having to
+	run aurbuild multiple times)
+
  * Make builddeps properly register themselves as deps rather than explicitly
    installed. (Done with syncdeps)
 
