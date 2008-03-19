@@ -580,7 +580,7 @@ def install(pkgpath):
 	if os.path.isfile(pacman_lock):
 		print '\nPacman is detected running. Package cannot not be' \
 			'installed at this time.'
-		print 'Once pacman exits, you may press enter to install' \
+		print 'Once pacman exits, you may press enter to install ' \
 			'this package. Control + C exits.'
 		raw_input()	
 		
