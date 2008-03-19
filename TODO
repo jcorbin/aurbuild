@@ -1,9 +1,14 @@
 
 To Do List:
+ * Add a switch to change AUR url.
+	example: aurbuild --url http://aur.test-site.org
+
  * Improve search
 	- Support for multiple keywords
 	- Narrowing down results by location, category, maintainer
 	- Narrowing results by votes
+
+ * Add support for an aurbuild config file
 
  * Make builddeps/syncdeps more sophisticated
 	I'd like to be able to select whether to sync or build the deps
@@ -11,7 +16,7 @@ To Do List:
 	can be applied to building deps from [unsupported] as well.
 
  * Add support to build deps from [unsupported] more easily (Without having to
-	run aurbuild multiple times)
+   run aurbuild multiple times)
 
  * Make builddeps properly register themselves as deps rather than explicitly
    installed. (Done with syncdeps)
@@ -22,6 +27,14 @@ To Do List:
 
  * Use the libalpm hooks in pacman3 for python. Only because it would be faster
    and easier to maintain than my manual flat file parsing module (pacman.py).
+
+ * Work out how source files should be cached
+	I'm thinking just the tarball with scripts/local sources should be
+	cached (instead of individual files), along with downloaded sources.
+	It might be a good idea to propose a patch to makepkg as well.
+	
+	Correspond with dev of yaourt and makepkg to get some kind
+	of standard location for caching sources
 
  * Look at raw_pkg_query to possibly improve search performance
 
