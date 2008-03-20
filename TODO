@@ -15,6 +15,9 @@ To Do List:
 	individually. The logic for selecting to build then reviewing pkgbuild
 	can be applied to building deps from [unsupported] as well.
 
+ * Dynamically determine abs root from /etc/abs/abs.conf or shell variable
+   $ABSROOT
+
  * Add support to build deps from [unsupported] more easily (Without having to
    run aurbuild multiple times)
 
