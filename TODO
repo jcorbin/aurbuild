@@ -42,13 +42,13 @@ To Do List:
  * Look at raw_pkg_query to possibly improve search performance
 
  * Find what's causing a delay when building official packages 
-	* aurbuild.find.find_dir() is causing a delay because of some ugly
-	recursion
-	* Alright I replaced the recursion with a `find` subprocess. It's
-	a bit better but there is still more delay than I'd like.
-	* Using pacman -Si to find the repo THEN doing the search in
-	/var/abs/repo is about five times faster than just searching
-	/var/abs (Just from shell experimentation)
+	- aurbuild.find.find_dir() is causing a delay because of some ugly
+	  recursion
+	- Alright I replaced the recursion with a `find` subprocess. It's
+	  a bit better but there is still more delay than I'd like.
+	- Using pacman -Si to find the repo THEN doing the search in
+	  /var/abs/repo is about five times faster than just searching
+	  /var/abs (Just from shell experimentation)
 
  * Make sure root user is used for as few operations as possible
    Currently some directories in /var/tmp/aurbuild are owned by root
@@ -67,6 +67,8 @@ To Do List:
  * Utilise AUR's JSON interface for search info (simplejson)
 
  * Change menu appearance
+	- Add more info like package repo, version, category
+
  * Change output when resolving dependencies
 
 In Progress:
