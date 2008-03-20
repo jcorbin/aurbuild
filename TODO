@@ -15,6 +15,10 @@ To Do List:
 	individually. The logic for selecting to build then reviewing pkgbuild
 	can be applied to building deps from [unsupported] as well.
 
+ * When searching for official PKGBUILDs be able to identify duplicate packages
+   and select the specific repo desired (eg. core|testing, extra|unstable or
+   any other repo that might have the same pkg as others)
+
  * Dynamically determine abs root from /etc/abs/abs.conf or shell variable
    $ABSROOT
 
@@ -23,6 +27,8 @@ To Do List:
 
  * Make builddeps properly register themselves as deps rather than explicitly
    installed. (Done with syncdeps)
+ 
+ * Support to vote, unvote, flag, unflag, upload, write comments
 
  * Add a switch to view user comments.
 
@@ -30,6 +36,10 @@ To Do List:
 
  * Use the libalpm hooks in pacman3 for python. Only because it would be faster
    and easier to maintain than my manual flat file parsing module (pacman.py).
+
+ * Respect pacman.conf:RootDir
+
+ * Cache installed pkgs in pacman.conf:CacheDir or /var/cache/pacman/pkg
 
  * Work out how source files should be cached
 	I'm thinking just the tarball with scripts/local sources should be
