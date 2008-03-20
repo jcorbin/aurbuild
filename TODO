@@ -25,9 +25,6 @@ To Do List:
  * Add support to build deps from [unsupported] more easily (Without having to
    run aurbuild multiple times)
 
- * Make builddeps properly register themselves as deps rather than explicitly
-   installed. (Done with syncdeps)
- 
  * Support to vote, unvote, flag, unflag, upload, write comments
 
  * Add a switch to view user comments.

@@ -570,22 +570,31 @@ def makepkgf(dep):
 			dep + '\" with makepkg.')
 		print 'build directory retained at `' + pkg_build_dir + '\''
 		print 'You may be able to visit the directory, fix the '
-			'problem and run makepkg with success.'
+		'problem and run makepkg with success.'
 		sys.exit(1)
 	
 	return get_pkgpath()
 
-def install(pkgpath):
+'''
+' args[0] is pkgpath
+' args[1] is asdeps
+'''
+def install(pkgpath, asdeps=False):
 	pacman_lock	= '/tmp/pacman.lck'
 	if os.path.isfile(pacman_lock):
-		print '\nPacman is detected running. Package cannot not be ' \
-			'installed at this time.'
-		print 'Once pacman exits, you may press enter to install ' \
-			'this package. Control + C exits.'
+		print '\nPacman is detected running. Package cannot not be '
+		'installed at this time.'
+		print 'Once pacman exits, you may press enter to install '
+		'this package. Control + C exits.'
 		raw_input()	
 		
 	print msg('Installing package...')
-	code = Popen(['pacman', '-U', pkgpath]).wait()
+
+	if not asdeps:
+		code = Popen(['pacman', '-U', pkgpath]).wait()
+	else:
+		code = Popen(['pacman', '-U', '--asdeps', pkgpath]).wait()
+
 	if code > 0:
 		print >>sys.stderr.write('\naurbuild: could not install'
 				'package through pacman --upgrade.')
@@ -615,7 +624,7 @@ def builddeps(deplist):
 		os.setegid(gid)
                 os.chdir(des_dir)
 		pkgpath = makepkgf(each)
-		if not NOINSTALL: install(pkgpath)
+		if not NOINSTALL: install(pkgpath, asdeps=True)
 
         os.chdir(cwd)
 	
