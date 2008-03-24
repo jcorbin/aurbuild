@@ -317,10 +317,10 @@ def savefiles(pkg, old_dir):
 		except OSError, e:
 			abort_msg(str(e))
 
-def search(args, verbose):
+def search(args, verbose, site):
 	import textwrap
 	try:
-		names, descriptions, locations, categories, maintainers, votes = aaurparse.aursearch(args[0]) 
+		names, descriptions, locations, categories, maintainers, votes = aaurparse.aursearch(args[0], site) 
 	except Exception, e:
 		print >>sys.stderr.write(str(e))
 		sys.exit(1)

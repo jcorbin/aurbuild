@@ -157,7 +157,7 @@ try:
 		'builder-opts=', 
 		'save', 'local', 'official', 'auto-build', 'upgrade',
 		'noconfirm', 'noinstall', 'rm-make-deps', 'clean',
-		'search'])
+		'search', 'url='])
 except getopt.GetoptError, e:
 	usage()
 	print 'Error: ' + str(e)
@@ -202,6 +202,8 @@ for opt, optarg in opts:
 	if opt in ['-m', '--rm-make-deps' ]: RM_MDEPS = 1
 	if opt in ['-c', '--clean' ]: CLEAN = 1
 	if opt in ['-S', '--search']: SEARCH = 1
+	if opt in ['--url']:
+		aursite = optarg
 #	if opt in ['-V', '--vote']: VOTE = 1
 #	if opt in ['-U', '--unvote']: UNVOTE = 1
 
@@ -294,7 +296,11 @@ def prepare_work_dirs():
 
 def get_tarball(pkg):
 	
-	main_url = aaurparse.pkg_main_url(pkg)
+	main_url, err = aaurparse.pkg_main_url(pkg, aursite)
+
+	if err:
+		cleanup()
+		sys.exit(1)
 
 	if main_url == '':
 		print >>sys.stderr.write(pkg + ': not found in AUR')
@@ -314,7 +320,7 @@ def get_tarball(pkg):
 		sys.exit(1)
 
 	try:
-		tarball_url = aaurparse.pkg_tarball_url(raw_text)
+		tarball_url = aaurparse.pkg_tarball_url(raw_text, aursite)
 	except:
 		print >>sys.stderr.write('\nUnable to parse tarball info. If '
 			'you see this message rarely, it is\n'  
@@ -800,7 +806,7 @@ def main():
 			sys.exit(retcode)
 	
 	if SEARCH: 
-		autils.search(args, VERBOSE)
+		autils.search(args, VERBOSE, aursite)
 		sys.exit(0)
 	
 	if VOTE or UNVOTE:

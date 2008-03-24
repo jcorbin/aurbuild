@@ -6,6 +6,8 @@ AURBUILD
 	* Rewrote find.py
 	* More functions moved around
 	* A bunch of code moved around and tweaked
+	* Added 'hidden' --url switch mainly for testing without bothering
+	  the official aur site.
 
  -v1.8.2 (March 4, 2008)
 	* Fancy new search output

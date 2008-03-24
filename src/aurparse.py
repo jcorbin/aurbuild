@@ -21,27 +21,30 @@
 
 import re, os, sys, urllib
 
-aururl = 'http://aur.archlinux.org/'
-search_url = aururl + 'packages.php?K='
-
+'''
+' The format of the 'site' argument must be protocol://domain/
+' ex: http://aur.archlinux.org/
+' The trailing slash is important
+'
+'''
 # this looks a little strange but we need to access each of these functions (except aursearch) and query the server only once, hence the
 # manual 'raw_text' parameters which is currently obtained from raw_pkg_query().
 
-def raw_pkg_query(keyword):
+def raw_pkg_query(keyword, site):
+	search_url = site + 'packages.php?K='
 	f = urllib.urlopen(search_url+keyword+'&PP=100')
 	lines = f.readlines()
 	return lines
 
-def pkg_main_url(pkg):
+def pkg_main_url(pkg, site):
 	raw_text = []
 
 	try:
 		raw_text = raw_pkg_query(pkg)
 	except Exception, e:
+		return None, str(e)
 		print >>sys.stderr.write('\ncould not retrieve needed data' +
 			'from aur: ' + str(e))
-		cleanup()
-		sys.exit(1)
 
 
         url = '' 
@@ -49,25 +52,28 @@ def pkg_main_url(pkg):
                 if 'packages.php?ID' in line and '>'+pkg+' ' in line:
                         url = line.split("ID=", 1)[1]
                         url = url.split("'>")[0]
-			url = aururl + "packages.php?ID=" + url
+			url = site + "packages.php?ID=" + url
 			break
-	return url
 
-def pkg_tarball_url(raw_text):
+	return url, None
+
+
+def pkg_tarball_url(raw_text, site):
 	url = ''
 	for line in raw_text:
 		if '\'>Tarball</a>' in line:
 			url = line.split("<a href='")[1]
 			url = url.split("'>Tarball")[0]
-			url = aururl + url
+			url = site + url
 	return url
 
+'''
+' Gets and parses the output from the site's search page
+' Returns a set of arrays that contain the package info
+'''
+def aursearch(keyword, site):
 
-def aursearch(keyword):
-	""" search(keyword)
-	search http://aur.archlinux.org/ search engine to find keyword and return info."""
-
-	f = raw_pkg_query(keyword)
+	f = raw_pkg_query(keyword, site)
 
 	candidates = []
 	for line in f:
@@ -118,5 +124,5 @@ def aursearch(keyword):
 
 if __name__ == '__main__':
 	import sys
-	print aursearch(sys.argv[1])
+	print aursearch(sys.argv[1], 'http://aur.archlinux.org/')
 	sys.exit(0)
