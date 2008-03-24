@@ -1,5 +1,6 @@
+TODO
 
-To Do List:
+General List:
  * Add a switch to change AUR url.
 	example: aurbuild --url http://aur.test-site.org
 
@@ -63,12 +64,6 @@ To Do List:
  * Make sure user_makedirs and user_copytree switch user effectively
    (Get rid of global variables)
 
- * Move cleanup() to utils. Should be able to take a variable number of
-   arguments. cleanup() is used in a lot of functions in the main
-   script and in utils. It probably is being called more than it is needed.
-   It also uses global variables which should be gotten rid of if possible.
-   Maybe it can be put into a class.
-
  * filter_deps() and main() in scripts/aurbuild need serious rework
 
  * Utilise AUR's JSON interface for search info (simplejson)
@@ -77,6 +72,17 @@ To Do List:
 	- Add more info like package repo, version, category
 
  * Change output when resolving dependencies
+
+cleanup() cleanup:
+ * Move cleanup() to utils. Should be able to take a variable number of
+   arguments. cleanup() is used in a lot of functions in the main
+   script and in utils. It probably is being called more than it is needed.
+   It also uses global variables which should be gotten rid of if possible.
+   Maybe it can be put into a class.
+
+ * Instead of calling cleanup() and sys.exit() in most functions throw an
+   error and let calling script deal with cleanup. Also fix function that
+   return an extra 'err' variable to throw an error instead.
 
 Long term:
  * Make sure only a few select functions call sys.exit() and cleanup()
