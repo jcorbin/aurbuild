@@ -60,23 +60,25 @@ def handler(signo, frame):
 		cleanup()
 		sys.exit(143)
 
-def get_depends(pkgbuild, dep1, dep2):
-	# dep1 is makedepends. dep2 is depends
-	p = Popen('source ' + pkgbuild + '; echo "${' + dep1 + '[@]}:${' +
-			dep2 + '[@]}"', shell=True, stdout=PIPE, stderr=PIPE)
+def get_depends(pkgbuild, makedeps, deps):
+
+	p = Popen('source ' + pkgbuild +
+		'; echo "${' + makedeps + '[@]}:${' +
+		deps + '[@]}"', shell=True, stdout=PIPE, stderr=PIPE)
+
 	out = p.stdout.read()
 	err = p.stderr.read()
 	p.stdout.close()
 	p.stderr.close()
 	if err != '':
 		print >>sys.stderr.write('\nPKGBUILD syntax error:\n\n' + err)
-		cleanup()
-		sys.exit(1)
+		err = 1
+
 	out = out.strip()
 	out = out.split(':')
-	dep1 = out[0].split(' ')
-	dep2 = out[1].split(' ')
-	return dep1, dep2
+	makedeps = out[0].split(' ')
+	deps = out[1].split(' ')
+	return makedeps, deps, err
 
 def get_dep_path(abs_root, dep):
 	if not os.path.isdir(abs_root):

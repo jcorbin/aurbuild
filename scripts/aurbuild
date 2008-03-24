@@ -436,7 +436,12 @@ def filter_deps(pkg, fd_ct, type):
 				dep_path = autils.get_dep_path(abs_root, pkg)
 				if dep_path != None:
 					# a dependency is found, check it's deps and run this method again
-					mdep_cans, dep_cans = autils.get_depends(dep_path + '/PKGBUILD', 'makedepends', 'depends')
+					mdep_cans, dep_cans, err = autils.get_depends(dep_path + '/PKGBUILD', 'makedepends', 'depends')
+
+					if err:
+						cleanup()
+						sys.exit(1)
+
 					if mdep_cans or dep_cans != ['']: fd_ct += spaces
 					if mdep_cans != ['']:
 						for mdep_can in mdep_cans:
@@ -983,7 +988,12 @@ def main():
 				continue
 	
 		# get dependencies
-		mdep_cans, dep_cans = autils.get_depends(work_dir + '/PKGBUILD', 'makedepends', 'depends')
+		mdep_cans, dep_cans, err = autils.get_depends(work_dir + '/PKGBUILD', 'makedepends', 'depends')
+
+		if err:
+			cleanup()
+			sys.exit(1)
+
 		mdeps = []
 		deps = []
 		print color('==> ', 'blue') + color('Checking Buildtime Dependencies... \n', 'black')
