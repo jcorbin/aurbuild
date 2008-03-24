@@ -40,7 +40,7 @@ def pkg_main_url(pkg, site):
 	raw_text = []
 
 	try:
-		raw_text = raw_pkg_query(pkg)
+		raw_text = raw_pkg_query(pkg, site)
 	except Exception, e:
 		return None, str(e)
 		print >>sys.stderr.write('\ncould not retrieve needed data' +

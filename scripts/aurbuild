@@ -68,7 +68,7 @@ abs_root 	= '/var/abs'
 pm_db_root 	= '/var/lib/pacman'
 pm_cache	= '/var/cache/pacman'
 installed_dir 	= pm_db_root + '/local'
-aursite 	= 'http://aur.archlinux.org'
+aursite 	= 'http://aur.archlinux.org/'
 # for filter_deps
 filtered	= []
 db_pkgs		= []
@@ -866,7 +866,7 @@ def main():
 		print >>sys.stderr.write('Error: editor value \"' + editor_no_args + '\" not found on system.')
 		cleanup()
 		sys.exit(1)
-	
+
 	if UPGRADE:
 		# set args to each potential AUR candidate
 		args, installed = apacman.db_tools().get_foreign()
