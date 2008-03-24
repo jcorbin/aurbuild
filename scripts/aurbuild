@@ -529,11 +529,17 @@ def get_pkgpath():
 		cleanup()
 		sys.exit(1)
 
+	arch, err = autils.echo_bash_vars(os.path.join(cwd,'PKGBUILD'), "${arch}")
+
+	# Make sure we can install packages built for 'any' arch
+	if arch != 'any':
+		arch = CARCH
+
 	out = out.split('%')
 	pkgname, pkgver, pkgrel = out[0], out[1], out[2]
 
 	pkgpath = os.path.join(_PKGDEST, pkgname + '-' + pkgver +
-			'-' + pkgrel + '-' + CARCH + '.' + PKGEXT)
+			'-' + pkgrel + '-' + arch + '.' + PKGEXT)
 
 	if os.path.exists(pkgpath):
 		return pkgpath
