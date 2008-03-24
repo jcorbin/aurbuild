@@ -78,6 +78,10 @@ To Do List:
 
  * Change output when resolving dependencies
 
+Long term:
+ * Make sure only a few select functions call sys.exit() and cleanup()
+ 	eg. Main script, main(), init()
+
 In Progress:
  * Move functions out of main script and into appropriate modules
 
