@@ -2,7 +2,7 @@
 AURBUILD
  -v1.8.3 (March 21, 2008)
 	* Install deps --asdeps
-	* Packages with 'any' arch install now
+	* Packages with 'any' arch will install now
 	* Rewrote find.py
 	* More functions moved around
 	* A bunch of code moved around and tweaked
