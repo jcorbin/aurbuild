@@ -1,0 +1,6 @@
+Always indent with tabs
+
+Testing:
+	Make sure aurbuild handles PKGBUILD errors gracefully.
+	Try building a PKGBUILD with syntax errors, etc.
+
