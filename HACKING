@@ -1,4 +1,5 @@
 Always indent with tabs
+Keep lines less than 80 columns long as much as possible
 
 Testing:
 	Make sure aurbuild handles PKGBUILD errors gracefully.
