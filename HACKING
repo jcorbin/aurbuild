@@ -2,6 +2,13 @@ Always indent with tabs
 Keep lines less than 80 columns long as much as possible
 
 Testing:
+Make sure everything works.
+	--sync with missing dependencies
+	--builddeps with missing dependencies
+	--sync --upgrade
+	--sync --local
+	--search
+
 	Make sure aurbuild handles PKGBUILD errors gracefully.
 	Try building a PKGBUILD with syntax errors, etc.
 
