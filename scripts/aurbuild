@@ -2,8 +2,8 @@
 #
 #   aurbuild
 #
-#   Copyright (C) 2005-2008 by Tyler Gates <TGates81@gmail.com>
-#				and Loui Chang <louipc.ist@gmail.com>
+#   Copyright (C) 2005-2007 by Tyler Gates <TGates81@gmail.com>
+#   Copyright (C) 2008 by Loui Chang <louipc.ist@gmail.com>
 #  
 #   This program is free software; you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -990,7 +990,7 @@ def main():
 				cleanup()
 				upgrade_ct += 1
 				continue
-		
+
 		# evaulate options and go to menu if needed
 		if not AUTO_BUILD:
 			select = menu(os.listdir(work_dir), argo)
