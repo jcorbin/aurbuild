@@ -1,6 +1,10 @@
 TODO
 
 General List:
+ * Use json interface to grab info on packages when syncing/building
+   there was some old code that was supposed to fix problems with finding
+   some packages that I clobbered. Example: try installing 'rar' from AUR
+
  * Add a switch to change AUR url. (Partially Done)
 	example: aurbuild --url http://aur.test-site.org
 	Need to add function to verify that the url is valid and to add a
