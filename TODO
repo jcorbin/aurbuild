@@ -27,15 +27,15 @@ General List:
 	individually. The logic for selecting to build then reviewing pkgbuild
 	can be applied to building deps from [unsupported] as well.
 
+ * Add support to build deps from [unsupported] more easily (Without having to
+   run aurbuild multiple times)
+
  * When searching for official PKGBUILDs be able to identify duplicate packages
    and select the specific repo desired (eg. core|testing, extra|unstable or
    any other repo that might have the same pkg as others)
 
  * Dynamically determine abs root from /etc/abs/abs.conf or shell variable
    $ABSROOT
-
- * Add support to build deps from [unsupported] more easily (Without having to
-   run aurbuild multiple times)
 
  * Support to vote, unvote, flag, unflag, upload, write comments
 
@@ -54,6 +54,8 @@ General List:
 	I'm thinking just the tarball with scripts/local sources should be
 	cached (instead of individual files), along with downloaded sources.
 	It might be a good idea to propose a patch to makepkg as well.
+
+	Cache cvs/svn/git sources as well.
 	
 	Correspond with dev of yaourt and makepkg to get some kind
 	of standard location for caching sources
@@ -83,6 +85,7 @@ General List:
 	- Add more info like package repo, version, category
 
  * Change output when resolving dependencies
+	- Use just tabs or spaces instead of a bunch of funky characters
 
 cleanup() cleanup:
  * Move cleanup() to utils. Should be able to take a variable number of
