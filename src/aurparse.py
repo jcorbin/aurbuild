@@ -42,9 +42,9 @@ def pkg_main_url(pkg, site):
 	try:
 		raw_text = raw_pkg_query(pkg, site)
 	except Exception, e:
-		return None, str(e)
-		print >>sys.stderr.write('\ncould not retrieve needed data' +
-			'from aur: ' + str(e))
+		print >>sys.stderr.write(
+			'Could not retrieve needed data from ' + site)
+		raise
 
 
         url = '' 
@@ -55,7 +55,7 @@ def pkg_main_url(pkg, site):
 			url = site + "packages.php?ID=" + url
 			break
 
-	return url, None
+	return url
 
 
 def pkg_tarball_url(raw_text, site):

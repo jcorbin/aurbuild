@@ -296,9 +296,10 @@ def prepare_work_dirs():
 
 def get_tarball(pkg):
 	
-	main_url, err = aaurparse.pkg_main_url(pkg, aursite)
-
-	if err:
+	try:
+		main_url = aaurparse.pkg_main_url(pkg, aursite)
+	except Exception, e:
+		print >>sys.stderr.write(str(e))
 		cleanup()
 		sys.exit(1)
 
@@ -315,14 +316,16 @@ def get_tarball(pkg):
 		raw_text = f.readlines()
 		f.close()
 	except IOError, e:
-		print >>sys.stderr.write('\ncould not retrieve needed data from aur: '+main_url + ': ' + str(e) + '\n')
+		print >>sys.stderr.write('Could not retrieve needed data from:'
+		'\n\t' + main_url)
+		print >>sys.stderr.write(str(e))
 		cleanup()
 		sys.exit(1)
 
 	try:
 		tarball_url = aaurparse.pkg_tarball_url(raw_text, aursite)
 	except:
-		print >>sys.stderr.write('\nUnable to parse tarball info. If '
+		print >>sys.stderr.write('Unable to parse tarball info. If '
 			'you see this message rarely, it is\n'  
 			'possible user comments have skewed the parsing '
 			'results on the web page.\n')
