@@ -95,9 +95,9 @@ cleanup() cleanup:
    It also uses global variables which should be gotten rid of if possible.
    Maybe it can be put into a class.
 
- * Instead of calling cleanup() and sys.exit() in most functions throw an
-   error and let calling script deal with cleanup. Also fix function that
-   return an extra 'err' variable to throw an error instead.
+ * Instead of calling cleanup() and sys.exit() in most functions raise an
+   exception and let calling script deal with cleanup. Also fix functions that
+   return an extra 'err' variable to raise an exception instead.
 
 Long term:
  * Make sure only a few select functions call sys.exit() and cleanup()
