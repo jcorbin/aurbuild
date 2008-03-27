@@ -28,11 +28,17 @@
 ' Returns a tuplet of two arrays
 '	search results
 '	any error messages
+'
+' Hardcoded maxdepth will cause problems if the ABS tree goes deeper than
+' three levels.
 '''
 def find_it(dir, name, type):
 	from subprocess import Popen, PIPE
 	output, error = Popen(
-		['find', dir, '-type', type, '-name', name],
+		['find', dir,
+		'-maxdepth', '3',
+		'-type', type,
+		'-name', name],
 		stdout=PIPE).communicate()
 	result = output.splitlines()
 
