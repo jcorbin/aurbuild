@@ -12,3 +12,6 @@ Make sure everything works.
 	Make sure aurbuild handles PKGBUILD errors gracefully.
 	Try building a PKGBUILD with syntax errors, etc.
 
+Prior to Release
+	- Merge working tree into master
+	- Tag the commit
