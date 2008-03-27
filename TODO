@@ -17,6 +17,8 @@ General List:
 	- Support for multiple keywords
 	- Narrowing down results by location, category, maintainer
 	- Narrowing results by votes
+	- Add functionality to allow user to browse through search pages
+	  just like in AUR (to review more than 100 results)
 
  * Add support for an aurbuild config file
 
