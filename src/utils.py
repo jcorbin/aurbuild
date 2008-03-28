@@ -3,6 +3,7 @@
 #   utils.py
 #
 #   Copyright (C) 2005-2007 by Tyler Gates <TGates81@gmail.com>
+#   Copyright (C) 2008 by Loui Chang <louipc.ist@gmail.com>
 #  
 #   This program is free software; you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -70,15 +71,15 @@ def get_depends(pkgbuild, makedeps, deps):
 	err = p.stderr.read()
 	p.stdout.close()
 	p.stderr.close()
+
 	if err != '':
-		print >>sys.stderr.write('\nPKGBUILD syntax error:\n\n' + err)
-		err = 1
+		raise Exception("PKGBUILD syntax error:\n\t" + err)
 
 	out = out.strip()
 	out = out.split(':')
 	makedeps = out[0].split(' ')
 	deps = out[1].split(' ')
-	return makedeps, deps, err
+	return makedeps, deps
 
 def get_dep_path(abs_root, dep):
 	if not os.path.isdir(abs_root):
