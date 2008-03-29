@@ -39,12 +39,17 @@ def echo_bash_vars(path, value, array=False):
 			stdout=PIPE, stderr=PIPE)
 	out = p.stdout.read()
 	out = out.strip()
+
 	if array:
 		out = out.split(' ')
 	p.stdout.close()
 	err = p.stderr.read()
 	p.stderr.close()
-	return out, err
+
+	if err != '':
+		raise Exception(err)
+
+	return out
 		
 def cleanup():
 	if os.path.isdir(pkg_build_dir):

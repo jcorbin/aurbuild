@@ -531,15 +531,20 @@ def get_pkgpath():
 		_PKGDEST = cwd
 	else:
 		_PKGDEST = PKGDEST
-	
-	out, err = autils.echo_bash_vars(os.path.join(cwd, 'PKGBUILD'),
-		'${pkgname}%${pkgver}%${pkgrel}')
-	if err != '':
-		print >>sys.stderr.write('PKGBUILD syntax error: '+err)
+
+	try:
+		out = autils.echo_bash_vars(os.path.join(cwd, 'PKGBUILD'),
+			'${pkgname}%${pkgver}%${pkgrel}')
+
+	except Exception, e:
+		print >>sys.stderr.write('PKGBUILD syntax error: '+ str(e))
 		cleanup()
 		sys.exit(1)
 
-	arch, err = autils.echo_bash_vars(os.path.join(cwd,'PKGBUILD'), "${arch}")
+	try:
+		arch = autils.echo_bash_vars(os.path.join(cwd,'PKGBUILD'), "${arch}")
+	except Exception, e:
+		pass
 
 	# Make sure we can install packages built for 'any' arch
 	if arch != 'any':
@@ -567,9 +572,11 @@ def get_pkgpath():
 def makepkgf(dep):
 
 	cwd = os.getcwd()
-	raw_sources, err = autils.echo_bash_vars(os.path.join(cwd, 'PKGBUILD'), '${source[@]}', array=True)
-	if err != '':
-		print >>sys.stderr.write('PKGBUILD syntax error: '+err)
+
+	try:
+		raw_sources = autils.echo_bash_vars(os.path.join(cwd, 'PKGBUILD'), '${source[@]}', array=True)
+	except Exception, e:
+		print >>sys.stderr.write('PKGBUILD syntax error: ' + err )
 		cleanup()
 		sys.exit(1)
 	
@@ -908,9 +915,10 @@ def main():
 				for r in results:
 					j = os.path.join(r, 'PKGBUILD')
 					if os.path.isfile(j):
-						_p_name, err = autils.echo_bash_vars(j, '${pkgname}')
-						if err != '':
-							print >>sys.stderr.write('PKGBUID syntax error: '+err)
+						try:
+							_p_name = autils.echo_bash_vars(j, '${pkgname}')
+						except Exception, e:
+							print >>sys.stderr.write('PKGBUID syntax error: ' + str(e))
 							cleanup()
 							upgrade_ct += 1
 							continue
@@ -958,9 +966,11 @@ def main():
 		# for --upgrade. compare versions and confirm upgrade with user
 		if UPGRADE:
 			pkgbuild_path = os.path.join(os.getcwd(), 'PKGBUILD')
-			package, err = autils.echo_bash_vars(pkgbuild_path, '${pkgname}')
-			if err != '':
-				print >>sys.stderr.write('PKGBUILD syntax error (' +argo+'), unable to process:\n' + err)
+
+			try:
+				package = autils.echo_bash_vars(pkgbuild_path, '${pkgname}')
+			except Exception, e:
+				print >>sys.stderr.write('PKGBUILD syntax error (' +argo+'), unable to process:\n' + str(e))
 				cleanup()
 				upgrade_ct += 1
 				continue

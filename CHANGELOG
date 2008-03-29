@@ -2,6 +2,7 @@
 AURBUILD
  -v1.8.4 (April 2008)
 	* DRASTICALLY improve search times when building official packages
+	* Improved exception and error handling
 
  -v1.8.3 (March 25, 2008)
 	* Install deps --asdeps
