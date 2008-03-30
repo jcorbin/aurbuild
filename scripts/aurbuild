@@ -123,12 +123,13 @@ def usage():
 # examine makepkg.conf and set more globals
 if os.access(makepkg_config, os.F_OK|os.R_OK):
 	BUILDENV = autils.echo_bash_vars(makepkg_config, '${BUILDENV[@]}',
-			array=True)[0]
+			array=True)
 
 	valid_buildenv = []
 	for var in BUILDENV:
 		if var[0] != '!':
 			valid_buildenv.append(var)
+
 	if 'color' in valid_buildenv: USE_COLOR = 'y'
 	else: USE_COLOR = 'n'
 
@@ -136,9 +137,9 @@ if os.access(makepkg_config, os.F_OK|os.R_OK):
 	else: USE_FAKEROOT = 'n'
 
 	
-	out = autils.echo_bash_vars(makepkg_config,
-			'$PKGDEST:$SRCDEST:$CARCH', array=False)[0]
+	out = autils.echo_bash_vars(makepkg_config, '$PKGDEST:$SRCDEST:$CARCH')
 	out = out.split(':')
+	
 	PKGDEST = out[0]
 	SRCDEST = out[1]
 	CARCH = out[2]
@@ -975,7 +976,7 @@ def main():
 				upgrade_ct += 1
 				continue
 
-			aur = autils.echo_bash_vars(pkgbuild_path, '${pkgver}-${pkgrel}')[0]
+			aur = autils.echo_bash_vars(pkgbuild_path, '${pkgver}-${pkgrel}')
 			
 			result = aversion.vercmp().vercmp(aur, installed[upgrade_ct])
 
@@ -1067,7 +1068,7 @@ def main():
 					if RM_MDEPS:
 						if 'make' in zdict[zct].lower():
 							rm_packages.extend(deps_type)
-	
+
 		pkgname = makepkgf(argo)
 		if not NOINSTALL: install(pkgname)
 

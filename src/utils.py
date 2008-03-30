@@ -32,16 +32,20 @@ import aurbuild
 aaurparse = aurbuild.aurparse
 afind = aurbuild.find
 
+'''
+' Return a variable from a bash file
+' The array parameter is to specify whether you're expecting an array
+'
+'''
 def echo_bash_vars(path, value, array=False):
-	""" return a variable from a bash file """
-	
-	p = Popen('source '+path+'; echo '+value, shell=True,
+	p = Popen('source ' + path + '; echo '+value, shell=True,
 			stdout=PIPE, stderr=PIPE)
 	out = p.stdout.read()
 	out = out.strip()
 
 	if array:
 		out = out.split(' ')
+
 	p.stdout.close()
 	err = p.stderr.read()
 	p.stderr.close()
