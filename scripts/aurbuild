@@ -400,7 +400,7 @@ def extract(file):
 		for d in os.listdir(dir):
 			v = os.path.join(dir, d)
 			os.chown(v, builduser_uid, builduser_gid)
-			if os.path.isdir(v):
+			if os.path.isdir(v) and not os.path.islink(v):
 				mod_extracted(v)
 
 	# the parent directory of the extracted tarball has a setgroup id bit set from AUR. This needs to be removed:
