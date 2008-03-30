@@ -51,7 +51,7 @@ def echo_bash_vars(path, value, array=False):
 	p.stderr.close()
 
 	if err != '':
-		raise Exception(err)
+		raise Exception(path + ' error:\n\t' + err)
 
 	return out
 		
