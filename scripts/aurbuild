@@ -565,8 +565,7 @@ def get_pkgpath():
 				'package in ' + pkgpath)
 		print >>sys.stderr.write('In some cases this might mean the '
 			'PKGDEST location does not have write and execute '
-			'permissions')
-		print >>sys.stderr.write('for the `aurbuild\' user or group.')
+			'permissions\nfor the `aurbuild\' user or group.')
 		cleanup()
 		sys.exit(1)
 	
