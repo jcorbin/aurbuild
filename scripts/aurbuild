@@ -624,10 +624,8 @@ def install(pkgpath, asdeps=False):
 		code = Popen(['pacman', '-U', '--asdeps', pkgpath]).wait()
 
 	if code > 0:
-		print >>sys.stderr.write('\naurbuild: could not install'
-				'package through pacman --upgrade.')
-		cleanup()
-		sys.exit(1)
+		raise Exception('aurbuild could not install '
+				'package via pacman --upgrade.')
 			
 def builddeps(deplist):
         # for -b option
@@ -635,7 +633,8 @@ def builddeps(deplist):
         for each in deplist:
                 dep_path = autils.get_dep_path(abs_root, each)
                 if dep_path == None:
-                        print >>sys.stderr.write('\naurbuild: dependency \"' + each + '\" not found in abs.')
+			raise Exception('aurbuild: dependency \"' + each + \
+				'\" not found in abs.')
                         cleanup()
                         sys.exit(1)
 
@@ -652,7 +651,11 @@ def builddeps(deplist):
 		os.setegid(gid)
                 os.chdir(des_dir)
 		pkgpath = makepkgf(each)
-		if not NOINSTALL: install(pkgpath, asdeps=True)
+		if not NOINSTALL:
+			try:
+				install(pkgpath, asdeps=True)
+			except Exception, e:
+				raise
 
         os.chdir(cwd)
 	
@@ -1063,14 +1066,20 @@ def main():
 							apacman.syncdeps(deps_type)
 						except:
 							print >>sys.stderr.write(str(e))
-							sys.exit(1)
 							cleanup()
+							sys.exit(1)
 					if RM_MDEPS:
 						if 'make' in zdict[zct].lower():
 							rm_packages.extend(deps_type)
 
 		pkgname = makepkgf(argo)
-		if not NOINSTALL: install(pkgname)
+		if not NOINSTALL:
+			try:
+				install(pkgname)
+			except Exception, e:
+				print >>sys.stderr.write(str(e))
+				cleanup()
+				sys.exit(1)
 
 		upgrade_ct += 1
 		cleanup()
