@@ -122,8 +122,12 @@ def usage():
 
 # examine makepkg.conf and set more globals
 if os.access(makepkg_config, os.F_OK|os.R_OK):
-	BUILDENV = autils.echo_bash_vars(makepkg_config, '${BUILDENV[@]}',
-			array=True)
+	try:
+		BUILDENV = autils.echo_bash_vars(makepkg_config,
+			'${BUILDENV[@]}', array=True)
+	except Exception, e:
+		print >>sys.stderr.write(makepkg_config + ' error:\n\t' + str(e))
+		sys.exit(1)
 
 	valid_buildenv = []
 	for var in BUILDENV:
@@ -145,7 +149,7 @@ if os.access(makepkg_config, os.F_OK|os.R_OK):
 	CARCH = out[2]
 	del(out)
 else:
-	print >>sys.stderr.write('Error: '+makepkg_config+
+	print >>sys.stderr.write('Error: ' + makepkg_config +
 			' is missing or read permissions are denied.')
 	sys.exit(1)
 
