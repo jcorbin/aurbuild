@@ -126,7 +126,7 @@ if os.access(makepkg_config, os.F_OK|os.R_OK):
 		BUILDENV = autils.echo_bash_vars(makepkg_config,
 			'${BUILDENV[@]}', array=True)
 	except Exception, e:
-		print >>sys.stderr.write(makepkg_config + ' error:\n\t' + str(e))
+		print >>sys.stderr.write(str(e))
 		sys.exit(1)
 
 	valid_buildenv = []
@@ -546,10 +546,7 @@ def get_pkgpath():
 		cleanup()
 		sys.exit(1)
 
-	try:
-		arch = autils.echo_bash_vars(os.path.join(cwd,'PKGBUILD'), "${arch}")
-	except Exception, e:
-		pass
+	arch = autils.echo_bash_vars(os.path.join(cwd,'PKGBUILD'), "${arch}")
 
 	# Make sure we can install packages built for 'any' arch
 	if arch != 'any':
