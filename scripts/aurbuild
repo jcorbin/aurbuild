@@ -609,7 +609,7 @@ def makepkgf(dep):
 ' args[1] is asdeps
 '''
 def install(pkgpath, asdeps=False):
-	pacman_lock	= '/tmp/pacman.lck'
+	pacman_lock	= '/var/lib/pacman/db.lck'
 	if os.path.isfile(pacman_lock):
 		print 'Pacman is detected running.'
 		print 'Once pacman exits, you may press enter to install'
