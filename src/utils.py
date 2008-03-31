@@ -82,7 +82,7 @@ def get_depends(pkgbuild, makedeps, deps):
 	p.stderr.close()
 
 	if err != '':
-		raise Exception("PKGBUILD syntax error:\n\t" + err)
+		raise Exception("PKGBUILD error:\n\t" + err)
 
 	out = out.strip()
 	out = out.split(':')

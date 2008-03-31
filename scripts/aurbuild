@@ -329,7 +329,7 @@ def get_tarball(pkg):
 
 	try:
 		tarball_url = aaurparse.pkg_tarball_url(raw_text, aursite)
-	except:
+	except Exception, e:
 		print >>sys.stderr.write('Unable to parse tarball info. If '
 			'you see this message rarely, it is\n'  
 			'possible user comments have skewed the parsing '
@@ -577,7 +577,7 @@ def makepkgf(dep):
 	try:
 		raw_sources = autils.echo_bash_vars(os.path.join(cwd, 'PKGBUILD'), '${source[@]}', array=True)
 	except Exception, e:
-		print >>sys.stderr.write('PKGBUILD syntax error: ' + err )
+		print >>sys.stderr.write('PKGBUILD syntax error: ' + str(e))
 		cleanup()
 		sys.exit(1)
 	
@@ -1064,7 +1064,7 @@ def main():
 					elif SYNCDEPS:
 						try:
 							apacman.syncdeps(deps_type)
-						except:
+						except Exception, e:
 							print >>sys.stderr.write(str(e))
 							cleanup()
 							sys.exit(1)
