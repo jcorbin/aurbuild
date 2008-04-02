@@ -117,6 +117,7 @@ cleanup() cleanup:
 Long term:
  * Make sure only a few select functions call sys.exit() and cleanup()
  	eg. Main script, main(), init()
+ * Get rid of ABS dependency to fetch official build files
 
 In Progress:
  * Move functions out of main script and into appropriate modules
