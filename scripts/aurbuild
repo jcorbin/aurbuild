@@ -422,13 +422,16 @@ def get_PKGBUILD_path(parent_dir):
 		results = results[0].replace('/PKGBUILD', '')
 		return results
 	else:
-		print >>sys.stderr.write('\nPKGBUILD not found.\n')
-		cleanup()
-		sys.exit(1)
+		raise Exception('PKGBUILD not found.\n')
 
+
+
+'''
+' Give required dependency and return it if it needs to be installed or
+' return group packages if it is that keyword
+'	filtered = [], list
+'''
 def filter_deps(pkg, fd_ct, type):
-	""" give required dependency and return it if it needs to be installed or return group packages if it is that keyword
-	filtered = [], list """
 	# for tabbing over tree branch symbols
 	pre_space  = 2
 	# spaces must be greater than pre_space
@@ -438,22 +441,22 @@ def filter_deps(pkg, fd_ct, type):
 	sys.stdout.write(color(indents + '`- ', 'blue') + color(pkg + ': ', 'black'))
 	sys.stdout.flush()
 	code = apacman.operations().pacmanT(pkg)
+
 	if code == 127:
 		# see if its a group name
 		group_pkgs = apacman.db_tools().get_group(pkg)
 		if group_pkgs == []:
 			print color('missing ' + type, 'red')
 			pkg = apacman.db_tools().strip_ver_cmps(pkg)[0]
+
 			if BUILDDEPS: 
 				dep_path = autils.get_dep_path(abs_root, pkg)
 				if dep_path != None:
 					# a dependency is found, check it's deps and run this method again
 					try:
 						mdep_cans, dep_cans = autils.get_depends(dep_path + '/PKGBUILD', 'makedepends', 'depends')
-					except Exception, e:
-						print >>sys.stderr.write(str(e))
-						cleanup()
-						sys.exit(1)
+					except Exception:
+						raise
 
 					if mdep_cans or dep_cans != ['']: fd_ct += spaces
 					if mdep_cans != ['']:
@@ -463,9 +466,8 @@ def filter_deps(pkg, fd_ct, type):
 						for dep_can in dep_cans:
 							filter_deps(dep_can, fd_ct, type='[D]')
 				else:
-					print >>sys.stderr.write('\n' + pkg + ': not found in ABS.\n')
-					cleanup()
-					sys.exit(1)
+					raise Exception(pkg + ': not found in ABS.\n')
+
 			elif SYNCDEPS:
 				# follows steps of BUILDDEPS omitting make dependencies
 				if db_paths == []:
@@ -490,9 +492,8 @@ def filter_deps(pkg, fd_ct, type):
 							for dep_can in dep_cans:
 								filter_deps(dep_can, fd_ct, type='[D]')
 				if not found:
-					print >>sys.stderr.write('\n' + pkg + ': not found in database.\n')
-					cleanup()
-					sys.exit(1)
+					raise Exception(pkg + ': not found in database.\n')
+
 			# there must be no remaining deps of deps, add to list
 			if not pkg in filtered: filtered.append(pkg)
 		else:
@@ -504,9 +505,8 @@ def filter_deps(pkg, fd_ct, type):
 		print color('ok ' + type, 'green')
 		
 	elif code != 127 and code != 0:
-		sys.stderr.write('\naurbuild: fatal error while testing dependencies.\n')
-		cleanup()
-		sys.exit(1)
+		raise Exception('aurbuild: fatal error while testing dependencies.\n')
+
 	return filtered
 
 
@@ -924,6 +924,7 @@ def main():
 							cleanup()
 							upgrade_ct += 1
 							continue
+
 						if _p_name == argo:
 							results = r
 							break
@@ -937,7 +938,13 @@ def main():
 				copytree(results, p_work_dir)
 				os.chown(p_work_dir, builduser_uid, builduser_uid)
 				os.chmod(p_work_dir, 0775)
-				work_dir = get_PKGBUILD_path(p_work_dir)
+
+				try:
+					work_dir = get_PKGBUILD_path(p_work_dir)
+				except Exception, e:
+					print >>sys.stderr.write(str(e))
+					cleanup()
+					sys.exit(1)
 		else:
 			aur_tarfile = get_tarball(argo)
 			if aur_tarfile == None:
@@ -948,7 +955,14 @@ def main():
 				continue
 
 			extract(aur_tarfile)
-			work_dir = get_PKGBUILD_path(p_work_dir)
+
+			try:
+				work_dir = get_PKGBUILD_path(p_work_dir)
+			except Exception, e:
+				print >>sys.stderr.write(str(e))
+				cleanup()
+				sys.exit(1)
+
 			
 		os.chdir(work_dir)
 
@@ -1027,16 +1041,30 @@ def main():
 		print color('==> ', 'blue') + color('Checking Buildtime Dependencies... \n', 'black')
 		if mdep_cans != ['']: 
 			for mdep_can in mdep_cans:
-				mdeps = filter_deps(mdep_can, fd_ct=1, type='[M]')
+				try:
+					mdeps = filter_deps(mdep_can, fd_ct=1, type='[M]')
+				except Exception, e:
+					print >>sys.stderr.write(str(e))
+					cleanup()
+					sys.exit(1)
+
 			# reset globals for deps
 			global filtered, db_pkgs, db_paths
 			filtered = []
 			db_pkgs = []
 			db_paths = []
+
 		print color('==> ','blue') + color('Checking Runtime Dependencies... \n', 'black')
+
 		if dep_cans != ['']:
 			for dep_can in dep_cans:
-				deps = filter_deps(dep_can, fd_ct=1, type='[D]')
+				try:
+					deps = filter_deps(dep_can, fd_ct=1, type='[D]')
+				except Exception, e:
+					print >>sys.stderr.write(str(e))
+					cleanup()
+					sys.exit(1)
+
 		# reset again for next loop of args
 		filtered = []
 		db_pkgs = []
