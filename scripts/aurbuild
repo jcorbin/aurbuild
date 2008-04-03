@@ -453,15 +453,14 @@ def filter_deps(pkg, fd_ct, type):
 				dep_path = autils.get_dep_path(abs_root, pkg)
 				if dep_path != None:
 					# a dependency is found, check it's deps and run this method again
-					try:
-						mdep_cans, dep_cans = autils.get_depends(dep_path + '/PKGBUILD', 'makedepends', 'depends')
-					except Exception:
-						raise
+					mdep_cans, dep_cans = autils.get_depends(dep_path + '/PKGBUILD', 'makedepends', 'depends')
 
 					if mdep_cans or dep_cans != ['']: fd_ct += spaces
+
 					if mdep_cans != ['']:
 						for mdep_can in mdep_cans:
 							filter_deps(mdep_can, fd_ct, type='[M]')
+
 					if dep_cans != ['']: 
 						for dep_can in dep_cans:
 							filter_deps(dep_can, fd_ct, type='[D]')
