@@ -31,6 +31,15 @@ aaurparse = aurbuild.aurparse
 afind = aurbuild.find
 
 '''
+'	Returns str as a call to a bash array
+'	Example: myarray becomes ${myarray[@]}
+'	Use for clarity in a program rather
+'	than sprinkling '${' + str + '[@]}' everywhere
+'''
+def bash_array(str):
+	return '${%s[@]}' % str
+
+'''
 ' Return a variable from a bash file
 ' The array parameter is to specify whether you're expecting an array
 '
@@ -68,12 +77,16 @@ def handler(signo, frame):
 		cleanup()
 		sys.exit(143)
 
-def get_depends(pkgbuild, makedeps, deps):
+def get_depends(pkgbuild, makedeps='makedepends',
+		deps='depends', optdeps='optdepends'):
 
-	p = Popen('source ' + pkgbuild +
-		'; echo "${' + makedeps + '[@]}:${' +
-		deps + '[@]}"', shell=True, stdout=PIPE, stderr=PIPE)
+	commands = 'source %s; echo -e "%s\n%s\n%s"' % (
+		pkgbuild,
+		bash_array(makedeps),
+		bash_array(deps),
+		bash_array(optdeps))
 
+	p = Popen(commands, shell=True, stdout=PIPE, stderr=PIPE)
 	out = p.stdout.read()
 	err = p.stderr.read()
 	p.stdout.close()
@@ -82,10 +95,10 @@ def get_depends(pkgbuild, makedeps, deps):
 	if err != '':
 		raise Exception("PKGBUILD error:\n\t" + err)
 
-	out = out.strip()
-	out = out.split(':')
+	out = out.splitlines()
 	makedeps = out[0].split(' ')
 	deps = out[1].split(' ')
+	optdeps = out[2].split(' ')
 	return makedeps, deps
 
 def get_dep_path(abs_root, dep):
