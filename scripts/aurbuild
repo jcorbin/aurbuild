@@ -299,19 +299,13 @@ def prepare_work_dirs():
 
 def get_tarball(pkg):
 	
-	try:
-		main_url = aaurparse.pkg_main_url(pkg, aursite)
-	except Exception, e:
-		print >>sys.stderr.write(str(e))
-		cleanup()
-		sys.exit(1)
+	main_url = aaurparse.pkg_main_url(pkg, aursite)
 
 	if main_url == '':
 		print >>sys.stderr.write(pkg + ': not found in AUR')
 		if UPGRADE: 
 			return None
 		else:
-			cleanup()
 			sys.exit(1)
 
 	try:
@@ -319,21 +313,17 @@ def get_tarball(pkg):
 		raw_text = f.readlines()
 		f.close()
 	except IOError, e:
-		print >>sys.stderr.write('Could not retrieve needed data from:'
-		'\n\t' + main_url)
-		print >>sys.stderr.write(str(e))
-		cleanup()
-		sys.exit(1)
+		raise Exception(
+			'Could not retrieve needed data from:'
+			'\n\t' + main_url + '\n' +str(e))
 
 	try:
 		tarball_url = aaurparse.pkg_tarball_url(raw_text, aursite)
 	except Exception, e:
-		print >>sys.stderr.write('Unable to parse tarball info. If '
+		raise Exception('Unable to parse tarball info. If '
 			'you see this message rarely, it is\n'  
 			'possible user comments have skewed the parsing '
 			'results on the web page.\n')
-		cleanup()
-		sys.exit(1)
 
 	if tarball_url == '' and UPGRADE:
 		return None
@@ -359,9 +349,9 @@ def get_tarball(pkg):
 		tar = urllib.urlretrieve(tarball_url)[0]
 		return tar
 	except IOError, e:
-		print >>sys.stderr.write('\ncould not retrieve needed data from aur: '+tarball_url + ': ' + str(e) + '\n')
-		cleanup()
-		sys.exit(1)
+		raise Exception(
+			'Could not retrieve needed data from:'
+			'\n\t' + main_url + '\n' + str(e))
 
 def extract(file):
 	extract_dir = pkg_build_dir
@@ -945,7 +935,13 @@ def main():
 					cleanup()
 					sys.exit(1)
 		else:
-			aur_tarfile = get_tarball(argo)
+			try:
+				aur_tarfile = get_tarball(argo)
+			except Exception, e:
+				print >>sys.stderr.write(str(e))
+				cleanup()
+				sys.exit(1)
+
 			if aur_tarfile == None:
 				# Probably built a community package.
 				# At any rate, the loop needs to continue.
@@ -1129,6 +1125,7 @@ if __name__ == '__main__':
 		main()
 		sys.exit(0)
 	except SystemExit, e:
+		cleanup()
 		sys.exit(e)
 	# print pacman specific errors, users will understand these.
 	except (apacman.DatabaseError, apacman.ConfigError), e:
