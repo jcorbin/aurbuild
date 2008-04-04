@@ -341,7 +341,6 @@ def get_tarball(pkg):
 			retval = Popen(cmd, shell=True).wait()
 			return None
 		else:
-			cleanup()
 			sys.exit(1)
 
 
@@ -363,7 +362,6 @@ def extract(file):
 	else:
 		print >>sys.stderr.write('\n' + file + ': unsupported compression. Cannot extract.\n')
 		if os.path.exists(file): os.remove(file)
-		cleanup()
 		sys.exit(1)
 	
 	try:
@@ -374,7 +372,6 @@ def extract(file):
 	except Exception, e:
 		print >>sys.stderr.write('could not create temporary extraction point:')
 		print >>sys.stderr.write(str(e))
-		cleanup()
 		sys.exit(1)
 
 	try:
@@ -384,7 +381,6 @@ def extract(file):
 	except tarfile.TarError, e:
 		print >>sys.stderr.write('\ncould not extract tarfile: ' + str(e) + '\n')
 		if os.path.exists(file): os.remove(file)
-		cleanup()
 		sys.exit(1)
 
 	# aur gives us fucked tarballs with nobody:nobody ownership... this will fix it
@@ -530,7 +526,6 @@ def get_pkgpath():
 
 	except Exception, e:
 		print >>sys.stderr.write('PKGBUILD syntax error: '+ str(e))
-		cleanup()
 		sys.exit(1)
 
 	arch = autils.echo_bash_vars(os.path.join(cwd,'PKGBUILD'), "${arch}")
@@ -553,7 +548,6 @@ def get_pkgpath():
 		print >>sys.stderr.write('In some cases this might mean the '
 			'PKGDEST location does not have write and execute '
 			'permissions\nfor the `aurbuild\' user or group.')
-		cleanup()
 		sys.exit(1)
 	
 
@@ -565,7 +559,6 @@ def makepkgf(dep):
 		raw_sources = autils.echo_bash_vars(os.path.join(cwd, 'PKGBUILD'), '${source[@]}', array=True)
 	except Exception, e:
 		print >>sys.stderr.write('PKGBUILD syntax error: ' + str(e))
-		cleanup()
 		sys.exit(1)
 	
 	app = 'makepkg'
@@ -622,7 +615,6 @@ def builddeps(deplist):
                 if dep_path == None:
 			raise Exception('aurbuild: dependency \"' + each + \
 				'\" not found in abs.')
-                        cleanup()
                         sys.exit(1)
 
 		des_dir = os.path.join(build_dir, each)
@@ -714,7 +706,6 @@ def menu(dir_list, package):
 		elif choice == 'v':
 			return choice
 		elif choice == 'q':
-			cleanup()
 			sys.exit(0)
 		elif choice == 's':
 			return choice
@@ -865,7 +856,6 @@ def main():
 	editor_no_args = editor[0]
 	if not autils.appcheck(editor_no_args) and not os.path.isfile(editor_no_args):
 		print >>sys.stderr.write('Error: editor value \"' + editor_no_args + '\" not found on system.')
-		cleanup()
 		sys.exit(1)
 
 	if UPGRADE:
@@ -890,14 +880,12 @@ def main():
 			# test for its existance
 			if not os.access(pkgbuild_root, os.F_OK | os.R_OK):
 				print >>sys.stderr.write('Error: PKGBUILD root '+pkgbuild_root+' not found or read permissions denied.')
-				cleanup()
 				sys.exit(1)
 
 			results = afind.find_dir(pkgbuild_root, argo)[0]
 
 			if results == [] and not UPGRADE:
 				print '\n\"'+argo+'\" not found under `'+pkgbuild_root+'\'\n'
-				cleanup()
 				sys.exit(1)
 			elif results == [] and UPGRADE:
 				upgrade_ct += 1
@@ -921,7 +909,6 @@ def main():
 
 				if results == '':
 					print '\n\"'+argo+'\" not found under `'+pkgbuild_root+'\'\n'
-					cleanup()
 					sys.exit(1)
 			
 				copytree(results, p_work_dir)
@@ -932,14 +919,12 @@ def main():
 					work_dir = get_PKGBUILD_path(p_work_dir)
 				except Exception, e:
 					print >>sys.stderr.write(str(e))
-					cleanup()
 					sys.exit(1)
 		else:
 			try:
 				aur_tarfile = get_tarball(argo)
 			except Exception, e:
 				print >>sys.stderr.write(str(e))
-				cleanup()
 				sys.exit(1)
 
 			if aur_tarfile == None:
@@ -955,7 +940,6 @@ def main():
 				work_dir = get_PKGBUILD_path(p_work_dir)
 			except Exception, e:
 				print >>sys.stderr.write(str(e))
-				cleanup()
 				sys.exit(1)
 
 			
@@ -970,7 +954,6 @@ def main():
 			# follows) requires -b or -s
 			if not BUILDDEPS and not SYNCDEPS:
 				if argo == args[len(args)-1]:
-					cleanup()
 					sys.exit(0)
 				else: continue
 
@@ -1028,7 +1011,6 @@ def main():
 			mdep_cans, dep_cans = autils.get_depends(work_dir + '/PKGBUILD', 'makedepends', 'depends')
 		except Exception, e:
 			print >>sys.stderr.write(str(e))
-			cleanup()
 			sys.exit(1)
 
 		mdeps = []
@@ -1040,7 +1022,6 @@ def main():
 					mdeps = filter_deps(mdep_can, fd_ct=1, type='[M]')
 				except Exception, e:
 					print >>sys.stderr.write(str(e))
-					cleanup()
 					sys.exit(1)
 
 			# reset globals for deps
@@ -1057,7 +1038,6 @@ def main():
 					deps = filter_deps(dep_can, fd_ct=1, type='[D]')
 				except Exception, e:
 					print >>sys.stderr.write(str(e))
-					cleanup()
 					sys.exit(1)
 
 		# reset again for next loop of args
@@ -1087,7 +1067,6 @@ def main():
 							apacman.syncdeps(deps_type)
 						except Exception, e:
 							print >>sys.stderr.write(str(e))
-							cleanup()
 							sys.exit(1)
 					if RM_MDEPS:
 						if 'make' in zdict[zct].lower():
@@ -1099,7 +1078,6 @@ def main():
 				install(pkgname)
 			except Exception, e:
 				print >>sys.stderr.write(str(e))
-				cleanup()
 				sys.exit(1)
 
 		upgrade_ct += 1
