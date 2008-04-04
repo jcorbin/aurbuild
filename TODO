@@ -18,6 +18,8 @@ General List:
  * Create a testing AUR specifically for aurbuild testing. With packages for
    that purpose.
 
+ * Enable user to `sudo aurbuild` without problems. See BUGS.
+
  * Improve search
 	- Support for multiple keywords
 	- Narrowing down results by location, category, maintainer

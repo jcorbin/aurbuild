@@ -10,4 +10,6 @@ BUGS
 
  * --builddeps --official considers any PKGBUILD under /var/abs/ to be official
 
+ * If running `sudo aurbuild` as a regular user the EDITOR variable isn't
+   recognised.
 
