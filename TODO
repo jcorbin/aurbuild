@@ -13,6 +13,9 @@ General List:
  * If a dependency isn't found in the database, don't quit immediately.
    Check the rest of the dependencies, THEN exit.
 
+ * When syncing don't go through the whole tree if the package is in a binary
+   repo.
+
  * Warning in menu for PKGBUILDs without arch array
 
  * Create a testing AUR specifically for aurbuild testing. With packages for
