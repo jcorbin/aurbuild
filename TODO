@@ -107,8 +107,10 @@ General List:
  * Change menu appearance
 	- Add more info like package repo, version, category
 
- * Change output when resolving dependencies
-	- Use just tabs or spaces instead of a bunch of funky characters
+ * echo_bash_vars() suffers from a potential problem if we wanted to echo
+   an array along with other variables, or maybe even two arrays.
+   It splits the bash array output into a python array in a not-so-smart way
+   which may yield undesirable results.
 
 cleanup() cleanup:
  * Move cleanup() to utils. Should be able to take a variable number of
