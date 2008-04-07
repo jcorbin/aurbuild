@@ -206,7 +206,7 @@ for opt, optarg in opts:
 	if opt in ['-c', '--clean' ]: CLEAN = 1
 	if opt in ['-S', '--search']: SEARCH = 1
 	if opt in ['--url']:
-		aursite = optarg
+		aursite = optarg + '/'
 #	if opt in ['-V', '--vote']: VOTE = 1
 #	if opt in ['-U', '--unvote']: UNVOTE = 1
 
