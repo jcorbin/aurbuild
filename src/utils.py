@@ -172,35 +172,15 @@ def prepare_build_user():
 		
 		# try again
 		return prepare_build_user()
-	
 
-def get_PKGBUILD_path(parent_dir):
-	results = Afind.find_file(parent_dir, 'PKGBUILD')[0]
+def get_pkgbuild_path(parent_dir):
+	results = afind.find_file(parent_dir, 'PKGBUILD')[0]
 	if results != []:
 		results = results[0].replace('/PKGBUILD', '')
 		return results
 	else:
-		print >>sys.stderr.write('\nPKGBUILD not found.\n')
-		cleanup()
-		sys.exit(1)
+		raise Exception('PKGBUILD not found.\n')
 
-def src_to_pm_cache(sources):
-	""" copy the sources in raw format (from sources array) to pacman cache """
-
-	cwd = os.getcwd()
-	if SRCDEST == '':
-		_SRCDEST = os.path.join(pm_cache, 'src')
-	else:
-		_SRCDEST = SRCDEST
-	for source in sources:
-		source_file = source.split('/')[-1]
-		try:
-			source_file = os.path.join(cwd, 'src', source_file)
-			copy(source_file, _SRCDEST)
-		except:
-			pass
-
-			
 def appcheck(app):
 	path = os.getenv('PATH')
 	path = path.replace(':', '/ ')
