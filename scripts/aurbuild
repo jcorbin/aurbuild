@@ -303,10 +303,7 @@ def get_tarball(pkg):
 
 	if main_url == '':
 		print >>sys.stderr.write(pkg + ': not found in AUR')
-		if UPGRADE: 
-			return None
-		else:
-			sys.exit(1)
+		return None
 
 	try:
 		f = urllib.urlopen(main_url)
@@ -325,24 +322,8 @@ def get_tarball(pkg):
 			'possible user comments have skewed the parsing '
 			'results on the web page.\n')
 
-	if tarball_url == '' and UPGRADE:
+	if tarball_url == '':
 		return None
-	elif tarball_url == '':
-		print >>sys.stderr.write(pkg + ': possible [community] package')
-		if SYNCDEPS:
-			cmd = 'aurbuild --syncdeps --official '+pkg
-		elif BUILDDEPS:
-			cmd = 'aurbuild --builddeps --official '+pkg
-		choice = raw_input('\nInstall by running `'+cmd+'\'? [Y/n]  ')
-		if choice == '': choice = 'y'
-		if NOCONFIRM: choice == 'y'
-		choice = choice.lower()
-		if choice == 'y' or choice == 'yes':
-			retval = Popen(cmd, shell=True).wait()
-			return None
-		else:
-			sys.exit(1)
-
 
 	try:
 		tar = urllib.urlretrieve(tarball_url)[0]
@@ -928,6 +909,22 @@ def main():
 				sys.exit(1)
 
 			if aur_tarfile == None:
+				if not UPGRADE:
+					print >>sys.stderr.write(argo + ': possible [community] package')
+					if SYNCDEPS:
+						cmd = 'aurbuild --syncdeps --official ' + argo
+					elif BUILDDEPS:
+						cmd = 'aurbuild --builddeps --official ' + argo
+					choice = raw_input('\nInstall by running `' + cmd + '\'? [Y/n]  ')
+					if choice == '': choice = 'y'
+					if NOCONFIRM: choice == 'y'
+					choice = choice.lower()
+					if choice == 'y' or choice == 'yes':
+						retval = Popen(cmd, shell=True).wait()
+						return None
+					else:
+						sys.exit(1)
+
 				# Probably built a community package.
 				# At any rate, the loop needs to continue.
 				cleanup()
