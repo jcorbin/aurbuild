@@ -458,7 +458,9 @@ def filter_deps(pkg, fd_ct, type):
 							for dep_can in dep_cans:
 								filter_deps(dep_can, fd_ct, type='[D]')
 				if not found:
-					raise Exception(pkg + ': not found in database.\n')
+					# Look in AUR for dependency.
+					print '\tNot found in database.'
+					return filtered
 
 			# there must be no remaining deps of deps, add to list
 			if not pkg in filtered: filtered.append(pkg)
