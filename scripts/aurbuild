@@ -122,7 +122,7 @@ def usage():
 if os.access(makepkg_config, os.F_OK|os.R_OK):
 	try:
 		BUILDENV = autils.echo_bash_vars(makepkg_config,
-			'${BUILDENV[@]}', array=True)
+			'${BUILDENV[@]}')
 	except Exception, e:
 		print >>sys.stderr.write(str(e))
 		sys.exit(1)
@@ -539,7 +539,7 @@ def makepkgf(dep):
 	cwd = os.getcwd()
 
 	try:
-		raw_sources = autils.echo_bash_vars(os.path.join(cwd, 'PKGBUILD'), '${source[@]}', array=True)
+		raw_sources = autils.echo_bash_vars(os.path.join(cwd, 'PKGBUILD'), '${source[@]}')
 	except Exception, e:
 		print >>sys.stderr.write('PKGBUILD syntax error: ' + str(e))
 		sys.exit(1)

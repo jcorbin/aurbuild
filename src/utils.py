@@ -44,8 +44,14 @@ def bash_array(str):
 ' The array parameter is to specify whether you're expecting an array
 '
 '''
-def echo_bash_vars(path, value, array=False):
-	p = Popen('source ' + path + '; echo '+value, shell=True,
+def echo_bash_vars(path, value):
+	# Check if the value is an array
+	if '[@]' in value:
+		array = True
+	else:
+		array = False
+
+	p = Popen('source %s; echo %s'%(path, value), shell=True,
 			stdout=PIPE, stderr=PIPE)
 	out = p.stdout.read()
 	out = out.strip()
@@ -58,7 +64,7 @@ def echo_bash_vars(path, value, array=False):
 	p.stderr.close()
 
 	if err != '':
-		raise Exception(path + ' error:\n\t' + err)
+		raise Exception('%s error:\n\t%s'%(path, err))
 
 	return out
 		
