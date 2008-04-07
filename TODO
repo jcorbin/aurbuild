@@ -47,14 +47,15 @@ General List:
 	  /var/abs (Just from shell experimentation)
 	- find -maxdepth might help as well (decreases search time by about
           21 times)
-	- find <repo_dir> -maxdir 3 -name <pkgname>
-	  is actually slower than:
-	  find <abs_root> -maxdir 3 -name <pkgname>
-	  doesn't make any sense but it's true. Look into improving find
-	  performance.
+	- find <repo_dir> -maxdepth 3 -name <pkgname>
+	  (.200s) is actually slower than:
+	  find <abs_root> -maxdepth 3 -name <pkgname>
+	  (.065s) which is slower than:
+	  find <repo_dir> -maxdepth 2 -name <pkgname>
+	  (.045s)
 
 	  Also,
-	  find -maxdir 3 -name <pkgname> -type d
+	  find -maxdepth 3 -name <pkgname> -type d
 	  is slower than when omitting type.
 
  * Make builddeps/syncdeps more sophisticated
