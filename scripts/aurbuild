@@ -215,7 +215,7 @@ if VERSION:
 	print 'Copyright (C) 2005-2008 ' + AUTHORS
 	print ''
 	print 'This program may be freely redistributed under'
-	print 'the terms of the GNU General Public License'
+	print 'the terms of the GNU General Public License version 2'
 	sys.exit(0)
 
 # check for no no's:
