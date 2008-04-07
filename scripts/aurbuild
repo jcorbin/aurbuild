@@ -400,12 +400,12 @@ def get_PKGBUILD_path(parent_dir):
 '''
 def filter_deps(pkg, fd_ct, type):
 	# for tabbing over tree branch symbols
-	pre_space  = 2
+	pre_space  = 3
 	# spaces must be greater than pre_space
 	spaces = 3
 	v = fd_ct/spaces
 	indents = ' '*pre_space + ('|' + ' '*spaces)*v
-	sys.stdout.write(color(indents + '`- ', 'blue') + color(pkg + ': ', 'black'))
+	sys.stdout.write(color(indents + '- ', 'blue') + color(pkg + ': ', 'black'))
 	sys.stdout.flush()
 	code = apacman.operations().pacmanT(pkg)
 
