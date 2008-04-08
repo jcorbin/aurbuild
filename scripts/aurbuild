@@ -532,7 +532,7 @@ def makepkgf(dep):
 	try:
 		raw_sources = autils.echo_bash_vars(os.path.join(cwd, 'PKGBUILD'), '${source[@]}')
 	except Exception, e:
-		print >>sys.stderr.write('PKGBUILD syntax error: ' + str(e))
+		print >>sys.stderr.write(str(e))
 		sys.exit(1)
 	
 	app = 'makepkg'
