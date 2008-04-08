@@ -770,7 +770,7 @@ def main():
 
 		if len(args) == 0:
 			sys.exit(retcode)
-	
+
 	if SEARCH: 
 		autils.search(args, VERBOSE, aursite)
 		sys.exit(0)
@@ -795,7 +795,7 @@ def main():
 					else:
 						print 'success'
 				except login.LoginError, e:
-					print'failed: ' + str(e)
+					print 'failed: ' + str(e)
 					code2 += 1
 				except:
 					print 'failed'
@@ -932,7 +932,6 @@ def main():
 				print >>sys.stderr.write(str(e))
 				sys.exit(1)
 
-			
 		os.chdir(work_dir)
 
 		# Save files
@@ -954,17 +953,18 @@ def main():
 			try:
 				package = autils.echo_bash_vars(pkgbuild_path, '${pkgname}')
 			except Exception, e:
-				print >>sys.stderr.write('PKGBUILD syntax error (' +argo+'), unable to process:\n' + str(e))
+				print >>sys.stderr.write('PKGBUILD syntax error (%s), unable to process:'%argo)
+				print >>sys.stderr.write(str(e))
 				cleanup()
 				upgrade_ct += 1
 				continue
 
-			aur = autils.echo_bash_vars(pkgbuild_path, '${pkgver}-${pkgrel}')
+			aurpkgver= autils.echo_bash_vars(pkgbuild_path, '${pkgver}-${pkgrel}')
 			
-			result = aversion.vercmp().vercmp(aur, installed[upgrade_ct])
+			result = aversion.vercmp().vercmp(aurpkgver, installed[upgrade_ct])
 
 			if result == 1:
-				print '\n  Target: '+package+'-'+aur+'\n'
+				print '\tTarget: %s-%s'%(package,aurpkgver)
 				if not NOCONFIRM:
 					choice = raw_input('\tProceed with upgrade?  [Y/n] ').lower()
 					print ''
@@ -973,9 +973,8 @@ def main():
 						upgrade_ct += 1
 						continue
 			elif result == 0:
-				status = 'up to date'
-				argline = argo + ' ' + installed[upgrade_ct]
-				argline += ' '
+				status = ' up to date'
+				argline = '%s %s '% (argo, installed[upgrade_ct])
 				rjust_spaces = 80 - (int(len(argline)) + \
 					int(len(status)))
 				print argline + status.rjust(rjust_spaces, '.')
@@ -983,7 +982,8 @@ def main():
 				upgrade_ct += 1
 				continue
 			elif result == -1:
-				print ':: local/%s %s seems newer than aur/%s %s'% (argo, installed[upgrade_ct], argo, aur) 
+				print ':: local/%s %s seems newer than aur/%s %s'% (
+					argo, installed[upgrade_ct], argo, aurpkgver) 
 				cleanup()
 				upgrade_ct += 1
 				continue
