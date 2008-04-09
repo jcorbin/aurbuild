@@ -554,7 +554,7 @@ def makepkgf(dep):
 		print 'Build directory retained at ' + pkg_build_dir
 		print 'You can visit the directory, fix the ' \
 		'problem, and run makepkg.'
-		sys.exit(1)
+		sys.exit(3)
 	
 	return get_pkgpath()
 
@@ -1093,7 +1093,8 @@ if __name__ == '__main__':
 		main()
 		sys.exit(0)
 	except SystemExit, e:
-		cleanup()
+		if int(str(e)) != 3:
+			cleanup()
 		sys.exit(e)
 	# print pacman specific errors, users will understand these.
 	except (apacman.DatabaseError, apacman.ConfigError), e:
