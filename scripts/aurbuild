@@ -88,32 +88,30 @@ def handler(signo, frame):
 		sys.exit(143)
 
 def usage():
-	print 'usage: %s [options] [package] <package>'%PROGRAM_NAME
+	print 'usage: %s [options] [package] <package>' % PROGRAM_NAME
 	print ''
 	print 'options:'
 	print '  -h, --help            show this help message and exit'
 	print '  -v, --version         display version and exit'
 	print '  --verbose             verbose search output'
-	print '  -b, --builddeps       build and install missing ' + \
+	print '  -b, --builddeps       build and install missing ' \
 					'dependencies from abs'
 	print '  -s, --syncdeps        install missing dependencies with pacman'
-	print '  -o \"OPTS\", --builder-opts=\"OPTS\"'
+	print '  -o "OPTS", --builder-opts="OPTS"'
 	print '                        pass OPTS to makepkg during build'
-	print '  -e, --save            save build files in %s'%save_dir
-	print '  -l, --local           use build files found in %s'%save_dir
-	print '                        instead of AUR'
-	print '  -f, --official        build official packages found in %s'%abs_root
-	print '                        instead of AUR'
-	print '  --auto-build          bypass menu and build ' + \
+	print '  -e, --save            save build files in %s' % save_dir
+	print '  -l, --local           use build files found in %s' % save_dir
+	print '  -f, --official        build official packages found in %s' % abs_root
+	print '  --auto-build          bypass menu and build ' \
 					'automatically (DANGEROUS)'
-	print '  -u, --upgrade         upgrade all packages installed ' + \
+	print '  -u, --upgrade         upgrade all packages installed ' \
 					'from unsupported AUR'
-	print '  -n, --noconfirm       bypass any confirmation messages ' + \
+	print '  -n, --noconfirm       bypass any confirmation messages ' \
 					'by answering yes'
 	print '  -x, --noinstall       do not install package after building'
 	print '  -m, --rm-make-deps    remove uneeded make dependencies'
 	print '  -c  --clean           clean the build directory'
-	print '  -S, --search          search aur for single [keyword]'
+	print '  -S, --search          search AUR for single [keyword]'
 #	print '  -V, --vote            vote for a package'
 #	print '  -U, --unvote          unvote for a package'
 
@@ -260,7 +258,7 @@ def color(text, color_alias):
 			'cyan':		'6',
 			'white':	'7',
 			'black':	'8'}
-		return '\033[1;3' + color_dict[color_alias] + 'm' + text + '\033[1;0m'
+		return '\033[1;3%sm%s\033[1;0m'%(color_dict[color_alias], text)
 	else:
 		return text
 
@@ -268,7 +266,7 @@ def msg(text):
 	if USE_COLOR == 'y':
 		return color('==> ', 'green') + color(text, 'white')
 	else:
-		return '==> ' + text
+		return '==> %s' % text
 
 def prepare_work_dirs():
 	try:
@@ -292,7 +290,7 @@ def prepare_work_dirs():
 		# pkg_build_dir should be created by the builduser
 		autils.user_makedirs(pkg_build_dir, builduser_uid, builduser_uid)
 	except Exception, e:
-		print >>sys.stderr.write('\ncould not prepare for build: ' + str(e) + '\n')
+		print >>sys.stderr.write('\ncould not prepare for build: %s\n' % str(e))
 		sys.exit(1)
 
 
@@ -301,7 +299,7 @@ def get_tarball(pkg):
 	main_url = aaurparse.pkg_main_url(pkg, aursite)
 
 	if main_url == '':
-		print >>sys.stderr.write(pkg + ': not found in AUR')
+		print >>sys.stderr.write('%s: not found in AUR' % pkg)
 		return None
 
 	try:
@@ -311,7 +309,7 @@ def get_tarball(pkg):
 	except IOError, e:
 		raise Exception(
 			'Could not retrieve needed data from:'
-			'\n\t' + main_url + '\n' +str(e))
+			'\n\t%s\n%s' % (main_url, str(e)))
 
 	try:
 		tarball_url = aaurparse.pkg_tarball_url(raw_text, aursite)
@@ -330,7 +328,7 @@ def get_tarball(pkg):
 	except IOError, e:
 		raise Exception(
 			'Could not retrieve needed data from:'
-			'\n\t' + main_url + '\n' + str(e))
+			'\n\t%s\n%s' % (main_url, str(e)))
 
 def extract(file):
 	extract_dir = pkg_build_dir
@@ -340,7 +338,7 @@ def extract(file):
 	elif 'tgz' in file_extension: ext = 'gz'
 	elif 'bz2' in file_extension: ext = 'bz2'
 	else:
-		print >>sys.stderr.write('\n' + file + ': unsupported compression. Cannot extract.\n')
+		print >>sys.stderr.write('\n%s: unsupported compression. Cannot extract.\n' % file)
 		if os.path.exists(file): os.remove(file)
 		sys.exit(1)
 	
@@ -359,7 +357,7 @@ def extract(file):
 		for member in tar_f.getmembers():
 			tar_f.extract(member, extract_dir)
 	except tarfile.TarError, e:
-		print >>sys.stderr.write('\ncould not extract tarfile: ' + str(e) + '\n')
+		print >>sys.stderr.write('\ncould not extract tarfile: %s\n' % str(e))
 		if os.path.exists(file): os.remove(file)
 		sys.exit(1)
 
@@ -517,7 +515,7 @@ def get_pkgpath():
 		return pkgpath
 	else:
 		print >>sys.stderr.write('Error: could not find the built '
-				'package in ' + pkgpath)
+				'package in %s' % pkgpath)
 		print >>sys.stderr.write('In some cases this might mean the '
 			'PKGDEST location does not have write and execute '
 			'permissions\nfor the `aurbuild\' user or group.')
@@ -586,9 +584,8 @@ def builddeps(deplist):
         for each in deplist:
                 dep_path = autils.get_dep_path(abs_root, each)
                 if dep_path == None:
-			raise Exception('aurbuild: dependency \"' + each + \
-				'\" not found in abs.')
-                        sys.exit(1)
+			raise Exception('aurbuild: dependency "%s" '
+				'not found in abs.' % each)
 
 		des_dir = os.path.join(build_dir, each)
 		os.setegid(builduser_gid)
@@ -620,7 +617,7 @@ def menu(dir_list, package):
 	sep_num = 51
 	seperator = '-'*sep_num
 	space_num = (columns - sep_num ) / 2
-	spaces = ' '*space_num
+	spaces = ' ' * space_num
 	for each in dir_list:
 		if os.path.isfile(each):
 			files.append(each)
@@ -640,7 +637,7 @@ def menu(dir_list, package):
 	def title(display, _color):
 		len_disp = int(len(display))
 		if len_disp > sep_num: centerspaces = ''
-		else: centerspaces = ' '*((sep_num - len_disp) / 2)
+		else: centerspaces = ' ' * ((sep_num - len_disp) / 2)
 		return spaces + centerspaces + color(display, _color)
 
 	getout = False
@@ -653,7 +650,7 @@ def menu(dir_list, package):
 
 		i = 0
 		while i < file_num:
-			print spaces + '  ' + str(i+1) + ')  View/Edit ' + files[i]
+			print '%s  %s) View/Edit %s' % (spaces, str(i + 1), files[i])
 			i = i + 1
 		print spaces + seperator
 
@@ -673,7 +670,8 @@ def menu(dir_list, package):
 		print spaces + seperator
 
 		display_choice = default_choice.upper()
-		choice = raw_input('\n' + spaces + 'Enter a selection: ['+ display_choice + '] ')
+		choice = raw_input('\n%sEnter a selection: [%s] ' % (spaces, display_choice))
+
 		if choice == 'b':
 			return choice
 		elif choice == 'v':
@@ -689,7 +687,7 @@ def menu(dir_list, package):
 				editor_cmd.remove(files[int(choice)-1])
 				
 			else:
-				print '\n' + spaces + choice + ': Invalid entry.'
+				print '\n%s%s: Invalid entry.' % (spaces, choice)
 				print spaces + 'Press enter to choose again.'
 				raw_input(spaces)
 		elif choice == '': return default_choice
@@ -1050,7 +1048,12 @@ def main():
 					print '\n'
 					dep_choice = 'y'
 				if dep_choice == 'y' or dep_choice == 'yes' or dep_choice == '':
-					if BUILDDEPS: builddeps(deps_type)
+					if BUILDDEPS:
+						try:
+							builddeps(deps_type)
+						except Exception, e:
+							print >>sys.stderr.write(str(e))
+							sys.exit(1)
 					elif SYNCDEPS:
 						try:
 							apacman.syncdeps(deps_type)
