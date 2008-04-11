@@ -102,7 +102,7 @@ def usage():
 	print '  -e, --save            save build files in %s' % save_dir
 	print '  -l, --local           use build files found in %s' % save_dir
 	print '  -f, --official        build official packages found in %s' % abs_root
-	print '  --auto-build          bypass menu and build ' \
+	print '  --auto                bypass menu and build ' \
 					'automatically (DANGEROUS)'
 	print '  -u, --upgrade         upgrade all packages installed ' \
 					'from unsupported AUR'
@@ -155,7 +155,7 @@ try:
 	opts, args = getopt.getopt(sys.argv[1:], 'hvbso:elfunxmcS',
 		['help', 'version', 'verbose', 'builddeps', 'syncdeps',
 		'builder-opts=', 
-		'save', 'local', 'official', 'auto-build', 'upgrade',
+		'save', 'local', 'official', 'auto', 'auto-build', 'upgrade',
 		'noconfirm', 'noinstall', 'rm-make-deps', 'clean',
 		'search', 'url='])
 except getopt.GetoptError, e:
@@ -195,7 +195,7 @@ for opt, optarg in opts:
 	if opt in ['-e', '--save']: SAVE = 1
 	if opt in ['-l', '--local']: LOCAL = 1
 	if opt in ['-f', '--official']: OFFICIAL = 1
-	if opt in ['--auto-build']: AUTO_BUILD = 1
+	if opt in ['--auto', '--auto-build']: AUTO_BUILD = 1
 	if opt in ['-u', '--upgrade']: UPGRADE =1
 	if opt in ['-n', '--noconfirm']: NOCONFIRM = 1
 	if opt in ['-x', '--noinstall']: NOINSTALL = 1
