@@ -849,13 +849,13 @@ def main():
 				pkgbuild_root = OFFICIAL_PATH
 			# test for its existance
 			if not os.access(pkgbuild_root, os.F_OK | os.R_OK):
-				print >>sys.stderr.write('Error: PKGBUILD root '+pkgbuild_root+' not found or read permissions denied.')
+				print >>sys.stderr.write('Error: PKGBUILD root %s not found or read permissions denied.' % pkgbuild_root)
 				sys.exit(1)
 
 			results = afind.find_dir(pkgbuild_root, argo)[0]
 
 			if results == [] and not UPGRADE:
-				print '\n\"'+argo+'\" not found under `'+pkgbuild_root+'\'\n'
+				print '\n%s not found under %s\n' % (argo, pkgbuild_root)
 				sys.exit(1)
 			elif results == [] and UPGRADE:
 				upgrade_ct += 1
@@ -878,7 +878,7 @@ def main():
 				if type(results) != str: results = ''
 
 				if results == '':
-					print '\n\"'+argo+'\" not found under `'+pkgbuild_root+'\'\n'
+					print '\n%s not found under %s\n' % (argo, pkgbuild_root)
 					sys.exit(1)
 			
 				copytree(results, p_work_dir)
@@ -901,10 +901,12 @@ def main():
 				if not UPGRADE:
 					print >>sys.stderr.write(argo + ': possible [community] package')
 					if SYNCDEPS:
-						cmd = 'aurbuild --syncdeps --official ' + argo
+						cmddeps = '--syncdeps'
 					elif BUILDDEPS:
-						cmd = 'aurbuild --builddeps --official ' + argo
-					choice = raw_input('\nInstall by running `' + cmd + '\'? [Y/n]  ')
+						cmddeps = '--builddeps'
+
+					cmd = 'aurbuild %s --official %s' % (cmddeps, argo)
+					choice = raw_input('\nInstall with `%s`? [Y/n]  ' % cmd)
 					if choice == '': choice = 'y'
 					if NOCONFIRM: choice == 'y'
 					choice = choice.lower()
