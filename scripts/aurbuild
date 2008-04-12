@@ -1042,7 +1042,6 @@ def main():
 				for v in deps_type: print v,
 				if not NOCONFIRM:
 					dep_choice = raw_input('\nProceed?  [Y/n] ').lower()
-					print ''
 				else: 
 					print '\n'
 					dep_choice = 'y'
@@ -1062,6 +1061,9 @@ def main():
 					if RM_MDEPS:
 						if 'make' in zdict[zct].lower():
 							rm_packages.extend(deps_type)
+				else:
+					print >> sys.stderr.write('Unresolved dependencies. Exiting.')
+					sys.exit(1)
 
 		pkgname = makepkgf(argo)
 		if not NOINSTALL:
