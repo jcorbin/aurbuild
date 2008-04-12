@@ -406,21 +406,21 @@ def filter_deps(pkg, fd_ct, type):
 
 			if BUILDDEPS: 
 				dep_path = autils.get_dep_path(abs_root, pkg)
-				if dep_path != None:
-					# a dependency is found, check it's deps and run this method again
-					mdep_cans, dep_cans = autils.get_depends(dep_path + '/PKGBUILD', 'makedepends', 'depends')
+				# a dependency is found, check it's deps and run this method again
+				mdep_cans, dep_cans = autils.get_depends(
+					'%s/PKGBUILD' % dep_path,
+					'makedepends',
+					'depends')
 
-					if mdep_cans or dep_cans != ['']: fd_ct += spaces
+				if mdep_cans or dep_cans != ['']: fd_ct += spaces
 
-					if mdep_cans != ['']:
-						for mdep_can in mdep_cans:
-							filter_deps(mdep_can, fd_ct, type='[M]')
+				if mdep_cans != ['']:
+					for mdep_can in mdep_cans:
+						filter_deps(mdep_can, fd_ct, type='[M]')
 
-					if dep_cans != ['']: 
-						for dep_can in dep_cans:
-							filter_deps(dep_can, fd_ct, type='[D]')
-				else:
-					raise Exception(pkg + ': not found in ABS.\n')
+				if dep_cans != ['']: 
+					for dep_can in dep_cans:
+						filter_deps(dep_can, fd_ct, type='[D]')
 
 			elif SYNCDEPS:
 				# follows steps of BUILDDEPS omitting make dependencies
@@ -583,9 +583,6 @@ def builddeps(deplist):
 	cwd = os.getcwd()
         for each in deplist:
                 dep_path = autils.get_dep_path(abs_root, each)
-                if dep_path == None:
-			raise Exception('aurbuild: dependency "%s" '
-				'not found in abs.' % each)
 
 		des_dir = os.path.join(build_dir, each)
 		os.setegid(builduser_gid)

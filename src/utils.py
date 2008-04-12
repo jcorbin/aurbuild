@@ -109,17 +109,17 @@ def get_depends(pkgbuild, makedeps='makedepends',
 
 def get_dep_path(abs_root, dep):
 	if not os.path.isdir(abs_root):
-		print >>sys.stderr.write('\n' + abs_root + 'not found in filesystem. Cannot build dependencies\n')
-		cleanup()
-		sys.exit(1)
+		raise Exception('\n%s not found in filesystem.'
+			'Cannot build dependencies\n' % abs_root)
+
 	results = afind.find_dir(abs_root + '/', dep)[0]
+
 	if results != []:
 		for p in results:
 			if os.path.isfile(p + '/PKGBUILD'):
 				return p
-		return None
-	else:
-		return None
+
+	raise Exception('%s: not found in ABS.\n' % dep)
 
 def user_copytree(target, des, u_uid, u_gid):
 	os.setegid(u_gid)
