@@ -51,7 +51,7 @@ def echo_bash_vars(path, value):
 	else:
 		array = False
 
-	p = Popen('source %s; echo %s'%(path, value), shell=True,
+	p = Popen('source %s; echo %s' % (path, value), shell=True,
 			stdout=PIPE, stderr=PIPE)
 	out = p.stdout.read()
 	out = out.strip()
@@ -64,7 +64,7 @@ def echo_bash_vars(path, value):
 	p.stderr.close()
 
 	if err != '':
-		raise Exception('%s error:\n\t%s'%(path, err))
+		raise Exception('%s error:\n\t%s' % (path, err))
 
 	return out
 		
@@ -99,7 +99,7 @@ def get_depends(pkgbuild, makedeps='makedepends',
 	p.stderr.close()
 
 	if err != '':
-		raise Exception("PKGBUILD error:\n\t" + err)
+		raise Exception('PKGBUILD error:\n\t%s' % err)
 
 	out = out.splitlines()
 	makedeps = out[0].split(' ')
@@ -155,16 +155,18 @@ def prepare_build_user():
 			'-u', '360',
 			'-c', 'aurbuild', 'aurbuild']).wait()
 		if code != 0:
-			print >>sys.stderr.write('Error: could not create designated build user. Reports exit status '+str(code)+'. ')
-			sys.exit(1)
-		else: print 'done.'
+			raise Exception('Error: could not create designated '
+				'build user. '
+				'Reports exit status %s' % str(code))
+		else:
+			print 'done.'
 		
 		# lock password
 		print 'locking password... ',
 		code = Popen(['passwd', '-l', '-q', 'aurbuild']).wait()
 		if code != 0:
-			print >>sys.stderr.write('Error: could not lock password. Reports exit status of '+str(code))
-			sys.exit(1)
+			raise Exception('Error: could not lock password. '
+				'Reports exit status of %s' % str(code))
 		else:
 			print 'done.'
 		
@@ -188,37 +190,6 @@ def appcheck(app):
 	for each in path:
 		if os.path.isfile(each + app): return True
 	return False
-
-def savefiles(pkg, old_dir):
-	failed = 0
-	def abort_msg(msg):
-		print >>sys.stderr.write('Error saving ' + pkg + ' to ' + save_dir + ': ' + msg)
-		print >>sys.stderr.write('Aborting save...')
-		
-	savecan = os.path.join(save_dir, pkg)
-	if not os.path.isdir(save_dir):
-		try:
-			os.makedirs(save_dir)
-			os.chmod(save_dir, 0775)
-			os.chown(save_dir, 0, builduser_uid)
-		except OSError, e:
-			abort_msg(str(e))
-			failed = 1
-	
-	if os.path.isdir(savecan) and not failed:
-		if not NOCONFIRM: choice = raw_input('`' + savecan + '\': directory exists. Overwrite? [Y/n]  ').lower()
-		if NOCONFIRM or choice == 'y' or choice == 'yes' or choice == '':
-			try:
-				rmtree(savecan)
-				user_copytree(old_dir, savecan, builduser_uid, builduser_gid)
-			except OSError, e:
-				abort_msg(str(e))
-				failed = 1
-	elif not os.path.isdir(savecan) and not failed:
-		try:
-			user_copytree(old_dir, savecan, builduser_uid, builduser_gid)
-		except OSError, e:
-			abort_msg(str(e))
 
 def search(args, verbose, site):
 	import textwrap
