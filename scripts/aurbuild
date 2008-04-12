@@ -736,7 +736,9 @@ def savefiles(pkg, old_dir):
 			failed = 1
 	
 	if os.path.isdir(savecan) and not failed:
-		if not NOCONFIRM: choice = raw_input('`' + savecan + '\': directory exists. Overwrite? [Y/n]  ').lower()
+		if not NOCONFIRM:
+			choice = raw_input(savecan + ': directory exists. Overwrite? [Y/n]  ').lower()
+
 		if NOCONFIRM or choice == 'y' or choice == 'yes' or choice == '':
 			try:
 				rmtree(savecan)
