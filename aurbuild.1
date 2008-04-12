@@ -6,7 +6,7 @@ aurbuild \- A utility to build and install packages from the AUR.
 \fBaurbuild\fR [options] [package] <package>
 
 .SH "DESCRIPTION"
-\fBaurbuild\fR is a utility to build and install packages from the AUR. It will retrieve the tarball containing necessary build files, invoke makepkg through under privileged user to build the package and pacman to install it. A menu is available to view or edit the build files if needed.
+\fBaurbuild\fR is a utility to build and install packages from the Arch Linux User-Community Repository. It can retrieve tarballs containing build files, invoke makepkg to build packages via an under privileged user, and call pacman to install them. A menu is available to view or edit the build files if needed.
 .SH "OPTIONS"
 A dependency installation method must be passed to aurbuild before it attempts to build a package.
 
@@ -22,15 +22,19 @@ Sync missing dependencies using pacman to retrieve prebuilt *.pkg.tar.gz binarie
 \fB\-o "OPTS", \-\-builder\-opts="OPTS"\fR
 This will pass options directly to the builder of choice (currently makepkg) as selected from the menu during the build process. Be sure to encapsulate your options in double quotes to ensure they are passed down correctly to the builder. Please note aurbuild will always pass -f to makepkg by default and some options will not work as an under-privileged build user. Also note the use of this switch is optional and normally not needed to build most packages. Below is an example:
 
-.TP
 \fBExample:\fR
-makepkg -Bn --> aurbuild -so "-B -n --foo"
+
+`makepkg -Bn --foo` would become:
+
+aurbuild -so "-B -n --foo"
+
+OR
 
 aurbuild --syncdeps --builder-opts="-B -n --foo"
 
 .TP 
-\fB\-\-auto-build\fR
-This will bypass the menu, build and install the package automatically. Use this as a modifier to --builddeps or --syncdeps. It cannot be used alone.
+\fB\-\-auto\fR
+Bypass the menu, build and install the package automatically. Use this as a modifier to --builddeps or --syncdeps. It cannot be used alone.
 
 .TP
 \fB\-e, \-\-save\fR
@@ -46,7 +50,8 @@ Build official packages using \fI/var/abs/\fR as the PKGBUILD root. NOTE: packag
 
 .TP
 \fB\-u, \-\-upgrade\fR
-Upgrade out of date packages installed from unsupported AUR. This will check AUR's website for each AUR package so it may take a while. Each package will be evaluated and upgraded one by one displaying a confirmation message. Use this as a modifier to --syncdeps or --builddeps. Note: --auto-build may be used to bypass the menu, but is not generally recommended unless you know what you are doing.
+Upgrade out of date packages installed from unsupported AUR. This will check AUR's website for each AUR package so it may take a while. Each package will be evaluated and upgraded one by one displaying a confirmation message. Use this as a modifier to --syncdeps or --builddeps.
+Note: --auto may be used to bypass the menu, but is not generally recommended unless you know what you are doing.
 .TP
 \fBExample:\fR
 aurbuild -su
@@ -129,12 +134,12 @@ The use of color is determined by setting color in the BUILDENV array in \fI/etc
 
 .SH "SEE ALSO"
 .B pacman
-is the ArchLinux package manager.
+is the Arch Linux package manager.
 
 .B makepkg
-is the package-building tool that comes with pacman.
+is the package building tool that comes with pacman.
 
 .SH "AUTHORS"
- The current maintainer is Loui Chang <louipc.ist@gmail.com>
  Tyler Gates <TGates81@gmail.com>
+ Loui Chang <louipc.ist@gmail.com> is the current maintainer.
 
