@@ -721,8 +721,8 @@ def savefiles(pkg, old_dir):
 
 	failed = 0
 	def abort_msg(msg):
-		print >>sys.stderr.write('Error saving ' + pkg +  
-			' to ' + save_dir + ': ' + msg)
+		print >>sys.stderr.write('Error saving %s to %s: %s' %
+			(pkg, save_dir, msg))
 		print >>sys.stderr.write('Aborting save...')
 		
 	savecan = os.path.join(save_dir, pkg)
