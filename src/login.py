@@ -18,8 +18,11 @@
 #   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 
-import cookielib, os, urllib2, urllib, httplib
-
+import cookielib
+import os
+import urllib2
+import urllib
+import httplib
 
 class LoginError(Exception):
 	# base exception

@@ -18,9 +18,13 @@
 #   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 
-import os, sys, re
-from aurbuild.version import vercmp
+import os
+import sys
+import re
+
 from subprocess import Popen, PIPE
+
+from aurbuild.version import vercmp
 
 class PacmanError(Exception):
 	# base excpetion
@@ -57,25 +61,27 @@ class db_tools:
 		return names, versions
 
 	def file_contents(self, file):
-		""" file_contents(file) -> contents
-		return list of newline split file contents
-		contents: list """
-		
+		"""
+		Return a file as a list of lines.
+		"""
+
 		f = open(file, 'r')
 		list = f.read().split('\n')
 		f.close()
 		return list
 
 	def strip_ver_cmps(self, package):
-		""" strip_ver_cmps(package) -> stripped, comp, version
-		strip out and return pkgname, the comparator and version if they exist.
-		stripped: string, list
-		comp: None, string
-		version: None, string """
+		"""
+		Separate pkgname, comparator (if it exists), and version
+		from a versioned dependency.
+
+		Return the three as a tuple.
+		"""
 		
 		stripped = package
 		comp = None
 		version = None
+
         	for comparator in self.comparators:
                 	stripped = stripped.split(comparator)
 	                if len(stripped) > 1:
@@ -86,9 +92,9 @@ class db_tools:
 		return stripped, comp, version
 
 	def check_installed(self, pkgname, logical=True):
-		""" check_installed(pkgname) ->pkgpath
-		check if a package is installed. If so, return its path
-		pkgpath: False, string """
+		"""
+		Check if a package is installed. If so, return its path.
+		"""
 
 		if not os.path.isdir(self.installed_db):
 			raise DatabaseError, 'pacman local database `' + \
@@ -114,9 +120,7 @@ class db_tools:
 		return False
 
 	def get_db_info(self, dbfile, info):
-		""" get_db_info(dbfile, info) -> results
-		get the database information info from dbfile.
-		results: [], list """
+		"""Get database information info from dbfile."""
 		
 		# this is all written this speed in mind
 		if not os.path.isfile(dbfile):
@@ -138,9 +142,7 @@ class db_tools:
 		return results
 
 	def get_repos(self):
-        	""" get_repos(self) -> repolist
-		reads pacman.conf for [repo] in returns that name.
-	        repolist: [], list """
+        	"""Read pacman.conf and return a list of enabled repos."""
 
 		if not os.path.isfile(self.pacman_config):
 			raise ConfigError, 'configuration file `' + self.pacman_config + '\' not found'
@@ -157,9 +159,10 @@ class db_tools:
 	        return repolist
 
 	def get_db_pkgpaths(self):
-        	""" get_db_pkgpaths(self) -> pkgpaths
-		get a list of all package database paths according to
-		specified repos in /etc/pacman.conf"""
+        	"""
+		Get a list of all package database paths according to
+		specified repos in /etc/pacman.conf
+		"""
 
 		#pkgpaths = [], list
 
@@ -177,9 +180,11 @@ class db_tools:
 	        return pkgpaths
 
 	def get_group(self, keyword):
-        	""" get_groups(self, keyword) -> packages
-		scan repo database for keyword as a group and return all packages included in the group. 
-	        packages: [], list """
+        	"""
+		Scan repo database for keyword as a group and return all
+		packages included in the group. 
+		"""
+
 	        packages = []
 	        pkg_paths = self.get_db_pkgpaths()
 	        for pkg_path in pkg_paths:
@@ -198,9 +203,8 @@ class db_tools:
 
 	def get_local(self):
 	        """
-		" get_local(self) -> names, versions
-	        " Returns two dictionaries of pkgname and pkgver of all
-		" locally installed packages
+	        Returns two dictionaries of pkgname and pkgver of all
+		locally installed packages.
 		"""
 
 		query = "-Q"
@@ -218,9 +222,8 @@ class db_tools:
 
 	def get_foreign(self):
 	        """
-		" get_foreign(self) -> names[], versions[]
-		" Returns two dictionaries of pkgname and pkgver of installed
-		" packages which aren't in the official repos.
+		Return two dictionaries of pkgname and pkgver of installed
+		packages which aren't in the official repos.
 	        """
 
 		query = "-Qm"
@@ -236,11 +239,13 @@ class db_tools:
 
 	        return names, versions
 
-'''
-' This function is for installing dependencies before starting the build
-' --syncdeps switch in aurbuild
-'''
 def syncdeps(deplist):
+	"""
+	Install dependencies before starting the build.
+
+	This is synonymous with --syncdeps switch in aurbuild.
+	"""
+
 	pkglist = []
 	pkgstring = ''
 	for pkg in deplist:
@@ -257,14 +262,15 @@ def syncdeps(deplist):
 
 class operations(db_tools):
 
-	''' pacmanT(dependency) -> int
-	' test if the dependency needs to be installed.
-	' Returns
-	'	0: satisfied
-	'	2: something bad happened
-	'	127: missing
-	'''
 	def pacmanT(db_tools, dependency):
+		"""
+		Test if the dependency needs to be installed.
+
+		Returns:
+			0: satisfied
+			2: something bad happened
+			127: missing
+		"""
 		
 		pkgname, comp, req_version = db_tools.strip_ver_cmps(dependency)
 		pkgpath = db_tools.check_installed(pkgname)

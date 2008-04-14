@@ -2,6 +2,7 @@
 #   version.py
 #
 #   Copyright (C) 2006-2007 by Tyler Gates <TGates81@gmail.com>
+#   Copyright (C) 2008 by Loui Chang <louipc.ist@gmail.com>
 #
 #   This program is free software; you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License version 2 
@@ -21,8 +22,13 @@ import re
 
 class vercmp:
 	def strip_release(self, ver):
-		""" strip_release(ver) -> ver, rel 
-		strip out the release number in ver and put it in rel """
+		"""
+		Separate out the pkgrel number from a package version.
+
+		Return two strings:
+			ver: the package version
+			rel: the PKGBUILD pkgrel
+		"""
 		
 		rerel = '-[0-9]*$'
 		rel = 0
@@ -38,8 +44,14 @@ class vercmp:
 	
 		
 	def vercmp(self, ver1, ver2):
-		""" (ver1, ver2) -> int 
-		compare ver1 to ver2, results are -1, 0, 1 """
+		"""
+		Compare two version numbers.
+		
+		Return an integer:
+			-1: ver1 is an earlier release
+			 0: ver1 and ver2 are the same
+			 1: ver1 is a later release
+		"""
 
 		# remove release number and store for later use
 		ver1, rel1 = self.strip_release(ver1)

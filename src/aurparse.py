@@ -17,16 +17,21 @@
 #   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 
-import re, os, sys, urllib
+import re
+import os
+import sys
+import urllib
 
-'''
-' The format of the 'site' argument must be protocol://domain/
-' ex: http://aur.archlinux.org/
-' The trailing slash is important
-'
-'''
-# this looks a little strange but we need to access each of these functions (except aursearch) and query the server only once, hence the
-# manual 'raw_text' parameters which is currently obtained from raw_pkg_query().
+"""
+The format of the 'site' argument must be protocol://domain/.
+ex: http://aur.archlinux.org/
+The trailing slash is important
+"""
+
+# this looks a little strange but we need to access each of these
+# functions (except aursearch) and query the server only once,
+# hence the manual 'raw_text' parameters which is currentlyi
+# obtained from raw_pkg_query().
 
 def raw_pkg_query(keyword, site):
 	search_url = site + 'packages.php?K='
@@ -65,11 +70,13 @@ def pkg_tarball_url(raw_text, site):
 			url = site + url
 	return url
 
-'''
-' Gets and parses the output from the site's search page
-' Returns a set of arrays that contain the package info
-'''
 def aursearch(keyword, site):
+	"""
+	Gets and parses the output from the site's search page.
+
+	Returns a set of arrays that contain the package info in the order of:
+	names, descriptions, locations, categories, maintainers, and votes.
+	"""
 
 	f = raw_pkg_query(keyword, site)
 

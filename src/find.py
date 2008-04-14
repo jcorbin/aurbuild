@@ -18,19 +18,22 @@
 #
 
 
-'''
-' Uses unix `find` to find files and/or directories
-' Pass parameters according to standard find usage
-'	find dir -type type -name name
-'
-' Returns a tuplet of two arrays
-'	search results
-'	any error messages
-'
-' Hardcoded maxdepth will cause problems if the ABS tree goes deeper than
-' three levels.
-'''
 def find_it(dir, name, type):
+	"""
+	Use unix `find` to find files and/or directories.
+
+	This function only supports two parameters.
+	Pass parameters according to standard find usage.
+		find dir -type type -name name
+
+	Return two arrays.
+		search results
+		any error messages
+
+	Hardcoded maxdepth will cause problems if the ABS tree goes deeper
+	than three levels.
+	"""
+
 	from subprocess import Popen, PIPE
 	output, error = Popen(
 		['find', dir,
@@ -42,20 +45,24 @@ def find_it(dir, name, type):
 
 	return result, [error]
 
-'''
-' Recursively search for directories from a starting directory
-' dir: starting directory
-' name: name of directory
-'''
 def find_dir(dir, name):
+	"""
+	Recursively search for directories from a starting directory.
+
+	dir: starting directory
+	name: name of directory
+	"""
+
 	return find_it(dir, name, 'd');
 	
 
-'''
-' Recursively search for files from a starting directory
-' dir: starting directory
-' name: name of file
-'''
 def find_file(dir, name):
+	"""
+	Recursively search for files from a starting directory.
+
+	dir: starting directory
+	name: name of file
+	"""
+
 	return find_it(dir, name, 'f')
 

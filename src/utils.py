@@ -19,32 +19,35 @@
 #   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 
-import os, sys, pwd
+import os
+import sys
+import pwd
+
 from subprocess import Popen, PIPE
 from shutil import copytree
 
-uid			= os.getuid()
-gid			= os.getgid()
-
 import aurbuild
+
 aaurparse = aurbuild.aurparse
 afind = aurbuild.find
 
-'''
-'	Returns str as a call to a bash array
-'	Example: myarray becomes ${myarray[@]}
-'	Use for clarity in a program rather
-'	than sprinkling '${' + str + '[@]}' everywhere
-'''
+uid = os.getuid()
+gid = os.getgid()
+
 def bash_array(str):
+	"""
+	Return str as a call to a bash array.
+
+	Example: myarray becomes ${myarray[@]}
+	Use for clarity in a program rather
+	than sprinkling '${' + str + '[@]}' everywhere
+	"""
+
 	return '${%s[@]}' % str
 
-'''
-' Return a variable from a bash file
-' The array parameter is to specify whether you're expecting an array
-'
-'''
 def echo_bash_vars(path, value):
+	"""Return a variable from a bash file."""
+
 	# Check if the value is an array
 	if '[@]' in value:
 		array = True
@@ -137,11 +140,14 @@ def user_makedirs(target, u_uid, u_gid):
 	os.seteuid(uid)
 	os.setegid(gid)
 
-'''
-' Prepare aurbuild user
-' Returns a tuple: aurbuild uid, and gid
-'''
 def prepare_build_user():
+	"""
+	Prepare the aurbuild user.
+
+	Create the user if it doesn't exist, otherwise
+	returns a tuple containing the uid, and gid.
+	"""
+
 	try:
 		builduser_uid = pwd.getpwnam('aurbuild')[2]
 		builduser_gid = pwd.getpwnam('aurbuild')[3]
