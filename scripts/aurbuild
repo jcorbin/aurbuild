@@ -19,15 +19,24 @@
 #   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 
-import os, sys, tarfile, urllib, signal, getopt, time, glob 
+import os
+import sys
+import tarfile
+import urllib
+import signal
+import getopt
+import time
+import glob
+
+from shutil import rmtree, copytree, copy
+from subprocess import Popen
+
 import aurbuild.pacman
 import aurbuild.version
 import aurbuild.find
 import aurbuild.aurparse
 import aurbuild.execute
 import aurbuild.utils
-from shutil import rmtree, copytree, copy
-from subprocess import Popen
 
 # globals
 PROGRAM_VERSION = '1.8.3'
@@ -381,19 +390,23 @@ def extract(file):
 	os.remove(file)
 
 
-'''
-' Give required dependency and return it if it needs to be installed or
-' return group packages if it is that keyword
-'	filtered = [], list
-'''
 def filter_deps(pkg, fd_ct, type):
+	"""
+	Resolve and print dependencies. Return a list of missing dependencies.
+
+	pkg is the package for which the dependencies shall be resolved.
+	type is either a makedepends, depends, or optdepends.
+	"""
+
 	# for tabbing over tree branch symbols
 	pre_space  = 3
 	# spaces must be greater than pre_space
 	spaces = 3
-	v = fd_ct/spaces
-	indents = ' '*pre_space + ('|' + ' '*spaces)*v
-	sys.stdout.write(color(indents + '- ', 'blue') + color(pkg + ': ', 'black'))
+	v = fd_ct / spaces
+	indents = ' ' * pre_space + ('|' + ' ' * spaces) * v
+	sys.stdout.write(color(indents + '- ', 'blue') + \
+		color(pkg + ': ', 'black'))
+
 	sys.stdout.flush()
 	code = apacman.operations().pacmanT(pkg)
 
@@ -467,7 +480,7 @@ def filter_deps(pkg, fd_ct, type):
 
 
 def src_to_pm_cache(sources):
-	""" copy the sources in raw format (from sources array) to pacman cache """
+	"""Copy the source files to pacman cache."""
 
 	cwd = os.getcwd()
 	if SRCDEST == '':
@@ -483,7 +496,7 @@ def src_to_pm_cache(sources):
 			pass
 
 def get_pkgpath():
-	""" get the built package path """
+	"""Get the built package path."""
 
 	cwd = os.getcwd()
 	if PKGDEST == '':
@@ -555,11 +568,13 @@ def makepkgf(dep):
 	
 	return get_pkgpath()
 
-'''
-' args[0] is pkgpath
-' args[1] is asdeps
-'''
 def install(pkgpath, asdeps=False):
+	"""
+	Install the specified package via pacman.
+	
+	If asdeps is True, then install the package as a dependency.
+	"""
+
 	pacman_lock	= '/var/lib/pacman/db.lck'
 	if os.path.isfile(pacman_lock):
 		print 'Pacman is detected running.'
