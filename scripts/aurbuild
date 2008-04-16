@@ -43,33 +43,43 @@ PROGRAM_VERSION = '1.8.3'
 PROGRAM_NAME = os.path.basename(sys.argv[0])
 AUTHORS = 'Tyler Gates, Loui Chang'
 
-apacman			= aurbuild.pacman
-aversion		= aurbuild.version
-afind			= aurbuild.find
-aaurparse 		= aurbuild.aurparse
-aexec			= aurbuild.execute
-autils			= aurbuild.utils
-aurbuild_home		= '/var/tmp/aurbuild'
-makepkg_config		= '/etc/makepkg.conf'
-uid			= os.getuid()
-gid			= os.getgid()
-build_dir	 	= os.path.join(aurbuild_home, 'build')
-save_dir 		= os.path.join(aurbuild_home, 'pkgbuilds')
-editor			= os.getenv('EDITOR')
-cookiefile 		= os.getenv('HOME') + '/.aurbuild/aurcookie.lwp'
-PKGEXT			= 'pkg.tar.gz'
-# these will be populated later
-builduser_uid		= None
-builduser_gid		= None
-working_pkg		= None
+apacman = aurbuild.pacman
+aversion = aurbuild.version
+afind = aurbuild.find
+aaurparse = aurbuild.aurparse
+aexec = aurbuild.execute
+autils = aurbuild.utils
+
+# pacman stuff
+pacman_config = '/etc/pacman.conf'
+makepkg_config = '/etc/makepkg.conf'
+PKGEXT = 'pkg.tar.gz'
+
+# Environment stuff
+uid = os.getuid()
+gid = os.getgid()
+editor = os.getenv('EDITOR')
+
+# aurbuild stuff
+aurbuild_home = '/var/tmp/aurbuild'
+build_dir = os.path.join(aurbuild_home, 'build')
+save_dir = os.path.join(aurbuild_home, 'pkgbuilds')
+cookiefile = os.getenv('HOME') + '/.aurbuild/aurcookie.lwp'
+
+# Populate these later.
+builduser_uid = None
+builduser_gid = None
+working_pkg = None
+
 # this will be build_dir/working_pkg
-pkg_build_dir		= 'dummy'
-aur_tarfile		= 'dummy'
+pkg_build_dir = 'dummy'
+aur_tarfile = 'dummy'
 
 if editor == None:
-	editor = ['']
+	# Default to nano.
+	editor = ['nano']
 else:
-	# get editor with list separated args
+	# Get editor with list separated args.
 	editor = editor.split(' ')
 
 abs_root = '/var/abs'
@@ -219,8 +229,8 @@ for opt, optarg in opts:
 #	if opt in ['-U', '--unvote']: UNVOTE = 1
 
 if VERSION:
-	print PROGRAM_NAME + ' v' + PROGRAM_VERSION
-	print 'Copyright (C) 2005-2008 ' + AUTHORS
+	print '%s v%s' % (PROGRAM_NAME, PROGRAM_VERSION)
+	print 'Copyright (C) 2005-2008 %s' % AUTHORS
 	print ''
 	print 'This program may be freely redistributed under'
 	print 'the terms of the GNU General Public License version 2'
@@ -228,32 +238,33 @@ if VERSION:
 
 # check for no no's:
 
-# must have an opt
+# Must have an opt.
 if len(opts) == 0:
 	usage()
 	sys.exit(1)
 
-# must have an arg unless --upgrade or --clean are specified
+# Must have an arg unless --upgrade or --clean are specified.
 if (len(args) == 0) and (not UPGRADE and not CLEAN):
 	print PROGRAM_NAME + ': no target specified'
 	sys.exit(1)
 
 # --builddeps and --syncdeps can't be used together
 if BUILDDEPS and SYNCDEPS:
-	print PROGRAM_NAME + ': -b, --builddeps and ' + \
+	print PROGRAM_NAME + ': -b, --builddeps and ' \
 			'-s, --syncdeps cannot be used together'
 	sys.exit(1)
 
-# --local, --official, --auto-build, and --upgrade must be used with a dependency install method
+# --local, --official, --auto-build, and --upgrade must be used
+# with a dependency install method.
 if LOCAL or OFFICIAL or AUTO_BUILD or UPGRADE:
 	if not BUILDDEPS and not SYNCDEPS:
-		print PROGRAM_NAME + ': this switch requires either ' + \
+		print PROGRAM_NAME + ': this switch requires either ' \
 				'-b, --builddeps or -s, --syncdeps'
 		sys.exit(1)
 
-# --vote and --unvote can't be used together
+# --vote and --unvote can't be used together.
 if VOTE and UNVOTE:
-	print PROGRAM_NAME + ': -V, --vote and ' + \
+	print PROGRAM_NAME + ': -V, --vote and ' \
 			'-U, --unvote cannot be used together'
 	sys.exit(1)
 
@@ -837,9 +848,9 @@ def main():
 	init()
 	# default to nano if no $EDITOR variable found
 	if editor == ['']: 
-		print "Editor environmental variable not set. Using nano... "
+		print "Editor environmental variable not set.' \
+			'Using %s... " % editor[0]
 		time.sleep(3)
-		editor = ['nano']
 	editor_no_args = editor[0]
 	if not autils.appcheck(editor_no_args) and not os.path.isfile(editor_no_args):
 		print >>sys.stderr.write('Error: editor value \"' + editor_no_args + '\" not found on system.')
