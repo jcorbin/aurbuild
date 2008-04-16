@@ -199,8 +199,10 @@ def appcheck(app):
 
 def search(args, verbose, site):
 	import textwrap
+
 	try:
-		names, descriptions, locations, categories, maintainers, votes = aaurparse.aursearch(args[0], site) 
+		names, descriptions, locations, categories, maintainers, \
+			votes = aaurparse.aursearch(args[0], site) 
 	except Exception, e:
 		print >>sys.stderr.write(str(e))
 		sys.exit(1)
@@ -221,16 +223,16 @@ def search(args, verbose, site):
 
 			description = ''
 			for line in desc:
-				description += '\t' + line + '\n'
+				description += '\t%s\n' % line
 
 			if category != '':
-				category = '(' + category + ')'
+				category = '(%s)' % category
 
-			pkg_info = location + '/' + name + ' ' + category + \
-				'\n' + description 
+			pkg_info = '%s/%s %s\n%s' % (
+				location, name, category, description) 
 
 			if verbose:
-				pkg_info += '\t' + maintainer + '\n\t' + _votes
+				pkg_info += '\t%s\n\t%s' % (maintainer, _votes)
 
 			pkg_info += '\n'
 
