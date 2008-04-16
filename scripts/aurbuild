@@ -71,15 +71,17 @@ if editor == None:
 else:
 	# get editor with list separated args
 	editor = editor.split(' ')
-abs_root 	= '/var/abs'
-pm_db_root 	= '/var/lib/pacman'
-pm_cache	= '/var/cache/pacman'
-installed_dir 	= pm_db_root + '/local'
-aursite 	= 'http://aur.archlinux.org/'
+
+abs_root = '/var/abs'
+pm_db_root = '/var/lib/pacman'
+installed_dir = pm_db_root + '/local'
+pm_cache = '/var/cache/pacman'
+aursite = 'http://aur.archlinux.org/'
+
 # for filter_deps
-filtered	= []
-db_pkgs		= []
-db_paths	= []
+filtered = []
+db_pkgs = []
+db_paths = []
 		
 def cleanup():
 	if os.path.isdir(pkg_build_dir):
