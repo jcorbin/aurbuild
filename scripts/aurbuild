@@ -888,7 +888,7 @@ def main():
 			results = afind.find_dir(pkgbuild_root, argo)[0]
 
 			if results == [] and not UPGRADE:
-				print '\n%s not found under %s\n' % (argo, pkgbuild_root)
+				print '%s not found under %s' % (argo, pkgbuild_root)
 				sys.exit(1)
 			elif results == [] and UPGRADE:
 				upgrade_ct += 1
