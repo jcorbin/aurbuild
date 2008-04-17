@@ -14,6 +14,8 @@ system if not done properly!
 Requirements:
 	python, pacman 3.1.0 or later, makepkg (found in pacman) and fakeroot
 
+	abs is required if you want to build official packages.
+
 Installation:
 	cd misc/
 	makepkg
