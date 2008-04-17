@@ -87,12 +87,7 @@ working_pkg = None
 pkg_build_dir = 'dummy'
 aur_tarfile = 'dummy'
 
-if editor == None:
-	# Default to nano.
-	editor = ['nano']
-else:
-	# Get editor with list separated args.
-	editor = editor.split(' ')
+default_editor = 'nano'
 
 # for filter_deps
 filtered = []
@@ -856,14 +851,18 @@ def main():
 			return 0
 
 	init()
-	# default to nano if no $EDITOR variable found
-	if editor == ['']: 
-		print 'Editor environmental variable not set.' \
-			'Using %s... ' % editor[0]
-		time.sleep(3)
+
+	if editor:
+		# Get editor with list separated args.
+		editor = editor.split(' ')
+	else:
+		# Default to nano.
+		print 'Using %s as $EDITOR... ' % default_editor
+		editor = [default_editor]
+
 	editor_no_args = editor[0]
 	if not autils.appcheck(editor_no_args) and not os.path.isfile(editor_no_args):
-		print >>sys.stderr.write('Error: editor value \"' + editor_no_args + '\" not found on system.')
+		print >>sys.stderr.write('Error: editor %s not found on system.' % editor_no_args)
 		return 1
 
 	if UPGRADE:
