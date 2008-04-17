@@ -97,8 +97,8 @@ class db_tools:
 		"""
 
 		if not os.path.isdir(self.installed_db):
-			raise DatabaseError, 'pacman local database `' + \
-				self.installed_db + '\' was not found'
+			raise DatabaseError('pacman local database %s'
+				' was not found' % self.installed_db)
 
 		cans = os.listdir(self.installed_db)
 		for can in cans:
@@ -107,9 +107,9 @@ class db_tools:
 				descfile = pkgpath + '/desc'
 				dependsfile = pkgpath + '/depends'
 				if not os.path.isfile(descfile):
-					raise DatabaseError, 'database description file `' + descfile + '\' not found'
+					raise DatabaseError('Database description file %s not found.' % descfile)
 				if not os.path.isfile(dependsfile):
-					raise DatabaseError, 'database depends file `' + dependsfile + '\' not found'
+					raise DatabaseError('Database depends file %s not found' % dependsfile)
 				name = self.get_db_info(descfile, '%NAME%')
 				provides = self.get_db_info(dependsfile, '%PROVIDES%')
 				for e in name: 
@@ -124,7 +124,7 @@ class db_tools:
 		
 		# this is all written this speed in mind
 		if not os.path.isfile(dbfile):
-			raise DatabaseError, 'database file `' + dbfile + '\' was not found'
+			raise DatabaseError('Database file %s was not found.' % dbfile)
 		lines = self.file_contents(dbfile)
 		results = []
 		for num in range(len(lines)):
@@ -145,7 +145,7 @@ class db_tools:
         	"""Read pacman.conf and return a list of enabled repos."""
 
 		if not os.path.isfile(self.pacman_config):
-			raise ConfigError, 'configuration file `' + self.pacman_config + '\' not found'
+			raise ConfigError('Configuration file %s not found' % self.pacman_config)
 	        contents = self.file_contents(self.pacman_config)
         	repolist = []
 	        for line in contents:
@@ -170,7 +170,8 @@ class db_tools:
 	        repo_names = self.get_repos()
 	        for repo_name in repo_names:
         	        # add the path to repo names and check it exists, if so list it to get pakage directories
-			if not os.path.isdir(self.pacman_db): raise DatabaseError, 'root database `' + self.pacman_db + '\' not found'
+			if not os.path.isdir(self.pacman_db):
+				raise DatabaseError('Root database %s not found' % self.pacman_db)
                 	repo_path = self.pacman_db + '/' + repo_name
 	                if os.path.isdir(repo_path) and not os.path.islink(repo_path):
         	                # get the files from package directories in each reop
@@ -196,8 +197,9 @@ class db_tools:
 					try:
 	                                	tmp = self.get_db_info(descfile, '%NAME%')[0]
 					except IndexError:
-						raise DatabaseError, 'Error: unable to parse NAME information from repo database file `'+ \
-								descfile+'\'. Possible corruption.\n'
+						raise DatabaseError(
+							'Error: unable to parse NAME from database file %s'
+							'. Possible corruption.\n' % descfile)
 	                                if tmp != []: packages.append(tmp)
 	        return packages
 
@@ -215,8 +217,8 @@ class db_tools:
 			# Set these two dictionaries
 			names, versions = self.get_query(query) 
 		except IndexError:
-			raise DatabaseError, \
-				'ERROR: pacman failure or empty set'
+			raise DatabaseError(
+				'ERROR: pacman failure or empty set.')
 	
 	        return names, versions
 
@@ -234,8 +236,8 @@ class db_tools:
 			# Set these two dictionaries
 			names, versions = self.get_query(query) 
 		except IndexError:
-			raise DatabaseError, \
-				'ERROR: pacman failure or empty set'
+			raise DatabaseError(
+				'ERROR: pacman failure or empty set')
 
 	        return names, versions
 
@@ -258,7 +260,7 @@ def syncdeps(deplist):
 			
 	code = Popen(cmd).wait()
 	if code == 127:
-		raise PacmanError, '\naurbuild: pacman could not install dependencies.\n'
+		raise PacmanError('pacman could not install dependencies.\n')
 
 class operations(db_tools):
 
@@ -280,13 +282,16 @@ class operations(db_tools):
 		try:
 			inst_version = db_tools.get_db_info(pkgpath + '/desc', '%VERSION%')[0]
 		except IndexError:
-			raise DatabaseError, 'Error: unable to parse VERSION information in local database file `'+ \
-					pkgpath+'/desc\'. Possible corruption.\n' \
-					'Try re-installing '+os.path.basename(pkgpath)+'.'
+			raise DatabaseError(
+				'Error: unable to parse VERSION information '
+				'in local database file %s/desc. Possible '
+				'corruption.\nTry re-installing %s.' %
+				(pkgpath, os.path.basename(pkgpath)))
 
 		
-		# if the dependency did not have a release number, remove it from the installed 
-		# for a fair comparison. We are concerned with package's version number.
+		# If the dependency did not have a release number, remove it
+		# from the installed for a fair comparison. We are concerned
+		# with package's version number.
 		if not re.search('-[0-9]*$', dependency): 
 			inst_version = re.sub('-[0-9]*$', '', inst_version)
 		
