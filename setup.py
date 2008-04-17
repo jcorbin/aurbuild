@@ -12,7 +12,7 @@ from distutils.core import setup
 
 DATAFILES = [('/usr/man/man1', ['aurbuild.1']),
 		('/usr/share/aurbuild-'+VERSION,
-		['BUGS', 'COPYING', 'README', 'AUTHORS', 'CHANGELOG'])]
+		['BUGS', 'COPYING', 'README', 'AUTHORS'])]
 
 setup(name=NAME,
 	version=VERSION,
