@@ -1,12 +1,14 @@
 
 AURBUILD
- -v1.8.4 (April 2008)
+ -v1.8.4 (April 17, 2008)
+	* Continuing general code clean up
 	* DRASTICALLY improve search times when building official packages
 	* Improved exception and error handling
+	* Properly detects if pacman is using the DB
 	* Fixed problem with symlinks in tarballs
 	* No longer quits immediately when a dependency isn't found in DB
-	* --auto-build shortened to --auto (Old way will still work for a
-	  couple releases)
+	* --auto-build shortened to --auto
+	  (Old way will still work for a few releases)
 
  -v1.8.3 (March 25, 2008)
 	* Install deps --asdeps
