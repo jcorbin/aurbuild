@@ -19,14 +19,15 @@
 #   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 
+import getopt
+import glob
 import os
+import re
+import signal
 import sys
 import tarfile
-import urllib
-import signal
-import getopt
 import time
-import glob
+import urllib
 
 from shutil import rmtree, copytree, copy
 from subprocess import Popen
@@ -629,6 +630,37 @@ def builddeps(deplist):
 			install(pkgpath, asdeps=True)
 
         os.chdir(cwd)
+
+def scan_pkgbuild(pkgbuild):
+	"""
+	Scan a PKGBUILD for problems and return an array of warnings.
+	"""
+
+	f = open(pkgbuild, 'r')
+	lines = f.read().split('\n')
+	f.close()
+
+	can_has = []
+	warnings = []
+	for line in lines:
+		if '#' in line:
+			line = line.split('#', 1)[0]
+		if re.search('arch=\(.*\)', line):
+			can_has.append('arch')
+			continue
+		if re.search('license=\(.*\)', line):
+			can_has.append('license')
+			continue
+
+	if not 'arch' in can_has:
+		warnings.append(
+			color('Warning: PKGBUILD arch may not be defined.', 'red'))
+
+	if not 'license' in can_has:
+		warnings.append(
+			color('Warning: PKGBUILD license may not be defined.', 'red'))
+
+	return warnings
 	
 def menu(dir_list, package):
 	files = []
@@ -637,7 +669,7 @@ def menu(dir_list, package):
 #	if columns == None: columns = 80
 	columns = 80
 	sep_num = 51
-	seperator = '-'*sep_num
+	seperator = '-' * sep_num
 	space_num = (columns - sep_num ) / 2
 	spaces = ' ' * space_num
 	for each in dir_list:
@@ -691,10 +723,16 @@ def menu(dir_list, package):
 		print spaces + '  q)  Quit without building.'
 		print spaces + seperator
 
+		warnings = scan_pkgbuild('PKGBUILD')
+		for warn in warnings:
+			print spaces + warn
+
 		display_choice = default_choice.upper()
 		choice = raw_input('\n%sEnter a selection: [%s] ' % (spaces, display_choice))
 
-		if choice == 'b':
+		if choice == '':
+			return default_choice
+		elif choice == 'b':
 			return choice
 		elif choice == 'v':
 			return choice
@@ -702,19 +740,14 @@ def menu(dir_list, package):
 			sys.exit(0)
 		elif choice == 's':
 			return choice
-		elif choice.isdigit():
-			if int(choice) >= 1 and int(choice) <= file_num:
+		elif (choice.isdigit() and
+			int(choice) >= 1 and
+			int(choice) <= file_num):
 				editor_cmd.append(files[int(choice)-1])
 				code = Popen(editor_cmd).wait()
 				editor_cmd.remove(files[int(choice)-1])
-				
-			else:
-				print '\n%s%s: Invalid entry.' % (spaces, choice)
-				print spaces + 'Press enter to choose again.'
-				raw_input(spaces)
-		elif choice == '': return default_choice
 		else:
-			print '\n' + spaces + choice + ': Invalid entry.'
+			print '\n%s%s: Invalid entry.' % (spaces, choice)
 			print spaces + 'Press enter to choose again.'
 			raw_input(spaces)
 
@@ -723,7 +756,7 @@ def init():
 	prog_list = ['makepkg', 'pacman', 'fakeroot']
 	for prog in prog_list:
 		if not autils.appcheck(prog):
-			print >>sys.stderr.write('\n' + prog + ' program not found in $PATH.\n')
+			print >>sys.stderr.write('%s program not found in $PATH.' % prog)
 			sys.exit(1)
 	# must be root
 	if uid != 0:
@@ -904,7 +937,7 @@ def main():
 						try:
 							_p_name = autils.echo_bash_vars(j, '${pkgname}')
 						except Exception, e:
-							print >>sys.stderr.write('PKGBUID syntax error: ' + str(e))
+							print >>sys.stderr.write('PKGBUILD syntax error: ' + str(e))
 							cleanup()
 							upgrade_ct += 1
 							continue
@@ -915,7 +948,7 @@ def main():
 				if type(results) != str: results = ''
 
 				if results == '':
-					print '\n%s not found under %s\n' % (argo, pkgbuild_root)
+					print '%s not found under %s' % (argo, pkgbuild_root)
 					return 1
 			
 				copytree(results, p_work_dir)
@@ -969,7 +1002,7 @@ def main():
 
 		os.chdir(work_dir)
 
-		# Save files
+		# Save files.
 		if SAVE:
 			savefiles(argo, work_dir)
 
@@ -1070,7 +1103,7 @@ def main():
 		db_pkgs = []
 		db_paths = []
 
-		# install missing dependencies
+		# Install missing dependencies.
 		remove_packages = []
 		zct = 0
 		zdict = {1: '\nMake Dependency', 2: '\nDependency'}
@@ -1114,7 +1147,8 @@ def main():
 
 		upgrade_ct += 1
 		cleanup()
-	# check for make deps that need to be removed
+
+	# Check for make deps that need to be removed.
 	if RM_MDEPS and len(rm_packages) > 0:
 		print '\nRemove Targets: ',
 		for rp in rm_packages: print rp,
@@ -1129,13 +1163,14 @@ def main():
 			p_cmd.extend(rm_packages)
 			retcode = Popen(p_cmd).wait()
 	cleanup()
+	return 0
 
 if __name__ == '__main__':
 	try:
 		val = main()
 		sys.exit(val)
 	except SystemExit, e:
-		if int(str(e)) != 3:
+		if str(e) != '3':
 			cleanup()
 		sys.exit(e)
 	# print pacman specific errors, users will understand these.
