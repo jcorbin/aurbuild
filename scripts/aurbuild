@@ -52,6 +52,12 @@ autils = aurbuild.utils
 
 # pacman stuff
 pacman_config = '/etc/pacman.conf'
+pm_db_root = '/var/lib/pacman'
+pacman_db_lock = pm_db_root + '/db.lck'
+installed_dir = pm_db_root + '/local'
+pm_cache = '/var/cache/pacman'
+
+# makepkg stuff
 makepkg_config = '/etc/makepkg.conf'
 PKGEXT = 'pkg.tar.gz'
 
@@ -59,6 +65,12 @@ PKGEXT = 'pkg.tar.gz'
 uid = os.getuid()
 gid = os.getgid()
 editor = os.getenv('EDITOR')
+
+# ABS
+abs_root = '/var/abs'
+
+# AUR stuff
+aursite = 'http://aur.archlinux.org/'
 
 # aurbuild stuff
 aurbuild_home = '/var/tmp/aurbuild'
@@ -81,12 +93,6 @@ if editor == None:
 else:
 	# Get editor with list separated args.
 	editor = editor.split(' ')
-
-abs_root = '/var/abs'
-pm_db_root = '/var/lib/pacman'
-installed_dir = pm_db_root + '/local'
-pm_cache = '/var/cache/pacman'
-aursite = 'http://aur.archlinux.org/'
 
 # for filter_deps
 filtered = []
@@ -588,8 +594,7 @@ def install(pkgpath, asdeps=False):
 	If asdeps is True, then install the package as a dependency.
 	"""
 
-	pacman_lock	= '/var/lib/pacman/db.lck'
-	if os.path.isfile(pacman_lock):
+	if os.path.isfile(pacman_db_lock):
 		print 'Pacman is detected running.'
 		print 'Once pacman exits, you may press enter to install'
 		print 'Control + C to cancel.'
