@@ -574,13 +574,13 @@ def makepkgf(dep):
 	env['HOME'] = aurbuild_home
 	code = aexec.child_spawn(app, args, builduser_uid, builduser_gid, env)
 
-	# copy src files over to cache
-	src_to_pm_cache(raw_sources)
+	# Copy src files over to cache.
+	# src_to_pm_cache(raw_sources)
 
 	if code > 0:
-		print >>sys.stderr.write('\naurbuild: could not build \"' + 
-			dep + '\" with makepkg.')
-		print 'Build directory retained at ' + pkg_build_dir
+		print >>sys.stderr.write('aurbuild: could not build %s '
+			'with makepkg.' % dep)
+		print 'Build directory retained at %s' % pkg_build_dir
 		print 'You can visit the directory, fix the ' \
 		'problem, and run makepkg.'
 		sys.exit(3)
@@ -631,10 +631,7 @@ def builddeps(deplist):
                 os.chdir(des_dir)
 		pkgpath = makepkgf(each)
 		if not NOINSTALL:
-			try:
-				install(pkgpath, asdeps=True)
-			except Exception, e:
-				raise
+			install(pkgpath, asdeps=True)
 
         os.chdir(cwd)
 	
@@ -786,6 +783,12 @@ def savefiles(pkg, old_dir):
 			abort_msg(str(e))
 
 def main():
+	"""
+	Do all interactive stuff.
+
+	If there's an error, return an error code. Otherwise return zero.
+	"""
+
 	global editor, args
 	rm_packages = []
 
@@ -798,11 +801,11 @@ def main():
 			print "Nothing to clean"
 
 		if len(args) == 0:
-			sys.exit(retcode)
+			return retcode
 
 	if SEARCH: 
 		autils.search(args, VERBOSE, aursite)
-		sys.exit(0)
+		return 0
 	
 	if VOTE or UNVOTE:
 		import getpass, aurbuild.login
@@ -846,20 +849,22 @@ def main():
 					print 'failed'
 					raise
 					
-		# if one fails, exit with error
-		if code2 > 0: sys.exit(1)
-		else: sys.exit(0)
+		# If one fails, exit with error.
+		if code2 > 0:
+			return 1
+		else:
+			return 0
 
 	init()
 	# default to nano if no $EDITOR variable found
 	if editor == ['']: 
-		print "Editor environmental variable not set.' \
-			'Using %s... " % editor[0]
+		print 'Editor environmental variable not set.' \
+			'Using %s... ' % editor[0]
 		time.sleep(3)
 	editor_no_args = editor[0]
 	if not autils.appcheck(editor_no_args) and not os.path.isfile(editor_no_args):
 		print >>sys.stderr.write('Error: editor value \"' + editor_no_args + '\" not found on system.')
-		sys.exit(1)
+		return 1
 
 	if UPGRADE:
 		# set args to each potential AUR candidate
@@ -883,13 +888,13 @@ def main():
 			# test for its existance
 			if not os.access(pkgbuild_root, os.F_OK | os.R_OK):
 				print >>sys.stderr.write('Error: PKGBUILD root %s not found or read permissions denied.' % pkgbuild_root)
-				sys.exit(1)
+				return 1
 
 			results = afind.find_dir(pkgbuild_root, argo)[0]
 
 			if results == [] and not UPGRADE:
 				print '%s not found under %s' % (argo, pkgbuild_root)
-				sys.exit(1)
+				return 1
 			elif results == [] and UPGRADE:
 				upgrade_ct += 1
 				continue
@@ -912,7 +917,7 @@ def main():
 
 				if results == '':
 					print '\n%s not found under %s\n' % (argo, pkgbuild_root)
-					sys.exit(1)
+					return 1
 			
 				copytree(results, p_work_dir)
 				os.chown(p_work_dir, builduser_uid, builduser_uid)
@@ -922,13 +927,13 @@ def main():
 					work_dir = autils.get_pkgbuild_path(p_work_dir)
 				except Exception, e:
 					print >>sys.stderr.write(str(e))
-					sys.exit(1)
+					return 1
 		else:
 			try:
 				aur_tarfile = get_tarball(argo)
 			except Exception, e:
 				print >>sys.stderr.write(str(e))
-				sys.exit(1)
+				return 1
 
 			if aur_tarfile == None:
 				if not UPGRADE:
@@ -945,9 +950,9 @@ def main():
 					choice = choice.lower()
 					if choice == 'y' or choice == 'yes':
 						retval = Popen(cmd, shell=True).wait()
-						return None
+						return retval
 					else:
-						sys.exit(1)
+						return 1
 
 				# Probably built a community package.
 				# At any rate, the loop needs to continue.
@@ -961,7 +966,7 @@ def main():
 				work_dir = autils.get_pkgbuild_path(p_work_dir)
 			except Exception, e:
 				print >>sys.stderr.write(str(e))
-				sys.exit(1)
+				return 1
 
 		os.chdir(work_dir)
 
@@ -974,7 +979,7 @@ def main():
 			# follows) requires -b or -s
 			if not BUILDDEPS and not SYNCDEPS:
 				if argo == args[len(args)-1]:
-					sys.exit(0)
+					return 0
 				else: continue
 
 		# for --upgrade. compare versions and confirm upgrade with user
@@ -1032,7 +1037,7 @@ def main():
 			mdep_cans, dep_cans = autils.get_depends(work_dir + '/PKGBUILD', 'makedepends', 'depends')
 		except Exception, e:
 			print >>sys.stderr.write(str(e))
-			sys.exit(1)
+			return 1
 
 		mdeps = []
 		deps = []
@@ -1043,7 +1048,7 @@ def main():
 					mdeps = filter_deps(mdep_can, fd_ct=1, type='[M]')
 				except Exception, e:
 					print >>sys.stderr.write(str(e))
-					sys.exit(1)
+					return 1
 
 			# reset globals for deps
 			global filtered, db_pkgs, db_paths
@@ -1059,7 +1064,7 @@ def main():
 					deps = filter_deps(dep_can, fd_ct=1, type='[D]')
 				except Exception, e:
 					print >>sys.stderr.write(str(e))
-					sys.exit(1)
+					return 1
 
 		# reset again for next loop of args
 		filtered = []
@@ -1086,19 +1091,19 @@ def main():
 							builddeps(deps_type)
 						except Exception, e:
 							print >>sys.stderr.write(str(e))
-							sys.exit(1)
+							return 1
 					elif SYNCDEPS:
 						try:
 							apacman.syncdeps(deps_type)
 						except Exception, e:
 							print >>sys.stderr.write(str(e))
-							sys.exit(1)
+							return 1
 					if RM_MDEPS:
 						if 'make' in zdict[zct].lower():
 							rm_packages.extend(deps_type)
 				else:
 					print >> sys.stderr.write('Unresolved dependencies. Exiting.')
-					sys.exit(1)
+					return 1
 
 		pkgname = makepkgf(argo)
 		if not NOINSTALL:
@@ -1106,7 +1111,7 @@ def main():
 				install(pkgname)
 			except Exception, e:
 				print >>sys.stderr.write(str(e))
-				sys.exit(1)
+				return 1
 
 		upgrade_ct += 1
 		cleanup()
@@ -1128,8 +1133,8 @@ def main():
 
 if __name__ == '__main__':
 	try:
-		main()
-		sys.exit(0)
+		val = main()
+		sys.exit(val)
 	except SystemExit, e:
 		if int(str(e)) != 3:
 			cleanup()
