@@ -2,13 +2,14 @@
 # Contributor: Loui Chang <louipc.ist@gmail.com
 
 pkgname=aurbuild
-pkgver=1.8.3
+pkgver=1.8.4
 pkgrel=1
 pkgdesc="A utility to build and install packages from AUR."
 url="http://aurbuild.berlios.de/"
 license="GPL"
 arch=('i686' 'x86_64')
 depends=('python' 'pacman>=3.1.0' 'fakeroot')
+optdepends=('abs')
 
 build() {
 	cd $startdir/..
