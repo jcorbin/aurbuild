@@ -645,10 +645,13 @@ def scan_pkgbuild(pkgbuild):
 	for line in lines:
 		if '#' in line:
 			line = line.split('#', 1)[0]
-		if re.search('arch=\(.*\)', line):
+		if re.search('arch=\(.+\)', line):
 			can_has.append('arch')
 			continue
-		if re.search('license=\(.*\)', line):
+		if re.search('license=\(.+\)', line):
+			can_has.append('license')
+			continue
+		if re.search('license=\".+\"', line):
 			can_has.append('license')
 			continue
 
