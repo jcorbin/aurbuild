@@ -1,6 +1,8 @@
 Always indent with tabs
 Keep lines less than 80 columns long as much as possible
 
+main() should always return an integer.
+
 Testing:
 Make sure everything works.
 	--sync with missing dependencies
