@@ -7,6 +7,7 @@ AURBUILD
 	* Properly detects if pacman is using the DB
 	* Fixed problem with symlinks in tarballs
 	* No longer quits immediately when a dependency isn't found in DB
+	* Display warnings when arch or license aren't found in PKGBUILD
 	* --auto-build shortened to --auto
 	  (Old way will still work for a few releases)
 
