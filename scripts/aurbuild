@@ -1035,7 +1035,7 @@ def main():
 			result = aversion.vercmp().vercmp(aurpkgver, installed[upgrade_ct])
 
 			if result == 1:
-				print '\tTarget: %s-%s'%(package,aurpkgver)
+				print '\tTarget: %s-%s' % (package, aurpkgver)
 				if not NOCONFIRM:
 					choice = raw_input('\tProceed with upgrade?  [Y/n] ').lower()
 					print ''
@@ -1045,15 +1045,14 @@ def main():
 						continue
 			elif result == 0:
 				status = ' up to date'
-				argline = '%s %s '% (argo, installed[upgrade_ct])
-				rjust_spaces = 80 - (int(len(argline)) + \
-					int(len(status)))
+				argline = '%s %s ' % (argo, installed[upgrade_ct])
+				rjust_spaces = 80 - (int(len(argline)))
 				print argline + status.rjust(rjust_spaces, '.')
 				cleanup()
 				upgrade_ct += 1
 				continue
 			elif result == -1:
-				print ':: local/%s %s seems newer than aur/%s %s' % (
+				print ':: local/%s %s seems newer than unsupported/%s %s' % (
 					argo, installed[upgrade_ct], argo, aurpkgver) 
 				cleanup()
 				upgrade_ct += 1
