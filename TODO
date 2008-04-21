@@ -12,20 +12,17 @@ General List:
 	trailing slash/ or leading protocol://
 
  * Make --upgrade more secure. Don't source PKGBUILD to check versions.
-   Get info from AUR instead.
+   Get info from AUR instead, or parse PKGBUILD without sourcing.
 
  * If a dependency isn't found in the database, don't quit immediately.
-   Check the rest of the dependencies, THEN exit.
+   Check the rest of the dependencies, THEN exit. (Partially Done)
 
- * When syncing don't go through the whole tree if the package is in a binary
-   repo.
+ * When syncing don't go through the whole tree if the package is installed.
 
- * Warning in menu for PKGBUILDs without arch array
+ * I think I made an oops in removing --revision. Add it back maybe.
 
  * Create a testing AUR specifically for aurbuild testing. With packages for
    that purpose.
-
- * Enable user to `sudo aurbuild` without problems. See BUGS.
 
  * Improve search
 	- Support for multiple keywords
@@ -66,11 +63,14 @@ General List:
 	individually. The logic for selecting to build then reviewing pkgbuild
 	can be applied to building deps from [unsupported] as well.
 
- * Add support to build deps from [unsupported] more easily (Without having to
-   run aurbuild multiple times)
+ * Add support to build deps recursively from [unsupported] more easily
+   (Without having to run aurbuild multiple times)
 
- * Dynamically determine abs root from /etc/abs/abs.conf or shell variable
-   $ABSROOT
+ * Get all system configuration from the proper places.
+	- /etc/abs.conf ($ABSROOT)
+	- /etc/pacman.conf (RootDir,DBPath,CacheDir)
+	- /etc/makepkg.conf (BUILDSCRIPT, PKGEXT, SRCEXT, ...)
+	- $HOME/.makepkg.conf (ditto)
 
  * Support to vote, unvote, flag, unflag, upload, write comments
 
@@ -80,10 +80,6 @@ General List:
 
  * Use the libalpm hooks in pacman3 for python. Only because it would be faster
    and easier to maintain than my manual flat file parsing module (pacman.py).
-
- * Respect pacman.conf:RootDir
-
- * Cache installed pkgs in pacman.conf:CacheDir or /var/cache/pacman/pkg
 
  * Work out how source files should be cached
 	I'm thinking just the tarball with scripts/local sources should be
