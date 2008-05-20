@@ -34,16 +34,29 @@ def find_it(dir, name, type):
 	than three levels.
 	"""
 
+	import os
 	from subprocess import Popen, PIPE
+
+	# Test for dir's existence.
+	if not os.access(dir, os.F_OK | os.R_OK):
+		raise Exception('Error: %s not found or read permissions denied.' % dir)
+
 	output, error = Popen(
 		['find', dir,
 		'-maxdepth', '3',
 		'-type', type,
 		'-name', name],
 		stdout=PIPE).communicate()
+
+	if error:
+		raise Exception(str(error))
+
 	result = output.splitlines()
 
-	return result, [error]
+	if result == []:
+		return None
+
+	return result
 
 def find_dir(dir, name):
 	"""

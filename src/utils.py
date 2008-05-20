@@ -115,9 +115,9 @@ def get_dep_path(abs_root, dep):
 		raise Exception('\n%s not found in filesystem.'
 			'Cannot build dependencies\n' % abs_root)
 
-	results = afind.find_dir(abs_root + '/', dep)[0]
+	results = afind.find_dir(abs_root + '/', dep)
 
-	if results != []:
+	if results != None:
 		for p in results:
 			if os.path.isfile(p + '/PKGBUILD'):
 				return p
@@ -182,8 +182,8 @@ def prepare_build_user():
 		return prepare_build_user()
 
 def get_pkgbuild_path(parent_dir):
-	results = afind.find_file(parent_dir, 'PKGBUILD')[0]
-	if results != []:
+	results = afind.find_file(parent_dir, 'PKGBUILD')
+	if results != None:
 		results = results[0].replace('/PKGBUILD', '')
 		return results
 	else:

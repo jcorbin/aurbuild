@@ -608,10 +608,10 @@ def install(pkgpath, asdeps=False):
 				'package via pacman --upgrade.')
 			
 def builddeps(deplist):
-        # for -b option
+	# for -b option
 	cwd = os.getcwd()
-        for each in deplist:
-                dep_path = autils.get_dep_path(abs_root, each)
+	for each in deplist:
+		dep_path = autils.get_dep_path(abs_root, each)
 
 		des_dir = os.path.join(build_dir, each)
 		os.setegid(builduser_gid)
@@ -621,15 +621,15 @@ def builddeps(deplist):
 		if os.path.isdir(des_dir):
 			rmtree(des_dir)
 
-                copytree(dep_path, des_dir)
+		copytree(dep_path, des_dir)
 		os.seteuid(uid)
 		os.setegid(gid)
-                os.chdir(des_dir)
+		os.chdir(des_dir)
 		pkgpath = makepkgf(each)
 		if not NOINSTALL:
 			install(pkgpath, asdeps=True)
 
-        os.chdir(cwd)
+	os.chdir(cwd)
 
 def scan_pkgbuild(pkgbuild):
 	"""
@@ -837,54 +837,6 @@ def main():
 	if SEARCH: 
 		autils.search(args, VERBOSE, aursite)
 		return 0
-	
-	if VOTE or UNVOTE:
-		import getpass, aurbuild.login
-
-		login = aurbuild.login
-		
-		username = raw_input('AUR Username: ')
-		password = getpass.getpass('AUR Password: ')
-
-		code2 = 0
-		for arg in args:
-			if VOTE:
-				print 'casting vote for ' + arg + '... ',
-				sys.stdout.flush()
-				try:
-					code = login.aurlogin().vote(username, password, cookiefile, arg)
-					if code == 2:
-						print 'vote previously cast!'
-					else:
-						print 'success'
-				except login.LoginError, e:
-					print 'failed: ' + str(e)
-					code2 += 1
-				except:
-					print 'failed'
-					raise
-					
-			elif UNVOTE:
-				print 'removing vote for ' + arg + '... ',
-				sys.stdout.flush()
-				try:
-					code = login.aurlogin().unvote(username, password, cookiefile, arg)
-					if code == 2:
-						print 'no vote cast!'
-					else:
-						print 'success'
-				except login.LoginError, e:
-					print 'failed: ' + str(e)
-					code2 += 1
-				except:
-					print 'failed'
-					raise
-					
-		# If one fails, exit with error.
-		if code2 > 0:
-			return 1
-		else:
-			return 0
 
 	init()
 
@@ -902,7 +854,7 @@ def main():
 		return 1
 
 	if UPGRADE:
-		# set args to each potential AUR candidate
+		# Set args to each potential AUR candidate.
 		args, installed = apacman.db_tools().get_foreign()
 
 	upgrade_ct = 0
@@ -911,101 +863,95 @@ def main():
 		working_pkg = argo
 		pkg_build_dir = os.path.join(build_dir, working_pkg)
 		prepare_work_dirs()
-		# a potential pkg work direcotory (after decompression)
-		p_work_dir = os.path.join(pkg_build_dir, working_pkg)
+
+		# Set potential pkg work directory (after decompression).
+		pkg_work_dir = os.path.join(pkg_build_dir, working_pkg)
 
 		# Retrieve build files and prepare to build.
-		if LOCAL or OFFICIAL:
-			if LOCAL:
-				pkgbuild_root = save_dir
-			if OFFICIAL:
-				pkgbuild_root = OFFICIAL_PATH
+		aur_tarfile = None
 
-			# Test for its existence.
-			if not os.access(pkgbuild_root, os.F_OK | os.R_OK):
-				print >>sys.stderr.write('Error: %s not found or read permissions denied.' % pkgbuild_root)
-				return 1
-
-			results = afind.find_dir(pkgbuild_root, argo)[0]
-
-			if results == [] and not UPGRADE:
-				print '%s not found under %s' % (argo, pkgbuild_root)
-				return 1
-			elif results == [] and UPGRADE:
-				upgrade_ct += 1
-				continue
-			elif results != 0:
-				for r in results:
-					j = os.path.join(r, 'PKGBUILD')
-					if os.path.isfile(j):
-						try:
-							_p_name = autils.echo_bash_vars(j, '${pkgname}')
-						except Exception, e:
-							print >>sys.stderr.write('PKGBUILD syntax error: ' + str(e))
-							cleanup()
-							upgrade_ct += 1
-							continue
-
-						if _p_name == argo:
-							results = r
-							break
-				if type(results) != str: results = ''
-
-				if results == '':
-					print '%s not found under %s' % (argo, pkgbuild_root)
-					return 1
-			
-				copytree(results, p_work_dir)
-				os.chown(p_work_dir, builduser_uid, builduser_uid)
-				os.chmod(p_work_dir, 0775)
-
-				try:
-					work_dir = autils.get_pkgbuild_path(p_work_dir)
-				except Exception, e:
-					print >>sys.stderr.write(str(e))
-					return 1
-		else:
+		if not (LOCAL or OFFICIAL) or UPGRADE:
 			try:
+				# Try to get a tarball from AUR.
 				aur_tarfile = get_tarball(argo)
 			except Exception, e:
 				print >>sys.stderr.write(str(e))
 				return 1
 
-			if aur_tarfile == None:
-				if not UPGRADE:
-					print >>sys.stderr.write(argo + ': possible official package')
-					if SYNCDEPS:
-						cmddeps = '--syncdeps'
-					elif BUILDDEPS:
-						cmddeps = '--builddeps'
+		if aur_tarfile == None:
+			# Look for package in ABS or local save paths.
 
-					cmd = 'aurbuild %s --official %s' % (cmddeps, argo)
-					choice = raw_input('\nInstall with `%s`? [Y/n]  ' % cmd)
-					if choice == '':
-						choice = 'y'
-					if NOCONFIRM:
-						choice == 'y'
-					choice = choice.lower()
-
-					if choice == 'y' or choice == 'yes':
-						retval = Popen(cmd, shell=True).wait()
-						return retval
-					else:
-						return 1
-
-				# Probably built a community package.
-				# At any rate, the loop needs to continue.
-				cleanup()
-				upgrade_ct += 1
-				continue
-
-			extract(aur_tarfile)
+			pkgbuild_root = save_dir
+			if LOCAL or UPGRADE:
+				pkgbuild_root = save_dir
+			if OFFICIAL:
+				pkgbuild_root = OFFICIAL_PATH
 
 			try:
-				work_dir = autils.get_pkgbuild_path(p_work_dir)
+				results = afind.find_dir(pkgbuild_root, argo)
 			except Exception, e:
 				print >>sys.stderr.write(str(e))
 				return 1
+
+			if results == None:
+
+				# Check ABS path for PKGBUILDs as a last resort.
+				# If ABSROOT doesn't exist don't do this section.
+				if not (LOCAL or UPGRADE):
+					pkgbuild_root = OFFICIAL_PATH
+					try:
+						results = afind.find_dir(pkgbuild_root, argo)
+					except Exception, e:
+						print >>sys.stderr.write(str(e))
+						return 1
+				# End section.
+
+				if UPGRADE:
+					upgrade_ct += 1
+
+				if results == None:
+					print >>sys.stderr.write('%s not found under %s' % (argo, pkgbuild_root))
+					continue
+
+			# Select one PKGBUILD first. Make this interactive.
+			selection = 0
+			r = results[selection]
+
+			# Check if there is a PKGBUILD in the directory.
+			j = os.path.join(r, 'PKGBUILD')
+			if os.path.isfile(j):
+
+				# Check if the PKGBUILD's $pkgname matches the pkg we want.
+				# We really don't want to source the PKGBUILD before the
+				# user has a chance to look at it. Find a safer way.
+
+				#try:
+				#	_pkgname = autils.echo_bash_vars(j, '${pkgname}')
+				#except Exception, e:
+				#	print >>sys.stderr.write('PKGBUILD syntax error: ' + str(e))
+				#	cleanup()
+				#	upgrade_ct += 1
+				#	continue
+
+				#if _pkgname == argo:
+				results = r
+
+			copytree(results, pkg_work_dir)
+			os.chown(pkg_work_dir, builduser_uid, builduser_uid)
+			os.chmod(pkg_work_dir, 0775)
+
+		else:
+			try:
+				extract(aur_tarfile)
+			except Exception, e:
+				print >>sys.stderr.write(str(e))
+				return 1
+
+		try:
+			work_dir = autils.get_pkgbuild_path(pkg_work_dir)
+		except Exception, e:
+			print >>sys.stderr.write(str(e))
+			return 1
 
 		os.chdir(work_dir)
 
@@ -1026,6 +972,7 @@ def main():
 		if UPGRADE:
 			pkgbuild_path = os.path.join(os.getcwd(), 'PKGBUILD')
 
+			# Sourcing the PKGBUILD before having a chance to look at it is bad.
 			try:
 				package = autils.echo_bash_vars(pkgbuild_path, '${pkgname}')
 			except Exception, e:
