@@ -114,27 +114,28 @@ def usage():
 	print 'usage: %s [options] [package] <package>' % PROGRAM_NAME
 	print ''
 	print 'options:'
-	print '  -h, --help            show this help message and exit'
-	print '  -v, --version         display version and exit'
-	print '  --verbose             verbose search output'
 	print '  -b, --builddeps       build and install missing ' \
-					'dependencies from abs'
+					'dependencies from ABS'
 	print '  -s, --syncdeps        install missing dependencies with pacman'
-	print '  -o "OPTS", --builder-opts="OPTS"'
-	print '                        pass OPTS to makepkg during build'
+	print ''
+	print '  -c  --clean           clean the build directory'
 	print '  -e, --save            save build files in %s' % save_dir
-	print '  -l, --local           use build files found in %s' % save_dir
 	print '  -f, --official        build official packages found in %s' % ABS_ROOT
+	print '  -h, --help            show this help message and exit'
+	print '  -l, --local           use build files found in %s' % save_dir
 	print '  --auto                bypass menu and build ' \
 					'automatically (DANGEROUS)'
-	print '  -u, --upgrade         upgrade all packages installed ' \
-					'from unsupported AUR'
+	print '  -m, --rm-make-deps    remove uneeded make dependencies'
 	print '  -n, --noconfirm       bypass any confirmation messages ' \
 					'by answering yes'
+	print '  -o "OPTS", --builder-opts="OPTS"'
+	print '                        pass OPTS to makepkg during build'
+	print '  -u, --upgrade         upgrade all packages installed ' \
+					'from unsupported AUR'
+	print '  -v, --version         display version and exit'
 	print '  -x, --noinstall       do not install package after building'
-	print '  -m, --rm-make-deps    remove uneeded make dependencies'
-	print '  -c  --clean           clean the build directory'
 	print '  -S, --search          search AUR for single [keyword]'
+	print '  --verbose             verbose search output'
 #	print '  -V, --vote            vote for a package'
 #	print '  -U, --unvote          unvote for a package'
 
