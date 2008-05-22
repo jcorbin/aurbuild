@@ -111,33 +111,33 @@ def handler(signo, frame):
 		sys.exit(143)
 
 def usage():
-	print 'usage: %s [options] [package] <package>' % PROGRAM_NAME
+	print 'Usage: %s [options] [package] <package>' % PROGRAM_NAME
 	print ''
-	print 'options:'
-	print '  -b, --builddeps       build and install missing ' \
+	print 'Options:'
+	print '  -b, --builddeps       Build and install missing ' \
 					'dependencies from ABS'
-	print '  -s, --syncdeps        install missing dependencies with pacman'
+	print '  -s, --syncdeps        Install missing dependencies with pacman'
 	print ''
-	print '  -c  --clean           clean the build directory'
-	print '  -e, --save            save build files in %s' % save_dir
-	print '  -f, --official        build official packages found in %s' % ABS_ROOT
-	print '  -h, --help            show this help message and exit'
-	print '  -l, --local           use build files found in %s' % save_dir
-	print '  --auto                bypass menu and build ' \
+	print '  -c  --clean           Clean the build directory'
+	print '  -e, --save            Save build files in %s' % save_dir
+	print '  -f, --official        Build official packages found in %s' % ABS_ROOT
+	print '  -h, --help            Show this help message and exit'
+	print '  -l, --local           Use build files found in %s' % save_dir
+	print '  --auto                Bypass menu and build ' \
 					'automatically (DANGEROUS)'
-	print '  -m, --rm-make-deps    remove uneeded make dependencies'
-	print '  -n, --noconfirm       bypass any confirmation messages ' \
+	print '  -m, --rm-make-deps    Remove uneeded make dependencies'
+	print '  -n, --noconfirm       Bypass any confirmation messages ' \
 					'by answering yes'
 	print '  -o "OPTS", --builder-opts="OPTS"'
-	print '                        pass OPTS to makepkg during build'
-	print '  -u, --upgrade         upgrade all packages installed ' \
+	print '                        Pass OPTS to makepkg during build'
+	print '  -u, --upgrade         Upgrade all packages installed ' \
 					'from unsupported AUR'
-	print '  -v, --version         display version and exit'
-	print '  -x, --noinstall       do not install package after building'
-	print '  -S, --search          search AUR for single [keyword]'
-	print '  --verbose             verbose search output'
-#	print '  -V, --vote            vote for a package'
-#	print '  -U, --unvote          unvote for a package'
+	print '  -v, --version         Display version and exit'
+	print '  -x, --noinstall       Do not install package after building'
+	print '  -S, --search          Search AUR for single [keyword]'
+	print '  --verbose             Verbose search output'
+#	print '  -V, --vote            Vote for a package'
+#	print '  -U, --unvote          Unvote for a package'
 
 # examine makepkg.conf and set more globals
 if os.access(makepkg_config, os.F_OK|os.R_OK):
