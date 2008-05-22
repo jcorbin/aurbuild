@@ -68,7 +68,7 @@ gid = os.getgid()
 editor = os.getenv('EDITOR')
 
 # ABS
-abs_root = '/var/abs'
+ABS_ROOT = '/var/abs'
 
 # AUR stuff
 aursite = 'http://aur.archlinux.org/'
@@ -124,7 +124,7 @@ def usage():
 	print '                        pass OPTS to makepkg during build'
 	print '  -e, --save            save build files in %s' % save_dir
 	print '  -l, --local           use build files found in %s' % save_dir
-	print '  -f, --official        build official packages found in %s' % abs_root
+	print '  -f, --official        build official packages found in %s' % ABS_ROOT
 	print '  --auto                bypass menu and build ' \
 					'automatically (DANGEROUS)'
 	print '  -u, --upgrade         upgrade all packages installed ' \
@@ -204,7 +204,7 @@ VOTE		= 0
 UNVOTE		= 0
 RM_MDEPS	= 0
 BUILDER_OPTARGS	= ''
-OFFICIAL_PATH	= abs_root
+OFFICIAL_PATH	= ABS_ROOT
 
 for opt, optarg in opts:
 	if opt in ['-h', '--help']: usage(); sys.exit(0)
@@ -433,7 +433,7 @@ def filter_deps(pkg, fd_ct, type):
 			pkg = apacman.db_tools().strip_ver_cmps(pkg)[0]
 
 			if BUILDDEPS: 
-				dep_path = autils.get_dep_path(abs_root, pkg)
+				dep_path = autils.get_dep_path(ABS_ROOT, pkg)
 				# a dependency is found, check it's deps and run this method again
 				mdep_cans, dep_cans = autils.get_depends(
 					'%s/PKGBUILD' % dep_path,
@@ -611,7 +611,7 @@ def builddeps(deplist):
 	# for -b option
 	cwd = os.getcwd()
 	for each in deplist:
-		dep_path = autils.get_dep_path(abs_root, each)
+		dep_path = autils.get_dep_path(ABS_ROOT, each)
 
 		des_dir = os.path.join(build_dir, each)
 		os.setegid(builduser_gid)
@@ -896,7 +896,7 @@ def main():
 			if results == None:
 
 				# Check ABS path for PKGBUILDs as a last resort.
-				# If ABSROOT doesn't exist don't do this section.
+				# If ABS_ROOT doesn't exist don't do this section.
 				if not (LOCAL or UPGRADE):
 					pkgbuild_root = OFFICIAL_PATH
 					try:
