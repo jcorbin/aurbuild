@@ -20,6 +20,7 @@
 #
 
 import os
+import re
 import sys
 import pwd
 
@@ -34,6 +35,51 @@ afind = aurbuild.find
 uid = os.getuid()
 gid = os.getgid()
 
+def color(text, color_alias):
+	color_dict = {
+		'grey': '0',
+		'red': '1',
+		'green': '2',
+		'yellow': '3',
+		'blue': '4',
+		'magenta': '5',
+		'cyan': '6',
+		'white': '7',
+		'black': '8'}
+	return '\033[1;3%sm%s\033[1;0m'%(color_dict[color_alias], text)
+
+def scan_pkgbuild(pkgbuild):
+	"""
+	Scan a PKGBUILD for problems and return an array of warnings.
+	"""
+
+	f = open(pkgbuild, 'r')
+	lines = f.read().split('\n')
+	f.close()
+
+	can_has = []
+	warnings = []
+	for line in lines:
+		if '#' in line:
+			line = line.split('#', 1)[0]
+		if re.search('arch=\(.+\)', line):
+			can_has.append('arch')
+			continue
+		if re.search('license=\(.+\)', line):
+			can_has.append('license')
+			continue
+		if re.search('license=\".+\"', line):
+			can_has.append('license')
+			continue
+
+	if not 'arch' in can_has:
+		warnings.append('Warning: PKGBUILD arch may not be defined.')
+
+	if not 'license' in can_has:
+		warnings.append('Warning: PKGBUILD license may not be defined.')
+
+	return warnings
+	
 def bash_array(str):
 	"""
 	Return str as a call to a bash array.
