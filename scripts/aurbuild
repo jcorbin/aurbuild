@@ -740,6 +740,7 @@ def savefiles(pkg, old_dir):
 		print >>sys.stderr.write('Aborting save...')
 		
 	savecan = os.path.join(save_dir, pkg)
+
 	if not os.path.isdir(save_dir):
 		try:
 			os.makedirs(save_dir)
@@ -765,6 +766,8 @@ def savefiles(pkg, old_dir):
 			autils.user_copytree(old_dir, savecan, builduser_uid, builduser_gid)
 		except OSError, e:
 			abort_msg(str(e))
+
+	print 'Saved %s to %s' % (pkg, save_dir)
 
 def main():
 	"""
@@ -915,7 +918,7 @@ def main():
 			# If --save is the only opt specified don't build or
 			# sync. It's OK to exit here because --upgrade (which
 			# follows) requires -b or -s
-			if not (BUILDDEPS and SYNCDEPS):
+			if not (BUILDDEPS or SYNCDEPS):
 				if argo == args[len(args)-1]:
 					return 0
 				else:
