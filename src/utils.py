@@ -236,11 +236,15 @@ def get_pkgbuild_path(parent_dir):
 		raise Exception('PKGBUILD not found.\n')
 
 def appcheck(app):
+	"""Check if an application exists in the system PATH."""
+
 	path = os.getenv('PATH')
 	path = path.replace(':', '/ ')
 	path = path.split(' ')
+
 	for each in path:
-		if os.path.isfile(each + app): return True
+		if os.path.isfile(each + app):
+			return True
 	return False
 
 def search(args, verbose, site):
