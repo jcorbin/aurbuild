@@ -1,5 +1,10 @@
 
 AURBUILD
+ -v1.8.5 (June , 2008)
+	* Rework PKGBUILD retrieval code.
+	* Prompt for editor if EDITOR and nano aren't found.
+	  Use less if the specified editor isn't found.
+
  -v1.8.4 (April 17, 2008)
 	* Continuing general code clean up
 	* DRASTICALLY improve search times when building official packages

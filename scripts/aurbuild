@@ -64,7 +64,8 @@ PKGEXT = 'pkg.tar.gz'
 # Environment stuff
 uid = os.getuid()
 gid = os.getgid()
-editor = os.getenv('EDITOR')
+editor = None
+default_editor = 'nano'
 
 # ABS
 ABS_ROOT = '/var/abs'
@@ -86,8 +87,6 @@ working_pkg = None
 # this will be build_dir/working_pkg
 pkg_build_dir = 'dummy'
 aur_tarfile = 'dummy'
-
-default_editor = 'nano'
 
 # for filter_deps
 filtered = []
@@ -619,15 +618,24 @@ def builddeps(deplist):
 	os.chdir(cwd)
 
 def menu(dir_list, package):
+	global editor
+
 	files = []
+	messages = ''
+
+	if not editor:
+		try:
+			get_editor()
+		except Exception, e:
+			messages += str(e) + "\n"
+
 	editor_cmd = editor
-#	columns = int(os.getenv('COLUMNS'))
-#	if columns == None: columns = 80
 	columns = 80
 	sep_num = 51
 	seperator = '-' * sep_num
 	space_num = (columns - sep_num ) / 2
 	spaces = ' ' * space_num
+
 	for each in dir_list:
 		if os.path.isfile(each):
 			files.append(each)
@@ -654,7 +662,7 @@ def menu(dir_list, package):
 	while not getout:
 		default_choice = 'b'
 		code = Popen('clear').wait()
-		print '\n'
+		print color(messages, 'red')
 		print title(package, 'white')
 		print '\n' + spaces + seperator
 
@@ -769,6 +777,29 @@ def savefiles(pkg, old_dir):
 
 	print 'Saved %s to %s' % (pkg, save_dir)
 
+def get_editor():
+	global editor
+	global default_editor
+	
+	editor = os.getenv('EDITOR')
+
+	# Prompt for editor.
+	if not editor:
+		editor = raw_input('No $EDITOR set.\n'
+		'Please specify an editor command [%s]: ' % default_editor)
+
+		if editor == '':
+			editor = default_editor
+
+	# Get editor with list separated args.
+	editor = editor.split(' ')
+
+	input = editor[0]
+	if not autils.appcheck(input) and not os.path.isfile(input):
+		# Use less to view files as a last resort.
+		editor = ['less']
+
+		raise Exception('Error: Editor %s not found on system.' % input)
 def main():
 	"""
 	Do all interactive stuff.
@@ -776,7 +807,7 @@ def main():
 	If there's an error, return an error code. Otherwise return zero.
 	"""
 
-	global editor, args
+	global args
 	rm_packages = []
 
 	if CLEAN:
@@ -795,19 +826,6 @@ def main():
 		return 0
 
 	init()
-
-	if editor:
-		# Get editor with list separated args.
-		editor = editor.split(' ')
-	else:
-		# Default to nano.
-		print 'Using %s as $EDITOR... ' % default_editor
-		editor = [default_editor]
-
-	editor_no_args = editor[0]
-	if not autils.appcheck(editor_no_args) and not os.path.isfile(editor_no_args):
-		print >>sys.stderr.write('Error: editor %s not found on system.' % editor_no_args)
-		return 1
 
 	if UPGRADE:
 		# Set args to each potential AUR candidate.
