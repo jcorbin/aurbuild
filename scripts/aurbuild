@@ -309,7 +309,7 @@ def get_tarball(pkg):
 	main_url = aaurparse.pkg_main_url(pkg, aursite)
 
 	if main_url == '':
-		print >>sys.stderr.write('%s: not found in AUR' % pkg)
+		print >>sys.stderr.write('%s: not found at %s' % (pkg, aursite))
 		return None
 
 	try:
