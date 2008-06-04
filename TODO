@@ -2,6 +2,9 @@ TODO
 Note: Some of these are just ideas and might not get implemented at all.
 
 General List:
+ * Add support to build deps recursively from [unsupported] more easily
+   (Without having to run aurbuild multiple times)
+
  * Use json interface to grab info on packages when syncing/building
    there was some old code that was supposed to fix problems with finding
    some packages that I clobbered. Example: try installing 'rar' from AUR
@@ -38,17 +41,15 @@ General List:
    any other repo that might have the same pkg as others)
 
  * Find what's causing a delay when building official packages 
-	- aurbuild.find.find_dir() is causing a delay because of some ugly
-	  recursion
-	- Alright I replaced the recursion with a `find` subprocess. It's
-	  a bit better but there is still more delay than I'd like.
+	- aurbuild.find.find_dir() is causing a delay because of some
+	  nasty recursion
 	- Using pacman -Si to find the repo THEN doing the search in
 	  /var/abs/repo is about five times faster than just searching
 	  /var/abs (Just from shell experimentation)
 	- find -maxdepth might help as well (decreases search time by about
           21 times)
 	- find <repo_dir> -maxdepth 3 -name <pkgname>
-	  (.200s) is actually slower than:
+	  (.200s) is slower than:
 	  find <abs_root> -maxdepth 3 -name <pkgname>
 	  (.065s) which is slower than:
 	  find <repo_dir> -maxdepth 2 -name <pkgname>
@@ -58,13 +59,15 @@ General List:
 	  find -maxdepth 3 -name <pkgname> -type d
 	  is slower than when omitting type.
 
+	- I had replaced the finding algorithm with a find subprocess.
+	  It made for nice short code and works well, but I don't think
+	  spawning another process is a good approach. I will restore it
+	  to pure Python.
+
  * Make builddeps/syncdeps more sophisticated
 	I'd like to be able to select whether to sync or build the deps
 	individually. The logic for selecting to build then reviewing pkgbuild
 	can be applied to building deps from [unsupported] as well.
-
- * Add support to build deps recursively from [unsupported] more easily
-   (Without having to run aurbuild multiple times)
 
  * Get all system configuration from the proper places.
 	- /etc/abs.conf ($ABSROOT)
@@ -79,12 +82,13 @@ General List:
  * Add a switch to take pacman arguments.
 
  * Use the libalpm hooks in pacman3 for python. Only because it would be faster
-   and easier to maintain than my manual flat file parsing module (pacman.py).
+   (and easier to maintain?) than the manual flat file parsing module pacman.py.
 
  * Work out how source files should be cached
 	I'm thinking just the tarball with scripts/local sources should be
-	cached (instead of individual files), along with downloaded sources.
-	It might be a good idea to propose a patch to makepkg as well.
+	cached (makepkg --source, instead of individual files), along with
+	downloaded sources. It might be a good idea to propose a patch to
+	makepkg as well.
 
 	Cache cvs/svn/git sources as well.
 	
@@ -125,7 +129,12 @@ cleanup() cleanup:
 Long term:
  * Make sure only a few select functions call sys.exit() and cleanup()
  	eg. Main script, main(), init()
+
  * Get rid of ABS dependency to fetch official build files
+
+ * Create a alpm database for packages explicitly installed via aurbuild.
+   It could be something like /var/cache/aurbuild/aur.archlinux.org
+   DBs should be on a per-URL basis.
 
 In Progress:
  * Move functions out of main script and into appropriate modules
