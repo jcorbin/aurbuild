@@ -372,21 +372,16 @@ def extract(file):
 		if os.path.exists(file): os.remove(file)
 		sys.exit(1)
 
-	# aur gives us fucked tarballs with nobody:nobody ownership... this will fix it
-	def mod_extracted(dir):
-		for d in os.listdir(dir):
-			v = os.path.join(dir, d)
-			os.chown(v, builduser_uid, builduser_gid)
-			if os.path.isdir(v) and not os.path.islink(v):
-				mod_extracted(v)
-
-	# the parent directory of the extracted tarball has a setgroup id bit set from AUR. This needs to be removed:
+	# The parent directory of the extracted tarball has a setgroup
+	# id bit set from AUR. This needs to be removed.
 	for j in os.listdir(extract_dir):
 		jf = os.path.join(extract_dir, j)
 		if os.path.isdir(jf):
 			os.chmod(jf, 0755)
 
-	mod_extracted(extract_dir)
+	# AUR gives us fucked tarballs with nobody:nobody ownership.
+	# This will fix it.
+	autils.own_dir(extract_dir, builduser_uid, builduser_gid)
 
 	tar_f.close()
 	os.remove(file)

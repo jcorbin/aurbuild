@@ -35,6 +35,14 @@ afind = aurbuild.find
 uid = os.getuid()
 gid = os.getgid()
 
+# Changes ownership of files and directories recursively.
+def own_dir(dir, user, group):
+	for d in os.listdir(dir):
+		v = os.path.join(dir, d)
+		os.chown(v, user, group)
+		if os.path.isdir(v) and not os.path.islink(v):
+			own_dir(v, user, group)
+
 def color(text, color_alias):
 	color_dict = {
 		'grey': '0',
