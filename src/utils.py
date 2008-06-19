@@ -37,11 +37,11 @@ gid = os.getgid()
 
 # Changes ownership of files and directories recursively.
 def own_dir(dir, user, group):
-	for d in os.listdir(dir):
-		v = os.path.join(dir, d)
-		os.chown(v, user, group)
-		if os.path.isdir(v) and not os.path.islink(v):
-			own_dir(v, user, group)
+	for file in os.listdir(dir):
+		path = os.path.join(dir, file)
+		os.chown(path, user, group)
+		if os.path.isdir(path) and not os.path.islink(path):
+			own_dir(path, user, group)
 
 def color(text, color_alias):
 	color_dict = {
