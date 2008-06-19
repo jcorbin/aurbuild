@@ -92,7 +92,28 @@ aur_tarfile = 'dummy'
 filtered = []
 db_pkgs = []
 db_paths = []
-		
+
+# Option variables.
+VERSION = 0
+VERBOSE = 0
+BUILDDEPS = 0
+SYNCDEPS = 0
+BUILDER_OPTS = 0
+SAVE = 0
+LOCAL = 0
+OFFICIAL = 0
+AUTO_BUILD = 0
+UPGRADE = 0
+NOCONFIRM = 0
+NOINSTALL = 0
+CLEAN = 0
+SEARCH = 0
+VOTE = 0
+UNVOTE = 0
+RM_MDEPS = 0
+BUILDER_OPTARGS = ''
+OFFICIAL_PATH = ABS_ROOT
+
 def cleanup():
 	if os.path.isdir(pkg_build_dir):
 		rmtree(pkg_build_dir)
@@ -184,26 +205,6 @@ except getopt.GetoptError, e:
 	usage()
 	print 'Error: ' + str(e)
 	sys.exit(1)
-
-VERSION		= 0
-VERBOSE		= 0
-BUILDDEPS	= 0
-SYNCDEPS	= 0
-BUILDER_OPTS	= 0
-SAVE		= 0
-LOCAL		= 0
-OFFICIAL	= 0
-AUTO_BUILD	= 0
-UPGRADE		= 0
-NOCONFIRM	= 0
-NOINSTALL	= 0
-CLEAN		= 0
-SEARCH		= 0
-VOTE		= 0
-UNVOTE		= 0
-RM_MDEPS	= 0
-BUILDER_OPTARGS	= ''
-OFFICIAL_PATH	= ABS_ROOT
 
 for opt, optarg in opts:
 	if opt in ['-h', '--help']: usage(); sys.exit(0)
