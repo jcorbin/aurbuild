@@ -229,13 +229,12 @@ for opt, optarg in opts:
 #	if opt in ['-V', '--vote']: VOTE = 1
 #	if opt in ['-U', '--unvote']: UNVOTE = 1
 
-if VERSION:
+def version():
 	print '%s v%s' % (PROGRAM_NAME, PROGRAM_VERSION)
 	print 'Copyright (C) 2005-2008 %s' % AUTHORS
 	print ''
 	print 'This program may be freely redistributed under'
 	print 'the terms of the GNU General Public License version 2'
-	sys.exit(0)
 
 # Check for problems with options, arguments and other input.
 def verify_inputs():
@@ -810,6 +809,10 @@ def main():
 
 	global args
 	rm_packages = []
+
+	if VERSION:
+		version()
+		return 0
 
 	errno = verify_inputs()
 	if errno != None:
