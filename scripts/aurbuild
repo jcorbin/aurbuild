@@ -237,37 +237,38 @@ if VERSION:
 	print 'the terms of the GNU General Public License version 2'
 	sys.exit(0)
 
-# check for no no's:
+# Check for problems with options, arguments and other input.
+def verify_inputs():
 
-# Must have an opt.
-if len(opts) == 0:
-	usage()
-	sys.exit(1)
+	# Must have an option.
+	if len(opts) == 0:
+		usage()
+		return 1
 
-# Must have an arg unless --upgrade or --clean are specified.
-if (len(args) == 0) and (not UPGRADE and not CLEAN):
-	print PROGRAM_NAME + ': no target specified'
-	sys.exit(1)
+	# Must have an arg unless --upgrade or --clean are specified.
+	if (len(args) == 0) and (not UPGRADE and not CLEAN):
+		print PROGRAM_NAME + ': no target specified'
+		return 1
 
-# --builddeps and --syncdeps can't be used together
-if BUILDDEPS and SYNCDEPS:
-	print PROGRAM_NAME + ': -b, --builddeps and ' \
+	# --builddeps and --syncdeps can't be used together
+	if BUILDDEPS and SYNCDEPS:
+		print PROGRAM_NAME + ': -b, --builddeps and ' \
 			'-s, --syncdeps cannot be used together'
-	sys.exit(1)
+		return 1
 
-# --local, --official, --auto-build, and --upgrade must be used
-# with a dependency install method.
-if LOCAL or OFFICIAL or AUTO_BUILD or UPGRADE:
-	if not BUILDDEPS and not SYNCDEPS:
-		print PROGRAM_NAME + ': this switch requires either ' \
+	# --local, --official, --auto-build, and --upgrade must be used
+	# with a dependency install method.
+	if LOCAL or OFFICIAL or AUTO_BUILD or UPGRADE:
+		if not BUILDDEPS and not SYNCDEPS:
+			print PROGRAM_NAME + ': this switch requires either ' \
 				'-b, --builddeps or -s, --syncdeps'
-		sys.exit(1)
+			return 1
 
-# --vote and --unvote can't be used together.
-if VOTE and UNVOTE:
-	print PROGRAM_NAME + ': -V, --vote and ' \
+	# --vote and --unvote can't be used together.
+	if VOTE and UNVOTE:
+		print PROGRAM_NAME + ': -V, --vote and ' \
 			'-U, --unvote cannot be used together'
-	sys.exit(1)
+		return 1
 
 def color(text, color_alias):
 	if USE_COLOR == 'y':
@@ -809,6 +810,10 @@ def main():
 
 	global args
 	rm_packages = []
+
+	errno = verify_inputs()
+	if errno != None:
+		return errno
 
 	if CLEAN:
 		retcode = 0
