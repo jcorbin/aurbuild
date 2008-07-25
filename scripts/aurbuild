@@ -65,7 +65,7 @@ PKGEXT = 'pkg.tar.gz'
 uid = os.getuid()
 gid = os.getgid()
 editor = None
-default_editor = 'nano'
+default_editor = 'less'
 
 # ABS
 ABS_ROOT = '/var/abs'
@@ -781,21 +781,21 @@ def get_editor():
 
 	# Prompt for editor.
 	if not editor:
-		editor = raw_input('No $EDITOR set.\n'
-		'Please specify an editor command [%s]: ' % default_editor)
+		print '$EDITOR not set.'
+		editor = raw_input('Please specify an editor command: ')
 
-		if editor == '':
-			editor = default_editor
-
-	# Get editor with list separated args.
+	# Get editor with separated args.
 	editor = editor.split(' ')
 
 	input = editor[0]
-	if not autils.appcheck(input) and not os.path.isfile(input):
-		# Use less to view files as a last resort.
-		editor = ['less']
 
-		raise Exception('Error: Editor %s not found on system.' % input)
+	if not autils.appcheck(input):
+		# Use less to view files if no valid editor is found.
+		editor = [default_editor]
+
+		raise Exception('%s not found on system.\n' 
+				'Using %s as an editor.' %
+				(input, default_editor))
 def main():
 	"""
 	Do all interactive stuff.
