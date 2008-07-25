@@ -4,6 +4,7 @@ AURBUILD
 	* Rework PKGBUILD retrieval code.
 	* Prompt for editor if EDITOR and nano aren't found.
 	  Use less if the specified editor isn't found.
+	* More code reorganisation and clean up.
 
  -v1.8.4 (April 17, 2008)
 	* Continuing general code clean up

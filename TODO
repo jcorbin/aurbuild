@@ -2,6 +2,9 @@ TODO
 Note: Some of these are just ideas and might not get implemented at all.
 
 General List:
+ * aurbuild downloads and extracts the tarballs when just checking for
+   updates. Make it not do that.
+
  * Add support to build deps recursively from [unsupported] more easily
    (Without having to run aurbuild multiple times)
 
