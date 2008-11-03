@@ -1,24 +1,27 @@
 HACKING
 
 Always indent with tabs.
-Keep lines less than 80 columns long as much as possible.
+Please Keep lines less than 79 columns long as much as possible.
 
 main() should always return an integer.
 
 Testing
 ---------------
 Make sure everything works.
-	--sync with missing dependencies
-	--builddeps with missing dependencies
-	--sync --upgrade
-	--sync --local
-	--search
+ --sync with missing dependencies
+ --builddeps with missing dependencies
+ --sync --upgrade
+ --sync --local
+ --search
 
-	Make sure aurbuild handles PKGBUILD errors gracefully.
-	Try building a PKGBUILD with syntax errors, etc.
+ Make sure aurbuild handles PKGBUILD errors gracefully.
+ Try building a PKGBUILD with syntax errors, etc.
 
 Prior to Release
 ----------------
-	- Merge working tree into master
-	- Tag the commit
+ - Merge working tree into master
+ - Tag the commit
+ - Merge master into stable
+
+Send git-formatted patches to louipc.ist@gmail.com
 
