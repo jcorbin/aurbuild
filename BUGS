@@ -1,8 +1,3 @@
-
-Python debugger:
-	import pdb
-	pdb.set_trace()
-
 BUGS
 ----
 
@@ -15,3 +10,10 @@ BUGS
    recognised. Run `sudo env EDITOR=$EDITOR aurbuild` for it to work.
 
  * File ownership and permission isn't being changed with ABS build copies. 
+
+DEBUGGING
+---------
+Enable the python debugger by adding this code:
+	import pdb
+	pdb.set_trace()
+
