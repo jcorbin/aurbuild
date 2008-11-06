@@ -1,5 +1,16 @@
 HACKING
 
+Git is used for revision control.
+
+The public git repo web page is at:
+http://repo.or.cz/w/aurbuild.git
+
+To clone the repo just type:
+
+$ git clone git://repo.or.cz/aurbuild.git
+
+Coding Style
+------------
 Always indent with tabs.
 Please Keep lines less than 79 columns long as much as possible.
 
