@@ -4,16 +4,16 @@
 #
 #   Copyright (C) 2005-2007 by Tyler Gates <TGates81@gmail.com>
 #   Copyright (C) 2008 by Loui Chang <louipc.ist@gmail.com>
-#  
+#
 #   This program is free software; you can redistribute it and/or modify
-#   it under the terms of the GNU General Public License version 2 
+#   it under the terms of the GNU General Public License version 2
 #   as published by the Free Software Foundation.
-# 
+#
 #   This program is distributed in the hope that it will be useful,
 #   but WITHOUT ANY WARRANTY; without even the implied warranty of
 #   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #   GNU General Public License for more details.
-#  
+#
 #   You should have received a copy of the GNU General Public License along
 #   with this program; if not, write to the Free Software Foundation, Inc.,
 #   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
@@ -197,7 +197,7 @@ signal.signal(signal.SIGTERM, handler)
 try:
 	opts, args = getopt.getopt(sys.argv[1:], 'hvbso:elfunxmcS',
 		['help', 'version', 'verbose', 'builddeps', 'syncdeps',
-		'builder-opts=', 
+		'builder-opts=',
 		'save', 'local', 'official', 'auto', 'auto-build', 'upgrade',
 		'noconfirm', 'noinstall', 'rm-make-deps', 'clean',
 		'search', 'url='])
@@ -212,7 +212,7 @@ for opt, optarg in opts:
 	if opt in ['--verbose']: VERBOSE = 1
 	if opt in ['-b', '--builddeps']: BUILDDEPS = 1
 	if opt in ['-s', '--syncdeps']: SYNCDEPS = 1
-	if opt in ['-o', '--builder-opts']: 
+	if opt in ['-o', '--builder-opts']:
 		BUILDER_OPTS = 1
 		BUILDER_OPTARGS = optarg
 	if opt in ['-e', '--save']: SAVE = 1
@@ -306,7 +306,7 @@ def prepare_work_dirs():
 
 
 def get_tarball(pkg):
-	
+
 	main_url = aaurparse.pkg_main_url(pkg, aursite)
 
 	if main_url == '':
@@ -326,7 +326,7 @@ def get_tarball(pkg):
 		tarball_url = aaurparse.pkg_tarball_url(raw_text, aursite)
 	except Exception, e:
 		raise Exception('Unable to parse tarball info. If '
-			'you see this message rarely, it is\n'  
+			'you see this message rarely, it is\n'
 			'possible user comments have skewed the parsing '
 			'results on the web page.\n')
 
@@ -357,7 +357,7 @@ def extract(file):
 		if os.path.isdir(extract_dir): rmtree(extract_dir)
 		os.mkdir(extract_dir)
 		os.chmod(extract_dir, 0775)
-		os.chown(extract_dir, builduser_uid, builduser_gid) 
+		os.chown(extract_dir, builduser_uid, builduser_gid)
 	except Exception, e:
 		print >>sys.stderr.write('could not create temporary extraction point:')
 		print >>sys.stderr.write(str(e))
@@ -414,7 +414,7 @@ def filter_deps(pkg, fd_ct, type):
 			print color('missing ' + type, 'red')
 			pkg = apacman.db_tools().strip_ver_cmps(pkg)[0]
 
-			if BUILDDEPS: 
+			if BUILDDEPS:
 				dep_path = autils.get_dep_path(ABS_ROOT, pkg)
 				# a dependency is found, check it's deps and run this method again
 				mdep_cans, dep_cans = autils.get_depends(
@@ -428,7 +428,7 @@ def filter_deps(pkg, fd_ct, type):
 					for mdep_can in mdep_cans:
 						filter_deps(mdep_can, fd_ct, type='[M]')
 
-				if dep_cans != ['']: 
+				if dep_cans != ['']:
 					for dep_can in dep_cans:
 						filter_deps(dep_can, fd_ct, type='[D]')
 
@@ -451,7 +451,7 @@ def filter_deps(pkg, fd_ct, type):
 						found = 1
 						dependsfile = db_path + '/depends'
 						dep_cans = apacman.db_tools().get_db_info(dependsfile, '%DEPENDS%')
-						if dep_cans != []: 
+						if dep_cans != []:
 							fd_ct += spaces
 							for dep_can in dep_cans:
 								filter_deps(dep_can, fd_ct, type='[D]')
@@ -562,7 +562,7 @@ def makepkgf(dep):
 		print 'You can visit the directory, fix the ' \
 		'problem, and run makepkg.'
 		sys.exit(3)
-	
+
 	return get_pkgpath()
 
 def install(pkgpath, asdeps=False):
@@ -577,7 +577,7 @@ def install(pkgpath, asdeps=False):
 		print 'Once pacman exits, you may press enter to install'
 		print 'Control + C to cancel.'
 		raw_input()	
-		
+
 	print msg('Installing package...')
 
 	if not asdeps:
@@ -588,7 +588,7 @@ def install(pkgpath, asdeps=False):
 	if code > 0:
 		raise Exception('aurbuild could not install '
 				'package via pacman --upgrade.')
-			
+
 def builddeps(deplist):
 	# for -b option
 	cwd = os.getcwd()
@@ -637,7 +637,7 @@ def menu(dir_list, package):
 			files.append(each)
 	del(each)
 	file_num = len(files)
-	
+
 	if not NOINSTALL:
 		# open editor with .install file
 		for k in files:
@@ -742,7 +742,7 @@ def savefiles(pkg, old_dir):
 		print >>sys.stderr.write('Error saving %s to %s: %s' %
 			(pkg, save_dir, msg))
 		print >>sys.stderr.write('Aborting save...')
-		
+
 	savecan = os.path.join(save_dir, pkg)
 
 	if not os.path.isdir(save_dir):
@@ -753,7 +753,7 @@ def savefiles(pkg, old_dir):
 		except OSError, e:
 			abort_msg(str(e))
 			failed = 1
-	
+
 	if os.path.isdir(savecan) and not failed:
 		if not NOCONFIRM:
 			choice = raw_input(savecan + ': directory exists. Overwrite? [Y/n]  ').lower()
@@ -776,7 +776,7 @@ def savefiles(pkg, old_dir):
 def get_editor():
 	global editor
 	global default_editor
-	
+
 	editor = os.getenv('EDITOR')
 
 	# Prompt for editor.
@@ -793,7 +793,7 @@ def get_editor():
 		# Use less to view files if no valid editor is found.
 		editor = [default_editor]
 
-		raise Exception('%s not found on system.\n' 
+		raise Exception('%s not found on system.\n'
 				'Using %s as an editor.' %
 				(input, default_editor))
 def main():
@@ -825,7 +825,7 @@ def main():
 		if len(args) == 0:
 			return retcode
 
-	if SEARCH: 
+	if SEARCH:
 		autils.search(args, VERBOSE, aursite)
 		return 0
 
@@ -961,7 +961,7 @@ def main():
 				continue
 
 			aurpkgver= autils.echo_bash_vars(pkgbuild_path, '${pkgver}-${pkgrel}')
-			
+
 			result = aversion.vercmp().vercmp(aurpkgver, installed[upgrade_ct])
 
 			if result == 1:
@@ -983,7 +983,7 @@ def main():
 				continue
 			elif result == -1:
 				print ':: local/%s %s seems newer than unsupported/%s %s' % (
-					argo, installed[upgrade_ct], argo, aurpkgver) 
+					argo, installed[upgrade_ct], argo, aurpkgver)
 				cleanup()
 				upgrade_ct += 1
 				continue
@@ -995,7 +995,7 @@ def main():
 				cleanup()
 				upgrade_ct += 1
 				continue
-	
+
 		# get dependencies
 		try:
 			mdep_cans, dep_cans = autils.get_depends(work_dir + '/PKGBUILD', 'makedepends', 'depends')
@@ -1006,7 +1006,7 @@ def main():
 		mdeps = []
 		deps = []
 		print color('==> ', 'blue') + color('Checking Buildtime Dependencies... \n', 'black')
-		if mdep_cans != ['']: 
+		if mdep_cans != ['']:
 			for mdep_can in mdep_cans:
 				try:
 					mdeps = filter_deps(mdep_can, fd_ct=1, type='[M]')
@@ -1046,7 +1046,7 @@ def main():
 				for v in deps_type: print v,
 				if not NOCONFIRM:
 					dep_choice = raw_input('\nProceed?  [Y/n] ').lower()
-				else: 
+				else:
 					print '\n'
 					dep_choice = 'y'
 				if dep_choice == 'y' or dep_choice == 'yes' or dep_choice == '':

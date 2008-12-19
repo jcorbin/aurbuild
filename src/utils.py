@@ -4,16 +4,16 @@
 #
 #   Copyright (C) 2005-2007 by Tyler Gates <TGates81@gmail.com>
 #   Copyright (C) 2008 by Loui Chang <louipc.ist@gmail.com>
-#  
+#
 #   This program is free software; you can redistribute it and/or modify
-#   it under the terms of the GNU General Public License version 2 
+#   it under the terms of the GNU General Public License version 2
 #   as published by the Free Software Foundation.
-# 
+#
 #   This program is distributed in the hope that it will be useful,
 #   but WITHOUT ANY WARRANTY; without even the implied warranty of
 #   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #   GNU General Public License for more details.
-#  
+#
 #   You should have received a copy of the GNU General Public License along
 #   with this program; if not, write to the Free Software Foundation, Inc.,
 #   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
@@ -205,11 +205,11 @@ def prepare_build_user():
 	try:
 		builduser_uid = pwd.getpwnam('aurbuild')[2]
 		builduser_gid = pwd.getpwnam('aurbuild')[3]
-		return builduser_uid, builduser_gid  
+		return builduser_uid, builduser_gid
 	except:
 		# setup an account
 		print 'creating designated build user... ',
-		code = Popen(['useradd', 
+		code = Popen(['useradd',
 			'-s', '/bin/false',
 			'-d', '/var/tmp/aurbuild',
 			'-u', '360',
@@ -260,7 +260,7 @@ def search(args, verbose, site):
 
 	try:
 		names, descriptions, locations, categories, maintainers, \
-			votes = aaurparse.aursearch(args[0], site) 
+			votes = aaurparse.aursearch(args[0], site)
 	except Exception, e:
 		print >>sys.stderr.write(str(e))
 		sys.exit(1)
@@ -272,10 +272,10 @@ def search(args, verbose, site):
 		view_list = []
 		for num in range(len(names)):
 			name 		= names[num]
-			desc	 	= textwrap.wrap(descriptions[num]) 
+			desc	 	= textwrap.wrap(descriptions[num])
 			location	= locations[num]
 			category	= categories[num]
-			maintainer	= 'Maintainer: ' + maintainers[num] 
+			maintainer	= 'Maintainer: ' + maintainers[num]
 			_votes		= 'Votes: ' + votes[num] + '\n'
 
 
@@ -287,7 +287,7 @@ def search(args, verbose, site):
 				category = '(%s)' % category
 
 			pkg_info = '%s/%s %s\n%s' % (
-				location, name, category, description) 
+				location, name, category, description)
 
 			if verbose:
 				pkg_info += '\t%s\n\t%s' % (maintainer, _votes)

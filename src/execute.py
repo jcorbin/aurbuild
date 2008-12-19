@@ -3,17 +3,17 @@
 #   execute.py
 #
 #   Copyright (C) 2007 by Tyler Gates <TGates81@gmail.com>
-#   Copyright (C) 2008 by Loui Chang <louipc.ist@gmail.com> 
+#   Copyright (C) 2008 by Loui Chang <louipc.ist@gmail.com>
 #
 #   This program is free software; you can redistribute it and/or modify
-#   it under the terms of the GNU General Public License version 2 
+#   it under the terms of the GNU General Public License version 2
 #   as published by the Free Software Foundation.
-# 
+#
 #   This program is distributed in the hope that it will be useful,
 #   but WITHOUT ANY WARRANTY; without even the implied warranty of
 #   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #   GNU General Public License for more details.
-#  
+#
 #   You should have received a copy of the GNU General Public License along
 #   with this program; if not, write to the Free Software Foundation, Inc.,
 #   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
@@ -44,7 +44,7 @@ def child_spawn(app, args, uid=None, gid=None, env={}):
 		pass
 
 	if os.path.isabs(app) and os.access(app, os.F_OK | os.X_OK):
-		# good 
+		# good
 		path = app
 		app = os.path.basename(path)
 	elif not os.path.isabs(app):
@@ -61,7 +61,7 @@ def child_spawn(app, args, uid=None, gid=None, env={}):
 	# args must be a list
 	if not isinstance(args, list):
 		args = args.split()
-		# add the binary to the front of the list 
+		# add the binary to the front of the list
 		args[:0] = app
 
 	fpid = os.fork()

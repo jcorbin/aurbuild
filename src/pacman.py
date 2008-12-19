@@ -5,14 +5,14 @@
 #   Copyright (C) 2008 by Loui Chang <louipc.ist@gmail.com>
 #
 #   This program is free software; you can redistribute it and/or modify
-#   it under the terms of the GNU General Public License version 2 
+#   it under the terms of the GNU General Public License version 2
 #   as published by the Free Software Foundation.
-# 
+#
 #   This program is distributed in the hope that it will be useful,
 #   but WITHOUT ANY WARRANTY; without even the implied warranty of
 #   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #   GNU General Public License for more details.
-#  
+#
 #   You should have received a copy of the GNU General Public License along
 #   with this program; if not, write to the Free Software Foundation, Inc.,
 #   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
@@ -112,7 +112,7 @@ class db_tools:
 					raise DatabaseError('Database depends file %s not found' % dependsfile)
 				name = self.get_db_info(descfile, '%NAME%')
 				provides = self.get_db_info(dependsfile, '%PROVIDES%')
-				for e in name: 
+				for e in name:
 					if e == pkgname: return pkgpath
 				if logical:
 					for j in provides:
@@ -183,7 +183,7 @@ class db_tools:
 	def get_group(self, keyword):
 		"""
 		Scan repo database for keyword as a group and return all
-		packages included in the group. 
+		packages included in the group.
 		"""
 
 		packages = []
@@ -215,7 +215,7 @@ class db_tools:
 
 		try:
 			# Set these two dictionaries
-			names, versions = self.get_query(query) 
+			names, versions = self.get_query(query)
 		except IndexError:
 			raise DatabaseError(
 				'ERROR: pacman failure or empty set.')
@@ -234,7 +234,7 @@ class db_tools:
 
 		try:
 			# Set these two dictionaries
-			names, versions = self.get_query(query) 
+			names, versions = self.get_query(query)
 		except IndexError:
 			raise DatabaseError(
 				'ERROR: pacman failure or empty set')
@@ -292,13 +292,13 @@ class operations(db_tools):
 		# If the dependency did not have a release number, remove it
 		# from the installed for a fair comparison. We are concerned
 		# with package's version number.
-		if not re.search('-[0-9]*$', dependency): 
+		if not re.search('-[0-9]*$', dependency):
 			inst_version = re.sub('-[0-9]*$', '', inst_version)
 
 		if inst_version != None:
 			if comp == None: return 0
 			elif req_version == None: return 0
-			elif comp == '>=': 
+			elif comp == '>=':
 				if vercmp().vercmp(inst_version, req_version) >= 0: return 0
 				else: return 127
 			elif comp == '<=':

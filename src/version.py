@@ -5,14 +5,14 @@
 #   Copyright (C) 2008 by Loui Chang <louipc.ist@gmail.com>
 #
 #   This program is free software; you can redistribute it and/or modify
-#   it under the terms of the GNU General Public License version 2 
+#   it under the terms of the GNU General Public License version 2
 #   as published by the Free Software Foundation.
-# 
+#
 #   This program is distributed in the hope that it will be useful,
 #   but WITHOUT ANY WARRANTY; without even the implied warranty of
 #   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #   GNU General Public License for more details.
-#  
+#
 #   You should have received a copy of the GNU General Public License along
 #   with this program; if not, write to the Free Software Foundation, Inc.,
 #   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
@@ -35,7 +35,7 @@ class vercmp:
 		if re.search(rerel, ver):
 			tmp_ver = re.sub(rerel, '', ver)
 			rel = re.sub(tmp_ver, '', ver)
-			# strip out the "-" in rel 
+			# strip out the "-" in rel
 			rel = re.sub('-', '', rel)
 			if rel == '': rel = 0
 			ver = tmp_ver
@@ -64,7 +64,7 @@ class vercmp:
 		def remove_empty(ver):
 			i = 0
 			while i < len(ver):
-				if ver[i] == '': 
+				if ver[i] == '':
 					ver.remove(ver[i])
 					i -= 1
 				i += 1
@@ -107,7 +107,7 @@ class vercmp:
 				# both must have matches, recombine using original ver order:
 
 				# find which list starts with the original string
-				if re.match(alver[0], ver): 
+				if re.match(alver[0], ver):
 					starter = alver
 					follower = numver
 				else:

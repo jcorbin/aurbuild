@@ -5,14 +5,14 @@
 #   Copyright (C) 2008 by Loui Chang <louipc.ist@gmail.com>
 #
 #   This program is free software; you can redistribute it and/or modify
-#   it under the terms of the GNU General Public License version 2 
+#   it under the terms of the GNU General Public License version 2
 #   as published by the Free Software Foundation.
-# 
+#
 #   This program is distributed in the hope that it will be useful,
 #   but WITHOUT ANY WARRANTY; without even the implied warranty of
 #   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #   GNU General Public License for more details.
-#  
+#
 #   You should have received a copy of the GNU General Public License along
 #   with this program; if not, write to the Free Software Foundation, Inc.,
 #   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
@@ -110,10 +110,10 @@ class aurlogin:
 		# checked that we are logged in
 		logged_in = 0
 		for line in handle:
-			if 'Logged-in as:' in line: 
+			if 'Logged-in as:' in line:
 				logged_in = 1
 				break
-		if not logged_in: 
+		if not logged_in:
 			raise AuthenticationError, 'invalid username or password'
 
 	def vote(self, username, password, cookiefile, pkgname):
@@ -147,20 +147,20 @@ class aurlogin:
 					# confirm
 					confirmed = 0
 					for l in handle:
-						if 'votes have been cast' in l: 
+						if 'votes have been cast' in l:
 							confirmed = 1
 							self.logout()
 							break
 					if not confirmed:
 						self.logout()
 						raise ActionError, 'action confirmation indicates failure'
-				else: 
+				else:
 					# return 2 because the action has already been performed
 					self.logout()
 					return 2
 				self.logout()
 				return
-		if not valid_pkg: 
+		if not valid_pkg:
 			self.logout()
 			raise TargetError, '`'+pkgname+'\' not found on host'
 
@@ -196,20 +196,20 @@ class aurlogin:
 					# confirm
 					confirmed = 0
 					for l in handle:
-						if 'have been removed' in l: 
+						if 'have been removed' in l:
 							confirmed = 1
 							self.logout()
 							break
 					if not confirmed:
 						self.logout()
 						raise ActionError, 'action confirmation indicates failure'
-				else: 
+				else:
 					# return 2 because the action has already been performed
 					self.logout()
 					return 2
 				self.logout()
 				return
-		if not valid_pkg: 
+		if not valid_pkg:
 			self.logout()
 			raise TargetError, '`'+pkgname+'\' not found on host'
 
