@@ -129,8 +129,8 @@ def handler(signo, frame):
 		cleanup()
 		sys.exit(143)
 
-def usage():
-	print 'Usage: %s [options] [package] <package>' % PROGRAM_NAME
+def usage(name):
+	print 'Usage: %s [options] [package] <package>' % name
 	print ''
 	print 'Options:'
 	print '  -b, --builddeps       Build and install missing ' \
@@ -202,12 +202,12 @@ try:
 		'noconfirm', 'noinstall', 'rm-make-deps', 'clean',
 		'search', 'url='])
 except getopt.GetoptError, e:
-	usage()
+	usage(PROGRAM_NAME)
 	print 'Error: ' + str(e)
 	sys.exit(1)
 
 for opt, optarg in opts:
-	if opt in ['-h', '--help']: usage(); sys.exit(0)
+	if opt in ['-h', '--help']: usage(PROGRAM_NAME); sys.exit(0)
 	if opt in ['-v', '--version']: VERSION = 1
 	if opt in ['--verbose']: VERBOSE = 1
 	if opt in ['-b', '--builddeps']: BUILDDEPS = 1
@@ -242,7 +242,7 @@ def verify_inputs():
 
 	# Must have an option.
 	if len(opts) == 0:
-		usage()
+		usage(PROGRAM_NAME)
 		return 1
 
 	# Must have an arg unless --upgrade or --clean are specified.
