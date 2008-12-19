@@ -29,7 +29,7 @@ class vercmp:
 			ver: the package version
 			rel: the PKGBUILD pkgrel
 		"""
-		
+
 		rerel = '-[0-9]*$'
 		rel = 0
 		if re.search(rerel, ver):
@@ -73,7 +73,7 @@ class vercmp:
 		# remove empty splits -for situations where our split points ("." and "-") are together
 		ver1 = remove_empty(ver1)
 		ver2 = remove_empty(ver2)
-		
+
 		def pad(v1, v2):
 			v1_len = len(v1)
 			v2_len = len(v2)
@@ -124,12 +124,12 @@ class vercmp:
 					if i <= len_follower-1: recombined.append(follower[i])
 
 				return recombined
-				
+
 		for num in range(len(ver1)):
 			# strip out special characters
 			ver1[num] = re.sub(notalphanum, '', ver1[num])
 			ver2[num] = re.sub(notalphanum, '', ver2[num])
-			
+
 			# if any alpha is found, we must go through and split at alpha and digit and compare
 			if re.search(alphas, ver1[num]) or re.search(alphas, ver2[num]):
 				tmpver1 = alnum_split(ver1[num])
@@ -147,7 +147,7 @@ class vercmp:
 					elif tmpver1[i].isdigit() and tmpver2[i].isalpha():
 						tmpver1[i] = int(tmpver1[i]) + 1
 						tmpver2[i] = 0
-					
+
 					elif tmpver1[i].isalpha() and tmpver2[i].isdigit():
 						tmpver2[i] = int(tmpver2[i]) + 1
 						tmpver1[i] = 0
@@ -159,10 +159,10 @@ class vercmp:
 			else:
 				if int(ver1[num]) > int(ver2[num]): return 1
 				elif int(ver1[num]) < int(ver2[num]): return -1
-		
+
 		# compare release if we have gotten this far
 		if int(rel1) > int(rel2): return 1
 		elif int(rel1) < int(rel2): return -1
-		
+
 		# everthing must be equal, return 0
 		return 0

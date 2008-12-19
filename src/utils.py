@@ -220,7 +220,7 @@ def prepare_build_user():
 				'Reports exit status %s' % str(code))
 		else:
 			print 'done.'
-		
+
 		# lock password
 		print 'locking password... ',
 		code = Popen(['passwd', '-l', '-q', 'aurbuild']).wait()
@@ -229,9 +229,9 @@ def prepare_build_user():
 				'Reports exit status of %s' % str(code))
 		else:
 			print 'done.'
-		
+
 		# prepare_work_dirs() will handle the proper build directories
-		
+
 		# try again
 		return prepare_build_user()
 

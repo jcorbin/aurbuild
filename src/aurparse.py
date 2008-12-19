@@ -50,11 +50,11 @@ def pkg_main_url(pkg, site):
 		raise
 
 
-        url = '' 
-        for line in raw_text:
-                if 'packages.php?ID' in line and '>'+pkg+' ' in line:
-                        url = line.split("ID=", 1)[1]
-                        url = url.split("'>")[0]
+	url = '' 
+	for line in raw_text:
+		if 'packages.php?ID' in line and '>'+pkg+' ' in line:
+			url = line.split("ID=", 1)[1]
+			url = url.split("'>")[0]
 			url = site + "packages.php?ID=" + url
 			break
 
@@ -94,7 +94,7 @@ def aursearch(keyword, site):
 	category_list		= []
 	maintainer_list		= []
 	votes_list		= []
-			
+
 	ct=0
 	while ct<len(candidates):
 		if ct*6<len(candidates):
@@ -115,7 +115,7 @@ def aursearch(keyword, site):
 			else:
 				maintainer = maintainer.split('</a>')[0]
 				maintainer = maintainer.rsplit('>', 1)[1]
-				
+
 			name_list.append(name)
 			description_list.append(description)
 			location_list.append(location)
@@ -123,7 +123,7 @@ def aursearch(keyword, site):
 			maintainer_list.append(maintainer)
 			votes_list.append(votes)
 		ct=ct+1
-	
+
 	return name_list, description_list, location_list, category_list, maintainer_list, votes_list
 
 

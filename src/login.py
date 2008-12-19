@@ -169,7 +169,7 @@ class aurlogin:
 		""" un-vote for pkgname and return 2 if not voted """
 
 		search_url = self.aursite+'packages.php?K='+pkgname
-		
+
 		# login
 		self.login(username, password, cookiefile)
 

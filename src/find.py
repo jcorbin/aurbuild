@@ -67,7 +67,7 @@ def find_dir(dir, name):
 	"""
 
 	return find_it(dir, name, 'd');
-	
+
 
 def find_file(dir, name):
 	"""

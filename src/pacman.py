@@ -142,95 +142,95 @@ class db_tools:
 		return results
 
 	def get_repos(self):
-        	"""Read pacman.conf and return a list of enabled repos."""
+		"""Read pacman.conf and return a list of enabled repos."""
 
 		if not os.path.isfile(self.pacman_config):
 			raise ConfigError('Configuration file %s not found' % self.pacman_config)
-	        contents = self.file_contents(self.pacman_config)
-        	repolist = []
-	        for line in contents:
+		contents = self.file_contents(self.pacman_config)
+		repolist = []
+		for line in contents:
 			# ignore comments
 			if '#' in line:
 				line = line.split('#', 1)[0]
-        	        if re.search('\[.*\]', line)  and not re.search('\[options\]', line):
+			if re.search('\[.*\]', line)  and not re.search('\[options\]', line):
 				line = line.split('[', 1)[1]
 				line = line.split(']', 1)[0]
-        	                repolist.append(line.strip())
-	        return repolist
+				repolist.append(line.strip())
+		return repolist
 
 	def get_db_pkgpaths(self):
-        	"""
+		"""
 		Get a list of all package database paths according to
 		specified repos in /etc/pacman.conf
 		"""
 
 		#pkgpaths = [], list
 
-        	pkgpaths = []
-	        repo_names = self.get_repos()
-	        for repo_name in repo_names:
-        	        # add the path to repo names and check it exists, if so list it to get pakage directories
+		pkgpaths = []
+		repo_names = self.get_repos()
+		for repo_name in repo_names:
+		        # add the path to repo names and check it exists, if so list it to get pakage directories
 			if not os.path.isdir(self.pacman_db):
 				raise DatabaseError('Root database %s not found' % self.pacman_db)
-                	repo_path = self.pacman_db + '/' + repo_name
-	                if os.path.isdir(repo_path) and not os.path.islink(repo_path):
-        	                # get the files from package directories in each reop
-                	        for e in os.listdir(repo_path):
-                        	        can = repo_path + '/' + e
-                                	if os.path.isdir(can) and not os.path.islink(can): pkgpaths.append(can)
-	        return pkgpaths
+			repo_path = self.pacman_db + '/' + repo_name
+			if os.path.isdir(repo_path) and not os.path.islink(repo_path):
+				# get the files from package directories in each reop
+				for e in os.listdir(repo_path):
+					can = repo_path + '/' + e
+					if os.path.isdir(can) and not os.path.islink(can): pkgpaths.append(can)
+		return pkgpaths
 
 	def get_group(self, keyword):
-        	"""
+		"""
 		Scan repo database for keyword as a group and return all
 		packages included in the group. 
 		"""
 
-	        packages = []
-	        pkg_paths = self.get_db_pkgpaths()
-	        for pkg_path in pkg_paths:
+		packages = []
+		pkg_paths = self.get_db_pkgpaths()
+		for pkg_path in pkg_paths:
 			# don't raise an exception here because these database files don't necessarily have to be there
 			descfile = pkg_path + '/desc'
-	                if os.path.isfile(descfile):
-	                        group_names = self.get_db_info(descfile, '%GROUPS%')
-	                        if keyword in group_names:
+			if os.path.isfile(descfile):
+				group_names = self.get_db_info(descfile, '%GROUPS%')
+				if keyword in group_names:
 					try:
-	                                	tmp = self.get_db_info(descfile, '%NAME%')[0]
+						tmp = self.get_db_info(descfile, '%NAME%')[0]
 					except IndexError:
 						raise DatabaseError(
 							'Error: unable to parse NAME from database file %s'
 							'. Possible corruption.\n' % descfile)
-	                                if tmp != []: packages.append(tmp)
-	        return packages
+					if tmp != []: packages.append(tmp)
+		return packages
 
 	def get_local(self):
-	        """
-	        Returns two dictionaries of pkgname and pkgver of all
+		"""
+		Returns two dictionaries of pkgname and pkgver of all
 		locally installed packages.
 		"""
 
 		query = "-Q"
-	        names = []
-	        versions = []
-						
+		names = []
+		versions = []
+
 		try:
 			# Set these two dictionaries
 			names, versions = self.get_query(query) 
 		except IndexError:
 			raise DatabaseError(
 				'ERROR: pacman failure or empty set.')
-	
-	        return names, versions
+
+		return names, versions
 
 	def get_foreign(self):
-	        """
+		"""
 		Return two dictionaries of pkgname and pkgver of installed
 		packages which aren't in the official repos.
-	        """
+		"""
 
 		query = "-Qm"
-	        names = []
-	        versions = []
+		names = []
+		versions = []
 
 		try:
 			# Set these two dictionaries
@@ -239,7 +239,7 @@ class db_tools:
 			raise DatabaseError(
 				'ERROR: pacman failure or empty set')
 
-	        return names, versions
+		return names, versions
 
 def syncdeps(deplist):
 	"""
@@ -254,10 +254,10 @@ def syncdeps(deplist):
 		if pkg != '':
 			pkg = db_tools().strip_ver_cmps(pkg)[0]
 			pkglist.append(pkg)
-	
+
 	cmd = ['pacman', '-S', '--asdeps', '--noconfirm']
 	cmd.extend(pkglist)
-			
+
 	code = Popen(cmd).wait()
 	if code == 127:
 		raise PacmanError('pacman could not install dependencies.\n')
@@ -273,12 +273,12 @@ class operations(db_tools):
 			2: something bad happened
 			127: missing
 		"""
-		
+
 		pkgname, comp, req_version = db_tools.strip_ver_cmps(dependency)
 		pkgpath = db_tools.check_installed(pkgname)
 
 		if not pkgpath:	return 127
-		
+
 		try:
 			inst_version = db_tools.get_db_info(pkgpath + '/desc', '%VERSION%')[0]
 		except IndexError:
@@ -294,7 +294,7 @@ class operations(db_tools):
 		# with package's version number.
 		if not re.search('-[0-9]*$', dependency): 
 			inst_version = re.sub('-[0-9]*$', '', inst_version)
-		
+
 		if inst_version != None:
 			if comp == None: return 0
 			elif req_version == None: return 0

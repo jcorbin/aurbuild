@@ -42,7 +42,7 @@ def child_spawn(app, args, uid=None, gid=None, env={}):
 			str(uid)+'. This may result in root access to builds, \
 			proceed at your own risk!.')
 		pass
-	
+
 	if os.path.isabs(app) and os.access(app, os.F_OK | os.X_OK):
 		# good 
 		path = app
@@ -63,7 +63,7 @@ def child_spawn(app, args, uid=None, gid=None, env={}):
 		args = args.split()
 		# add the binary to the front of the list 
 		args[:0] = app
-	
+
 	fpid = os.fork()
 	if not fpid:
 		if gid != None: os.setgid(gid)
