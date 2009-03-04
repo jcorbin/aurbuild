@@ -2,6 +2,7 @@
 #   aurparse.py
 #
 #   Copyright (C) 2005-2007 by Tyler Gates <TGates81@gmail.com>
+#   Copyright (C) 2009 by Loui Chang <louipc.ist@gmail.com>
 #
 #   This program is free software; you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License version 2
@@ -23,9 +24,8 @@ import sys
 import urllib
 
 """
-The format of the 'site' argument must be protocol://domain/.
-ex: http://aur.archlinux.org/
-The trailing slash is important
+The format of the 'site' argument must be protocol://domain
+ex: http://aur.archlinux.org
 """
 
 # this looks a little strange but we need to access each of these
@@ -33,9 +33,13 @@ The trailing slash is important
 # hence the manual 'raw_text' parameters which is currentlyi
 # obtained from raw_pkg_query().
 
+def fix_path(str):
+	str = re.sub('\\\\/', '/', str)
+	return str
+
 def raw_pkg_query(keyword, site):
-	search_url = site + 'packages.php?K='
-	f = urllib.urlopen(search_url+keyword+'&PP=100')
+	search_url = "%s/rpc.php?type=search&arg=" % site
+	f = urllib.urlopen(search_url + keyword)
 	lines = f.readlines()
 	return lines
 
@@ -46,30 +50,32 @@ def pkg_main_url(pkg, site):
 		raw_text = raw_pkg_query(pkg, site)
 	except Exception, e:
 		print >>sys.stderr.write(
-			'Could not retrieve needed data from ' + site)
+			"Could not retrieve needed data from %s" % site)
 		raise
 
+	# Match the portion of the search for a specific package.
+	url = re.search("ID\":\"()\",\"Name\":\"%s\"" % pkg, raw_text[0])
+	url = "%s/rpc.php?type=info&arg=%s" % (site, url)
 
+	return url
+
+def pkg_tarball_url(pkgname, site):
 	url = ''
-	for line in raw_text:
-		if 'packages.php?ID' in line and '>'+pkg+' ' in line:
-			url = line.split("ID=", 1)[1]
-			url = url.split("'>")[0]
-			url = site + "packages.php?ID=" + url
+	search_url = "%s/rpc.php?type=info&arg=%s" % (site, pkgname)
+	f = urllib.urlopen(search_url)
+	lines = f.readlines()
+
+	for line in lines:
+		if '"Name":"%s"' % pkgname in line:
+			url = line.split('"URLPath":"')[1]
+			url = url.split('",')[0]
+			url = fix_path(url)
 			break
 
-	return url
-
-
-def pkg_tarball_url(raw_text, site):
-	url = ''
-	for line in raw_text:
-		if '\'>Tarball</a>' in line:
-			url = line.split("<a href='")[1]
-			url = url.split("'>Tarball")[0]
-			url = site + url
-	return url
-
+	if url != '':
+		return site + url
+	else:
+		return
 def aursearch(keyword, site):
 	"""
 	Gets and parses the output from the site's search page.
@@ -80,13 +86,41 @@ def aursearch(keyword, site):
 
 	f = raw_pkg_query(keyword, site)
 
-	candidates = []
+	# Implode
+	data = ''
 	for line in f:
-		if re.search('data\d', line):
-			candidates.append(line)
+		data += line
+
+	results = data.split('"type":"')[1]
+	results = results.split('","results":')
+	type = results[0]
+	results = results[1]
+
+	if type == "error":
+		results = results.split('"')[1]
+		print results
+		return
+
+	# Clean up paths
+	results = re.sub('\\\/', '/', results)
+	results = re.sub('","', '"\n"', results)
+	results = re.sub(r'"(\w+?)":"(.+?)"', r'\1:\2', results)
+
+	# Split up results.
+	results = results.split('[{')[1]
+	results = results.split('}]}')[0]
+	results = results.split('},{')
+	for num in range(len(results)):
+		print results[num]
+	sys.exit(0)
+
+	# Separate each package in the returned data.
+	candidates = []
+	if re.search('data\d', line):
+		candidates.append(line)
 
 	if len(candidates) == 0:
-		return None, None, None, None, None, None
+		return None
 
 	name_list		= []
 	description_list	= []
@@ -95,26 +129,17 @@ def aursearch(keyword, site):
 	maintainer_list		= []
 	votes_list		= []
 
-	ct=0
-	while ct<len(candidates):
-		if ct*6<len(candidates):
-			location = candidates[ct * 6].split("class='blue'>")[1]
-			location = location.split("</span")[0]
-			category = candidates[(ct * 6) + 1].split("class='blue'>")[1]
-			category = category.split("</span")[0]
-			color="'black'"
-			name = candidates[(ct * 6) + 2].split("class=" + color + ">")[1]
-			name = name.split("</span></a>")[0]
-			votes = candidates[(ct * 6) + 3].split("&nbsp;&nbsp;&nbsp;")[1]
-			votes = votes.split("</span")[0]
-			description = candidates[(ct * 6) + 4].split("class='blue'>")[1]
-			description = description.split("</span>")[0]
-			maintainer = candidates[(ct * 6) +5]
-			if re.search("'>orphan", maintainer):
-				maintainer = 'ORPHANED'
-			else:
-				maintainer = maintainer.split('</a>')[0]
-				maintainer = maintainer.rsplit('>', 1)[1]
+	ct = 0
+	while ct < len(candidates):
+		if (ct * 6) < len(candidates):
+			location = location.split("Location")[0]
+			category = category.split("Category")[0]
+			name = name.split("Name")[0]
+			votes = votes.split("NumVotes")[0]
+			description = description.split("Description")[0]
+
+#			maintainer = maintainer.split('Maintainer')[0]
+			maintainer = ''
 
 			name_list.append(name)
 			description_list.append(description)
@@ -122,7 +147,7 @@ def aursearch(keyword, site):
 			category_list.append(category)
 			maintainer_list.append(maintainer)
 			votes_list.append(votes)
-		ct=ct+1
+		ct = ct + 1
 
 	return name_list, description_list, location_list, category_list, maintainer_list, votes_list
 

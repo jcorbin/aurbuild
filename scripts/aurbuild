@@ -3,7 +3,7 @@
 #   aurbuild
 #
 #   Copyright (C) 2005-2007 by Tyler Gates <TGates81@gmail.com>
-#   Copyright (C) 2008 by Loui Chang <louipc.ist@gmail.com>
+#   Copyright (C) 2008-2009 by Loui Chang <louipc.ist@gmail.com>
 #
 #   This program is free software; you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License version 2
@@ -307,31 +307,17 @@ def prepare_work_dirs():
 
 def get_tarball(pkg):
 
-	main_url = aaurparse.pkg_main_url(pkg, aursite)
-
-	if main_url == '':
-		print >>sys.stderr.write('%s: not found at %s' % (pkg, aursite))
-		return None
-
 	try:
-		f = urllib.urlopen(main_url)
-		raw_text = f.readlines()
-		f.close()
-	except IOError, e:
-		raise Exception(
-			'Could not retrieve needed data from:'
-			'\n\t%s\n%s' % (main_url, str(e)))
-
-	try:
-		tarball_url = aaurparse.pkg_tarball_url(raw_text, aursite)
+		tarball_url = aaurparse.pkg_tarball_url(pkg, aursite)
 	except Exception, e:
 		raise Exception('Unable to parse tarball info. If '
 			'you see this message rarely, it is\n'
 			'possible user comments have skewed the parsing '
 			'results on the web page.\n')
 
-	if tarball_url == '':
-		return None
+	if not tarball_url:
+		print >>sys.stderr.write('%s: not found at %s' % (pkg, aursite))
+		return
 
 	try:
 		tar = urllib.urlretrieve(tarball_url)[0]
@@ -339,7 +325,7 @@ def get_tarball(pkg):
 	except IOError, e:
 		raise Exception(
 			'Could not retrieve needed data from:'
-			'\n\t%s\n%s' % (main_url, str(e)))
+			'\n\t%s\n%s' % (aursite, str(e)))
 
 def extract(file):
 	extract_dir = pkg_build_dir
