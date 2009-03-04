@@ -258,35 +258,35 @@ def appcheck(app):
 def search(args, verbose, site):
 	import textwrap
 
-	names, descriptions, locations, categories, maintainers, \
-		votes = aaurparse.aursearch(args[0], site)
+	packages = aaurparse.aursearch(args[0], site)
 
-	if names == None:
+	if packages == None:
 		print >>sys.stderr.write(args[0] + ': search results empty')
 		sys.exit(1)
 	else:
 		view_list = []
-		for num in range(len(names)):
-			name 		= names[num]
-			desc	 	= textwrap.wrap(descriptions[num])
-			location	= locations[num]
-			category	= categories[num]
-			maintainer	= 'Maintainer: ' + maintainers[num]
-			_votes		= 'Votes: ' + votes[num] + '\n'
-
+		for pkg in packages:
+			desc = textwrap.wrap(pkg['Description'])
 
 			description = ''
 			for line in desc:
 				description += '\t%s\n' % line
 
-			if category != '':
-				category = '(%s)' % category
+			if pkg['category'] != '':
+				category = '(%s)' % pkg['category']
 
 			pkg_info = '%s/%s %s\n%s' % (
-				location, name, category, description)
+				pkg['repo'],
+				pkg['Name'],
+				category,
+				description
+			)
 
 			if verbose:
-				pkg_info += '\t%s\n\t%s' % (maintainer, _votes)
+				pkg_info += '\tMaintainer: %s\tVotes: %s\n' % (
+					pkg['maintainer'],
+					pkg['NumVotes']
+				)
 
 			pkg_info += '\n'
 

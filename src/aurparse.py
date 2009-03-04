@@ -76,12 +76,14 @@ def pkg_tarball_url(pkgname, site):
 		return site + url
 	else:
 		return
+
 def aursearch(keyword, site):
 	"""
 	Gets and parses the output from the site's search page.
 
-	Returns a set of arrays that contain the package info in the order of:
-	names, descriptions, locations, categories, maintainers, and votes.
+	Returns 2D dict indexed by pkgname that contains
+	package info in the order of:
+	name, description, repo, category, maintainer, and votes.
 	"""
 
 	f = raw_pkg_query(keyword, site)
@@ -90,6 +92,9 @@ def aursearch(keyword, site):
 	data = ''
 	for line in f:
 		data += line
+
+	# Clean up paths
+	data = re.sub('\\\/', '/', data)
 
 	results = data.split('"type":"')[1]
 	results = results.split('","results":')
@@ -101,55 +106,64 @@ def aursearch(keyword, site):
 		print results
 		return
 
-	# Clean up paths
-	results = re.sub('\\\/', '/', results)
+	# We could probably evaluate the output as python here,
+	# but that may open up a security vulnerability.
+
 	results = re.sub('","', '"\n"', results)
+
+	# Probably don't need to do this.
 	results = re.sub(r'"(\w+?)":"(.+?)"', r'\1:\2', results)
 
 	# Split up results.
 	results = results.split('[{')[1]
 	results = results.split('}]}')[0]
 	results = results.split('},{')
+
 	for num in range(len(results)):
-		print results[num]
-	sys.exit(0)
+		temp = {}
+		results[num] = results[num].splitlines()
+		for num1 in range(len(results[num])):
+			index, value = results[num][num1].split(':', 1)
+			temp[index] = value 
+		results[num] = temp
 
-	# Separate each package in the returned data.
-	candidates = []
-	if re.search('data\d', line):
-		candidates.append(line)
+	# pkgname = re.match('Name:(.+)', '"\n"', results)
 
-	if len(candidates) == 0:
-		return None
+	packages = results
 
-	name_list		= []
-	description_list	= []
-	location_list		= []
-	category_list		= []
-	maintainer_list		= []
-	votes_list		= []
+	repos = {
+		'2': 'unsupported',
+		'3': 'community'
+	}
 
-	ct = 0
-	while ct < len(candidates):
-		if (ct * 6) < len(candidates):
-			location = location.split("Location")[0]
-			category = category.split("Category")[0]
-			name = name.split("Name")[0]
-			votes = votes.split("NumVotes")[0]
-			description = description.split("Description")[0]
+	categories = {
+		'1': 'none',
+		'2': 'daemons',
+		'3': 'devel',
+		'4': 'editors',
+		'5': 'emulators',
+		'6': 'games',
+		'7': 'gnome',
+		'8': 'i18n',
+		'9': 'kde',
+		'10': 'lib',
+		'11': 'modules',
+		'12': 'multimedia',
+		'13': 'network',
+		'14': 'office',
+		'15': 'science',
+		'16': 'system',
+		'17': 'x11',
+		'18': 'xfce',
+		'19': 'kernels'
+	}
 
-#			maintainer = maintainer.split('Maintainer')[0]
-			maintainer = ''
+	for num in range(len(results)):
+		results[num]['repo'] = repos[results[num]['LocationID']]
+		results[num]['maintainer'] = ''
+		results[num]['category'] = categories[results[num]['CategoryID']]
 
-			name_list.append(name)
-			description_list.append(description)
-			location_list.append(location)
-			category_list.append(category)
-			maintainer_list.append(maintainer)
-			votes_list.append(votes)
-		ct = ct + 1
-
-	return name_list, description_list, location_list, category_list, maintainer_list, votes_list
+	return packages
 
 
 if __name__ == '__main__':
