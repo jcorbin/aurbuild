@@ -81,9 +81,10 @@ def aursearch(keyword, site):
 	"""
 	Gets and parses the output from the site's search page.
 
-	Returns 2D dict indexed by pkgname that contains
-	package info in the order of:
+	Returns an array of dicts that contain package info including:
 	name, description, repo, category, maintainer, and votes.
+
+	Note: maintainer isn't returned on the server side yet.
 	"""
 
 	f = raw_pkg_query(keyword, site)
