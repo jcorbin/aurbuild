@@ -323,8 +323,7 @@ def get_tarball(pkg):
 		tar = urllib.urlretrieve(tarball_url)[0]
 		return tar
 	except IOError, e:
-		raise Exception(
-			'Could not retrieve needed data from:'
+		raise Exception('Could not retrieve needed data from:'
 			'\n\t%s\n%s' % (aursite, str(e)))
 
 def extract(file):
@@ -335,28 +334,24 @@ def extract(file):
 	elif 'tgz' in file_extension: ext = 'gz'
 	elif 'bz2' in file_extension: ext = 'bz2'
 	else:
-		print >>sys.stderr.write('\n%s: unsupported compression. Cannot extract.\n' % file)
 		if os.path.exists(file): os.remove(file)
-		sys.exit(1)
-	
+		raise Exception('%s: unsupported compression. Cannot extract.' % file)
+
 	try:
 		if os.path.isdir(extract_dir): rmtree(extract_dir)
 		os.mkdir(extract_dir)
 		os.chmod(extract_dir, 0775)
 		os.chown(extract_dir, builduser_uid, builduser_gid)
 	except Exception, e:
-		print >>sys.stderr.write('could not create temporary extraction point:')
-		print >>sys.stderr.write(str(e))
-		sys.exit(1)
+		raise Exception('could not create temporary extraction point: %s' % str(e))
 
 	try:
-		tar_f = tarfile.open(file, 'r:' + ext)
+		tar_f = tarfile.open(file, 'r:*')
 		for member in tar_f.getmembers():
 			tar_f.extract(member, extract_dir)
 	except tarfile.TarError, e:
-		print >>sys.stderr.write('\ncould not extract tarfile: %s\n' % str(e))
 		if os.path.exists(file): os.remove(file)
-		sys.exit(1)
+		raise Exception('Could not extract tarfile: %s\n' % str(e))
 
 	# The parent directory of the extracted tarball has a setgroup
 	# id bit set from AUR. This needs to be removed.
@@ -836,13 +831,16 @@ def main():
 
 		if not (LOCAL or OFFICIAL) or UPGRADE:
 			try:
+				aurpkg = aaurparse.pkg_info(argo, aursite)
+
 				# Try to get a tarball from AUR.
 				aur_tarfile = get_tarball(argo)
 			except Exception, e:
 				print >>sys.stderr.write(str(e))
-				return 1
+				upgrade_ct += 1
+				continue
 
-		if aur_tarfile == None:
+		if aurpkg == None:
 			# Look for package in ABS or local save paths.
 
 			pkgbuild_root = save_dir
@@ -909,7 +907,8 @@ def main():
 				extract(aur_tarfile)
 			except Exception, e:
 				print >>sys.stderr.write(str(e))
-				return 1
+				upgrade_ct += 1
+				continue
 
 		try:
 			work_dir = autils.get_pkgbuild_path(pkg_work_dir)
@@ -936,7 +935,6 @@ def main():
 		if UPGRADE:
 
 			# Get aur package's info
-			aurpkg = aaurparse.pkg_info(argo, aursite)
 			aurpkgver = aurpkg['Version']
 			package = aurpkg['Name']
 

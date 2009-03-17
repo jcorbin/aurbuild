@@ -47,7 +47,11 @@ def pkg_info(pkg, site):
 	search_url = "%s/rpc.php?type=info&arg=%s" % (site, pkg)
 	f = urllib.urlopen(search_url)
 	lines = f.readlines()
-	return parse(lines)[0]
+
+	try:
+		return parse(lines)[0]
+	except TypeError:
+		return None
 
 def pkg_main_url(pkg, site):
 	raw_text = []
@@ -66,17 +70,8 @@ def pkg_main_url(pkg, site):
 	return url
 
 def pkg_tarball_url(pkgname, site):
-	url = ''
-	search_url = "%s/rpc.php?type=info&arg=%s" % (site, pkgname)
-	f = urllib.urlopen(search_url)
-	lines = f.readlines()
-
-	for line in lines:
-		if '"Name":"%s"' % pkgname in line:
-			url = line.split('"URLPath":"')[1]
-			url = url.split('",')[0]
-			url = fix_path(url)
-			break
+#	url = pkg_info(pkgname, site)['URLPath']
+	url = 'packages/%s/%s.tar.gz' % (pkgname, pkgname)
 
 	if url != '':
 		return site + url
