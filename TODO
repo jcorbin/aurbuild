@@ -4,23 +4,13 @@ Note: Some of these are just ideas and might not get implemented at all.
 General List:
  * Anything marked with 'TODO' in the source
 
- * aurbuild downloads and extracts the tarballs when just checking for
-   updates. Make it not do that.
-
  * Add support to build deps recursively from [unsupported] more easily
    (Without having to run aurbuild multiple times)
-
- * Use json interface to grab info on packages when syncing/building
-   there was some old code that was supposed to fix problems with finding
-   some packages that I clobbered. Example: try installing 'rar' from AUR
 
  * Add a switch to change AUR url. (Partially Done)
 	example: aurbuild --url http://aur.test-site.org
 	Need to add function to verify that the url is valid and to add a
 	trailing slash/ or leading protocol://
-
- * Make --upgrade more secure. Don't source PKGBUILD to check versions.
-   Get info from AUR instead, or parse PKGBUILD without sourcing.
 
  * If a dependency isn't found in the database, don't quit immediately.
    Check the rest of the dependencies, THEN exit. (Partially Done)
@@ -33,7 +23,6 @@ General List:
    that purpose.
 
  * Improve search
-	- Support for multiple keywords
 	- Sorting packages alphabetically.
 	- Narrowing down and sorting results by location, maintainer
 	- Narrowing, sorting results by votes
@@ -87,8 +76,9 @@ General List:
 
  * Add a switch to take pacman arguments.
 
- * Use the libalpm hooks in pacman3 for python. Only because it would be faster
-   (and easier to maintain?) than the manual flat file parsing module pacman.py.
+ * Use the libalpm hooks in pacman3 for python. Only because it would be
+   faster (and easier to maintain?) than the manual flat file parsing module
+   pacman.py.
 
  * Work out how source files should be cached
 	I'm thinking just the tarball with scripts/local sources should be
@@ -114,7 +104,7 @@ General List:
  * Utilise AUR's JSON interface for search info (simplejson)
 
  * Change menu appearance
-	- Add more info like package repo, version, category
+	- Add more info like package repo, version
 
  * echo_bash_vars() suffers from a potential problem if we wanted to echo
    an array along with other variables, or maybe even two arrays.
