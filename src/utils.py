@@ -257,11 +257,13 @@ def appcheck(app):
 
 def search(args, verbose, site):
 	import textwrap
+	
+	args = ' '.join(args)
 
-	packages = aaurparse.aursearch(args[0], site)
+	packages = aaurparse.aursearch(args, site)
 
 	if packages == None:
-		print >>sys.stderr.write(args[0] + ': search results empty')
+		print >>sys.stderr.write(args + ': search results empty')
 		sys.exit(1)
 	else:
 		view_list = []

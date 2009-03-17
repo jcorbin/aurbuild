@@ -38,6 +38,7 @@ def fix_path(str):
 	return str
 
 def raw_pkg_query(keyword, site):
+	keyword = re.sub('\s', '+', keyword)
 	search_url = "%s/rpc.php?type=search&arg=%s" % (site, keyword)
 	f = urllib.urlopen(search_url)
 	lines = f.readlines()
@@ -87,6 +88,7 @@ def parse(f):
 
 	Note: maintainer isn't returned on the server side yet.
 	"""
+
 	# Implode
 	data = ''
 	for line in f:
