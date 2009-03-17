@@ -832,13 +832,44 @@ def main():
 		if not (LOCAL or OFFICIAL) or UPGRADE:
 			try:
 				aurpkg = aaurparse.pkg_info(argo, aursite)
-
-				# Try to get a tarball from AUR.
-				aur_tarfile = get_tarball(argo)
 			except Exception, e:
 				print >>sys.stderr.write(str(e))
 				upgrade_ct += 1
 				continue
+
+		# for --upgrade. compare versions and confirm upgrade with user
+		if aurpkg and UPGRADE:
+
+			# Get aur package's info
+			aurpkgver = aurpkg['Version']
+			package = aurpkg['Name']
+
+			result = aversion.vercmp().vercmp(aurpkgver, installed[upgrade_ct])
+
+			if result == 1:
+				print '\tTarget: %s-%s' % (package, aurpkgver)
+				if not NOCONFIRM:
+					choice = raw_input('\tProceed with upgrade?  [Y/n] ').lower()
+					print ''
+					if choice != 'y' and choice != 'yes' and choice != '':
+						cleanup()
+						upgrade_ct += 1
+						continue
+			elif result == 0:
+				status = ' up to date'
+				argline = '%s %s ' % (argo, installed[upgrade_ct])
+				rjust_spaces = 80 - (int(len(argline)))
+				print argline + status.rjust(rjust_spaces, '.')
+				cleanup()
+				upgrade_ct += 1
+				continue
+			elif result == -1:
+				print ':: local/%s %s seems newer than unsupported/%s %s' % (
+					argo, installed[upgrade_ct], argo, aurpkgver)
+				cleanup()
+				upgrade_ct += 1
+				continue
+
 
 		if aurpkg == None:
 			# Look for package in ABS or local save paths.
@@ -904,6 +935,8 @@ def main():
 
 		else:
 			try:
+				# Try to get a tarball from AUR.
+				aur_tarfile = get_tarball(argo)
 				extract(aur_tarfile)
 			except Exception, e:
 				print >>sys.stderr.write(str(e))
@@ -930,39 +963,6 @@ def main():
 					return 0
 				else:
 					continue
-
-		# for --upgrade. compare versions and confirm upgrade with user
-		if UPGRADE:
-
-			# Get aur package's info
-			aurpkgver = aurpkg['Version']
-			package = aurpkg['Name']
-
-			result = aversion.vercmp().vercmp(aurpkgver, installed[upgrade_ct])
-
-			if result == 1:
-				print '\tTarget: %s-%s' % (package, aurpkgver)
-				if not NOCONFIRM:
-					choice = raw_input('\tProceed with upgrade?  [Y/n] ').lower()
-					print ''
-					if choice != 'y' and choice != 'yes' and choice != '':
-						cleanup()
-						upgrade_ct += 1
-						continue
-			elif result == 0:
-				status = ' up to date'
-				argline = '%s %s ' % (argo, installed[upgrade_ct])
-				rjust_spaces = 80 - (int(len(argline)))
-				print argline + status.rjust(rjust_spaces, '.')
-				cleanup()
-				upgrade_ct += 1
-				continue
-			elif result == -1:
-				print ':: local/%s %s seems newer than unsupported/%s %s' % (
-					argo, installed[upgrade_ct], argo, aurpkgver)
-				cleanup()
-				upgrade_ct += 1
-				continue
 
 		# evaulate options and go to menu if needed
 		if not AUTO_BUILD:
