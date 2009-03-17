@@ -38,10 +38,16 @@ def fix_path(str):
 	return str
 
 def raw_pkg_query(keyword, site):
-	search_url = "%s/rpc.php?type=search&arg=" % site
-	f = urllib.urlopen(search_url + keyword)
+	search_url = "%s/rpc.php?type=search&arg=%s" % (site, keyword)
+	f = urllib.urlopen(search_url)
 	lines = f.readlines()
 	return lines
+
+def pkg_info(pkg, site):
+	search_url = "%s/rpc.php?type=info&arg=%s" % (site, pkg)
+	f = urllib.urlopen(search_url)
+	lines = f.readlines()
+	return parse(lines)[0]
 
 def pkg_main_url(pkg, site):
 	raw_text = []
@@ -77,18 +83,15 @@ def pkg_tarball_url(pkgname, site):
 	else:
 		return
 
-def aursearch(keyword, site):
+def parse(f):
 	"""
-	Gets and parses the output from the site's search page.
+	Parses the output from the site's json interface.
 
 	Returns an array of dicts that contain package info including:
 	name, description, repo, maintainer, and votes.
 
 	Note: maintainer isn't returned on the server side yet.
 	"""
-
-	f = raw_pkg_query(keyword, site)
-
 	# Implode
 	data = ''
 	for line in f:
@@ -101,7 +104,7 @@ def aursearch(keyword, site):
 	results = results.split('","results":')
 	type = results[0]
 	results = results[1]
-
+	
 	if type == "error":
 		results = results.split('"')[1]
 		print results
@@ -113,11 +116,11 @@ def aursearch(keyword, site):
 	results = re.sub('","', '"\n"', results)
 
 	# Probably don't need to do this.
-	results = re.sub(r'"(\w+?)":"(.+?)"', r'\1:\2', results)
+	results = re.sub(r'"(\w+?)":"(.*)"', r'\1:\2', results)
 
 	# Split up results.
-	results = results.split('[{')[1]
-	results = results.split('}]}')[0]
+	results = re.split('\[?\{', results, 1)[1]
+	results = re.split('\}\]?\}', results, 1)[0]
 	results = results.split('},{')
 
 	for num in range(len(results)):
@@ -127,8 +130,6 @@ def aursearch(keyword, site):
 			index, value = results[num][num1].split(':', 1)
 			temp[index] = value 
 		results[num] = temp
-
-	# pkgname = re.match('Name:(.+)', '"\n"', results)
 
 	packages = results
 
@@ -147,6 +148,12 @@ def aursearch(keyword, site):
 		results[num]['maintainer'] = ''
 
 	return packages
+
+def aursearch(keyword, site):
+	"""Perform a search."""
+
+	return parse(raw_pkg_query(keyword, site))
+
 
 
 if __name__ == '__main__':

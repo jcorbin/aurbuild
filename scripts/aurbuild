@@ -934,19 +934,11 @@ def main():
 
 		# for --upgrade. compare versions and confirm upgrade with user
 		if UPGRADE:
-			pkgbuild_path = os.path.join(os.getcwd(), 'PKGBUILD')
 
-			# Sourcing the PKGBUILD before having a chance to look at it is bad.
-			try:
-				package = autils.echo_bash_vars(pkgbuild_path, '${pkgname}')
-			except Exception, e:
-				print >>sys.stderr.write('PKGBUILD syntax error (%s), unable to process:' % argo)
-				print >>sys.stderr.write(str(e))
-				cleanup()
-				upgrade_ct += 1
-				continue
-
-			aurpkgver= autils.echo_bash_vars(pkgbuild_path, '${pkgver}-${pkgrel}')
+			# Get aur package's info
+			aurpkg = aaurparse.pkg_info(argo, aursite)
+			aurpkgver = aurpkg['Version']
+			package = aurpkg['Name']
 
 			result = aversion.vercmp().vercmp(aurpkgver, installed[upgrade_ct])
 
