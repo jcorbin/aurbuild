@@ -137,8 +137,13 @@ def aursearch(keyword, site):
 		'3': 'community'
 	}
 
+	# Compensate for some possible RPC flaws.
 	for num in range(len(results)):
-		results[num]['repo'] = repos[results[num]['LocationID']]
+		try:
+			results[num]['repo'] = repos[results[num]['LocationID']]
+		except KeyError:
+			results[num]['repo'] = 'aur';
+
 		results[num]['maintainer'] = ''
 
 	return packages
