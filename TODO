@@ -32,8 +32,9 @@ General List:
 
  * Improve search
 	- Support for multiple keywords
-	- Narrowing down results by location, maintainer
-	- Narrowing results by votes
+	- Sorting packages alphabetically.
+	- Narrowing down and sorting results by location, maintainer
+	- Narrowing, sorting results by votes
 	- Add functionality to allow user to browse through search pages
 	  just like in AUR (to review more than 100 results)
 
