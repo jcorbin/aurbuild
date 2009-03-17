@@ -1,9 +1,10 @@
 
 AURBUILD
- -v1.8.5 (June , 2008)
+ -v1.8.5 (March 17, 2009)
 	* Rework PKGBUILD retrieval code.
 	* Prompt for editor if EDITOR isn't defined.
 	  Use less if the specified editor isn't found.
+	* Update searching to use the JSON interface.
 	* More code reorganisation and clean up.
 
  -v1.8.4 (April 17, 2008)

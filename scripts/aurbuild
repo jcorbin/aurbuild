@@ -39,7 +39,7 @@ import aurbuild.execute
 import aurbuild.utils
 
 # globals
-PROGRAM_VERSION = '1.8.4'
+PROGRAM_VERSION = '1.8.5'
 PROGRAM_NAME = os.path.basename(sys.argv[0])
 AUTHORS = 'Tyler Gates, Loui Chang'
 
