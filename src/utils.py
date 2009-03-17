@@ -272,13 +272,9 @@ def search(args, verbose, site):
 			for line in desc:
 				description += '\t%s\n' % line
 
-			if pkg['category'] != '':
-				category = '(%s)' % pkg['category']
-
-			pkg_info = '%s/%s %s\n%s' % (
+			pkg_info = '%s/%s\n%s' % (
 				pkg['repo'],
 				pkg['Name'],
-				category,
 				description
 			)
 

@@ -82,7 +82,7 @@ def aursearch(keyword, site):
 	Gets and parses the output from the site's search page.
 
 	Returns an array of dicts that contain package info including:
-	name, description, repo, category, maintainer, and votes.
+	name, description, repo, maintainer, and votes.
 
 	Note: maintainer isn't returned on the server side yet.
 	"""
@@ -137,32 +137,9 @@ def aursearch(keyword, site):
 		'3': 'community'
 	}
 
-	categories = {
-		'1': 'none',
-		'2': 'daemons',
-		'3': 'devel',
-		'4': 'editors',
-		'5': 'emulators',
-		'6': 'games',
-		'7': 'gnome',
-		'8': 'i18n',
-		'9': 'kde',
-		'10': 'lib',
-		'11': 'modules',
-		'12': 'multimedia',
-		'13': 'network',
-		'14': 'office',
-		'15': 'science',
-		'16': 'system',
-		'17': 'x11',
-		'18': 'xfce',
-		'19': 'kernels'
-	}
-
 	for num in range(len(results)):
 		results[num]['repo'] = repos[results[num]['LocationID']]
 		results[num]['maintainer'] = ''
-		results[num]['category'] = categories[results[num]['CategoryID']]
 
 	return packages
 
