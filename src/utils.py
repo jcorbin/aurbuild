@@ -272,7 +272,7 @@ def search(args, verbose, site):
 
 			description = ''
 			for line in desc:
-				description += '\t%s\n' % line
+				description += '    %s\n' % line
 
 			pkg_info = '%s/%s %s\n%s' % (
 				pkg['repo'],
