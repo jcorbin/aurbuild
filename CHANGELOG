@@ -1,5 +1,10 @@
 
 AURBUILD
+ -v1.8.6 (March 18, 2009)
+	* Compensate for bad URLPath when fetching tarballs.
+	* Support multiple search terms.
+	* Reduce indent in search output formatting.
+
  -v1.8.5 (March 17, 2009)
 	* Rework PKGBUILD retrieval code.
 	* Prompt for editor if EDITOR isn't defined.
