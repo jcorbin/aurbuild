@@ -23,7 +23,7 @@ General List:
    that purpose.
 
  * Improve search
-	- Sorting packages alphabetically.
+	- Sorting packages by repo and alphabetically.
 	- Narrowing down and sorting results by location, maintainer
 	- Narrowing, sorting results by votes
 	- Add functionality to allow user to browse through search pages
