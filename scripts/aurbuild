@@ -187,8 +187,8 @@ if os.access(makepkg_config, os.F_OK|os.R_OK):
 	CARCH = out[2]
 	del(out)
 else:
-	print >>sys.stderr.write('Error: ' + makepkg_config +
-			' is missing or read permissions are denied.')
+	print >>sys.stderr.write('Error: %s is missing'
+		'or read permissions are denied.' % makepkg_config)
 	sys.exit(1)
 
 signal.signal(signal.SIGINT, handler)
@@ -829,6 +829,7 @@ def main():
 		# Retrieve build files and prepare to build.
 		aur_tarfile = None
 
+		aurpkg = None
 		if not (LOCAL or OFFICIAL) or UPGRADE:
 			try:
 				aurpkg = aaurparse.pkg_info(argo, aursite)
@@ -880,11 +881,7 @@ def main():
 			if OFFICIAL:
 				pkgbuild_root = OFFICIAL_PATH
 
-			try:
-				results = afind.find_dir(pkgbuild_root, argo)
-			except Exception, e:
-				print >>sys.stderr.write(str(e))
-				return 1
+			results = afind.find_dir(pkgbuild_root, argo)
 
 			if results == None:
 
@@ -896,7 +893,6 @@ def main():
 						results = afind.find_dir(pkgbuild_root, argo)
 					except Exception, e:
 						print >>sys.stderr.write(str(e))
-						return 1
 				# End section.
 
 				if UPGRADE:
@@ -937,7 +933,10 @@ def main():
 			try:
 				# Try to get a tarball from AUR.
 				aur_tarfile = get_tarball(argo)
-				extract(aur_tarfile)
+				if aur_tarfile:
+					extract(aur_tarfile)
+				else:
+					continue
 			except Exception, e:
 				print >>sys.stderr.write(str(e))
 				upgrade_ct += 1

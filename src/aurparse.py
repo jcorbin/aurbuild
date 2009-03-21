@@ -71,10 +71,10 @@ def pkg_main_url(pkg, site):
 	return url
 
 def pkg_tarball_url(pkgname, site):
-#	url = pkg_info(pkgname, site)['URLPath']
+	pkginfo = pkg_info(pkgname, site)
 	url = 'packages/%s/%s.tar.gz' % (pkgname, pkgname)
 
-	if url != '':
+	if url != '' and pkginfo['repo'] != 'community':
 		return site + url
 	else:
 		return

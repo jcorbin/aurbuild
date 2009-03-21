@@ -35,11 +35,13 @@ def find_it(dir, name, type):
 	"""
 
 	import os
+	import sys
 	from subprocess import Popen, PIPE
 
 	# Test for dir's existence.
 	if not os.access(dir, os.F_OK | os.R_OK):
-		raise Exception('Error: %s not found or read permissions denied.' % dir)
+		print >> sys.stderr.write('Error: %s not found or read permissions denied.' % dir)
+		return None
 
 	output, error = Popen(
 		['find', dir,
