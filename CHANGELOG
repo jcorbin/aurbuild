@@ -1,5 +1,9 @@
 
 AURBUILD
+ -v1.8.7 (March 29, 2009)
+	* Fix building official packages.
+	* Fix building packages when the save path doesn't exist.
+
  -v1.8.6 (March 18, 2009)
 	* Compensate for bad URLPath when fetching tarballs.
 	* Support multiple search terms.
