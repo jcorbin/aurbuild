@@ -38,14 +38,14 @@ def fix_path(str):
 	return str
 
 def raw_pkg_query(keyword, site):
-	keyword = re.sub('\s', '+', keyword)
+	keyword = urllib.quote(keyword)
 	search_url = "%s/rpc.php?type=search&arg=%s" % (site, keyword)
 	f = urllib.urlopen(search_url)
 	lines = f.readlines()
 	return lines
 
 def pkg_info(pkg, site):
-	search_url = "%s/rpc.php?type=info&arg=%s" % (site, pkg)
+	search_url = "%s/rpc.php?type=info&arg=%s" % (site, urllib.quote(pkg))
 	f = urllib.urlopen(search_url)
 	lines = f.readlines()
 
