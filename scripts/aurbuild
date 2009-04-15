@@ -43,6 +43,9 @@ PROGRAM_VERSION = '1.8.7'
 PROGRAM_NAME = os.path.basename(sys.argv[0])
 AUTHORS = 'Tyler Gates, Loui Chang'
 
+install_app = 'pacman'
+build_app = "makepkg"
+
 apacman = aurbuild.pacman
 aversion = aurbuild.version
 afind = aurbuild.find
@@ -649,15 +652,13 @@ def menu(dir_list, package):
 			i = i + 1
 		print spaces + seperator
 
-		menu_op = "Build"
-		menu_app = "makepkg"
+		menu_op = "Build with %s" % build_app
 
 		if not NOINSTALL:
-			menu_op += " and install"
-			menu_app += " and pacman"
+			menu_op += " and install with %s" % install_app
 
 		# Build (and install) with makepkg (and pacman)
-		print spaces + color('*', 'blue') + ' b)  %s with %s.'% (menu_op, menu_app)
+		print spaces + color('*', 'blue') + ' b)  %s.'% menu_op
 		default_choice = 'b'
 
 		print spaces + '  s)  Skip this package.'
