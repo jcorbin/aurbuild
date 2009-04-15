@@ -526,8 +526,8 @@ def makepkgf(dep):
 		print >>sys.stderr.write(str(e))
 		sys.exit(1)
 	
-	app = 'makepkg'
-	args = ['makepkg', '-f']
+	app = build_app
+	args = [app, '-f']
 	if BUILDER_OPTS and BUILDER_OPTARGS != '':
 		args.extend(BUILDER_OPTARGS.split(' '))
 	
@@ -541,10 +541,10 @@ def makepkgf(dep):
 
 	if code > 0:
 		print >>sys.stderr.write('aurbuild: could not build %s '
-			'with makepkg.' % dep)
+			'with %s.' % (dep, app))
 		print 'Build directory retained at %s' % pkg_build_dir
 		print 'You can visit the directory, fix the ' \
-		'problem, and run makepkg.'
+		'problem, and run %s.' % app
 		sys.exit(3)
 
 	return get_pkgpath()
