@@ -661,7 +661,8 @@ def menu(dir_list, package):
 		print spaces + color('*', 'blue') + ' b)  %s.'% menu_op
 		default_choice = 'b'
 
-		print spaces + '  s)  Skip this package.'
+		print spaces + '  s)  Save build files and build.'
+		print spaces + '  n)  Next package. Skip this package.'
 		print spaces + '  q)  Quit without building.'
 		print spaces + seperator
 
@@ -674,14 +675,10 @@ def menu(dir_list, package):
 
 		if choice == '':
 			return default_choice
-		elif choice == 'b':
-			return choice
-		elif choice == 'v':
+		elif choice in ('b', 'n', 's', 'v'):
 			return choice
 		elif choice == 'q':
 			sys.exit(0)
-		elif choice == 's':
-			return choice
 		elif (choice.isdigit() and
 			int(choice) >= 1 and
 			int(choice) <= file_num):
@@ -964,13 +961,15 @@ def main():
 				else:
 					continue
 
-		# evaulate options and go to menu if needed
+		# Go to menu if needed.
 		if not AUTO_BUILD:
 			select = menu(os.listdir(work_dir), argo)
-			if select == 's':
+			if select == 'n':
 				cleanup()
 				upgrade_ct += 1
 				continue
+			if select == 's':
+				savefiles(argo, work_dir)
 
 		# get dependencies
 		try:
