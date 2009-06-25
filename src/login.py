@@ -56,7 +56,7 @@ class aurlogin:
 
 	def get_cookie(self, cookiefile):
 		""" get a cookie from the main site and save it to cookiefile """
-		
+
 		# create dirname of cookie file if not found
 		cookie_dir = os.path.dirname(cookiefile)
 		if not os.path.isdir(cookie_dir):
@@ -64,7 +64,7 @@ class aurlogin:
 				os.makedirs(cookie_dir)
 			except Exception, e:
 				raise CookieError, 'could not create cookie directory `'+cookie_dir+'\'. '+str(e)
-		
+
 		req = urllib2.Request(self.aursite, None, self.headers)
 		handle = urllib2.urlopen(req)
 		# save the cookie
@@ -72,7 +72,7 @@ class aurlogin:
 
 	def logout(self):
 		""" logout of the main site """
-		
+
 		try:
 			req = urllib2.Request(self.logout_url, None, self.headers)
 			handle = urllib2.urlopen(req)
@@ -82,7 +82,7 @@ class aurlogin:
 
 	def login(self, username, password, cookiefile):
 		""" login to the main site """
-	
+
 		login_url = self.aursite
 		login_params = urllib.urlencode(
 			{'user': username, 'pass': password})
@@ -93,11 +93,11 @@ class aurlogin:
 
 		data = response.read()
 		conn.close()
-	
+
 
 		# get a cookie
 		if not os.path.isfile(cookiefile): self.get_cookie(cookiefile)
-		
+
 		# build an opener for the cookie
 		self.cookie_jar.load(cookiefile)
 		self.opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookie_jar))
@@ -106,7 +106,7 @@ class aurlogin:
 		# login request
 		req = urllib2.Request(login_url, None, self.headers)
 		handle = urllib2.urlopen(req)
-		
+
 		# checked that we are logged in
 		logged_in = 0
 		for line in handle:
@@ -123,7 +123,7 @@ class aurlogin:
 
 		# login
 		self.login(username, password, cookiefile)
-		
+
 		# query for pkgname
 		req = urllib2.Request(search_url, None, self.headers)
 		handle = urllib2.urlopen(req)

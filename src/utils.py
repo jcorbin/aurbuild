@@ -87,7 +87,7 @@ def scan_pkgbuild(pkgbuild):
 		warnings.append('Warning: PKGBUILD license may not be defined.')
 
 	return warnings
-	
+
 def bash_array(str):
 	"""
 	Return str as a call to a bash array.
@@ -124,7 +124,7 @@ def echo_bash_vars(path, value):
 		raise Exception('%s error:\n\t%s' % (path, err))
 
 	return out
-		
+
 def cleanup():
 	if os.path.isdir(pkg_build_dir):
 		rmtree(pkg_build_dir)
@@ -257,7 +257,7 @@ def appcheck(app):
 
 def search(args, verbose, site):
 	import textwrap
-	
+
 	args = ' '.join(args)
 
 	packages = aaurparse.aursearch(args, site)

@@ -49,7 +49,7 @@ class db_tools:
 	def get_query(self, query):
 		command = "pacman"
 		output = Popen([command,query], stdout=PIPE).communicate()[0]
-		
+
 		names = []
 		versions = []
 		output = output.splitlines()
@@ -77,7 +77,7 @@ class db_tools:
 
 		Return the three as a tuple.
 		"""
-		
+
 		stripped = package
 		comp = None
 		version = None
@@ -121,7 +121,7 @@ class db_tools:
 
 	def get_db_info(self, dbfile, info):
 		"""Get database information info from dbfile."""
-		
+
 		# this is all written this speed in mind
 		if not os.path.isfile(dbfile):
 			raise DatabaseError('Database file %s was not found.' % dbfile)
@@ -288,7 +288,6 @@ class operations(db_tools):
 				'corruption.\nTry re-installing %s.' %
 				(pkgpath, os.path.basename(pkgpath)))
 
-		
 		# If the dependency did not have a release number, remove it
 		# from the installed for a fair comparison. We are concerned
 		# with package's version number.

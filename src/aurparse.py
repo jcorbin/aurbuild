@@ -101,7 +101,7 @@ def parse(f):
 	results = results.split('","results":')
 	type = results[0]
 	results = results[1]
-	
+
 	if type == "error":
 		results = results.split('"')[1]
 		print results

@@ -57,7 +57,7 @@ def child_spawn(app, args, uid=None, gid=None, env={}):
 		app = os.path.basename(path)
 	# set effective uid back
 	os.seteuid(original_uid)
-	
+
 	# args must be a list
 	if not isinstance(args, list):
 		args = args.split()

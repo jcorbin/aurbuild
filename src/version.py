@@ -41,12 +41,12 @@ class vercmp:
 			ver = tmp_ver
 
 		return ver, rel
-	
-		
+
+
 	def vercmp(self, ver1, ver2):
 		"""
 		Compare two version numbers.
-		
+
 		Return an integer:
 			-1: ver1 is an earlier release
 			 0: ver1 and ver2 are the same
@@ -139,11 +139,11 @@ class vercmp:
 					if tmpver1[i].isdigit() and tmpver2[i].isdigit():
 						tmpver1[i] = int(tmpver1[i])
 						tmpver2[i] = int(tmpver2[i])
-						
+
 					elif tmpver1[i].isalpha() and tmpver2[i].isalpha():
 						# nothing more to do, pass
 						pass
-					
+
 					elif tmpver1[i].isdigit() and tmpver2[i].isalpha():
 						tmpver1[i] = int(tmpver1[i]) + 1
 						tmpver2[i] = 0
