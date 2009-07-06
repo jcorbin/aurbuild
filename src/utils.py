@@ -250,9 +250,12 @@ def appcheck(app):
 	path = path.replace(':', '/ ')
 	path = path.split(' ')
 
-	for each in path:
-		if os.path.isfile(each + app):
-			return True
+	if os.path.isfile(app):
+		return True
+	else:
+		for each in path:
+			if os.path.isfile(each + app):
+				return True
 	return False
 
 def search(args, verbose, site):
