@@ -1,5 +1,10 @@
 
 AURBUILD
+ -v1.8.8 (July 6, 2009)
+	* Fix app detection
+	* Fix searching and installing packages named with a plus sign.
+	* Change menu options and add save option.
+
  -v1.8.7 (March 29, 2009)
 	* Fix building official packages.
 	* Fix building packages when the save path doesn't exist.
