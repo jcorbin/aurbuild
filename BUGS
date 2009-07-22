@@ -9,7 +9,7 @@ BUGS
  * If running `sudo aurbuild` as a regular user the EDITOR variable isn't
    recognised. Run `sudo env EDITOR=$EDITOR aurbuild` for it to work.
 
- * File ownership and permission isn't being changed with ABS build copies. 
+ * File ownership and permission isn't being changed with ABS build copies.
 
 DEBUGGING
 ---------

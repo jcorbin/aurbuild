@@ -288,7 +288,7 @@ def prepare_work_dirs():
 		if not os.path.isdir(os.path.dirname(aurbuild_home)):
 			os.makedirs(os.path.dirname(aurbuild_home))
 
-		# aurbuild_home should be aurbuild:aurbuild with 0775	
+		# aurbuild_home should be aurbuild:aurbuild with 0775
 		if not os.path.isdir(aurbuild_home):
 			os.mkdir(aurbuild_home)
 			os.chmod(aurbuild_home, 0775)
@@ -452,7 +452,7 @@ def filter_deps(pkg, fd_ct, type):
 				filter_deps(group_pkg, fd_ct, type='[D]')
 	elif code == 0:
 		print color('ok ' + type, 'green')
-		
+
 	elif code != 127 and code != 0:
 		raise Exception('aurbuild: fatal error while testing dependencies.\n')
 
@@ -559,7 +559,7 @@ def install(pkgpath, asdeps=False):
 		print 'Pacman is detected running.'
 		print 'Once pacman exits, you may press enter to install'
 		print 'Control + C to cancel.'
-		raw_input()	
+		raw_input()
 
 	print msg('Installing package...')
 

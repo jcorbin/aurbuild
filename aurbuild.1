@@ -10,11 +10,11 @@ aurbuild \- A utility to build and install packages from the AUR.
 .SH "OPTIONS"
 A dependency installation method must be passed to aurbuild before it attempts to build a package.
 
-.TP 
+.TP
 \fB\-b, \-\-builddeps\fR
 Build missing dependencies from source using the abs tree. makedepends and depends will be evaluated and satisfied in that order. It is wise to run abs refresh your abs tree before building.
 
-.TP 
+.TP
 \fB\-s, \-\-syncdeps\fR
 Sync missing dependencies using pacman to retrieve prebuilt *.pkg.tar.gz binaries. makedepends and depends will be evaluated and satisfied in that order.
 
@@ -32,7 +32,7 @@ OR
 
 aurbuild --syncdeps --builder-opts="-B -n --foo"
 
-.TP 
+.TP
 \fB\-\-auto\fR
 Bypass the menu, build and install the package automatically. Use this as a modifier to --builddeps or --syncdeps. It cannot be used alone.
 
@@ -42,7 +42,7 @@ Save the build files extracted from the tarball in AUR to the directory \fI/var/
 
 .TP
 \fB\-l, \-\-local\fR
-Look in \fI/var/tmp/aurbuild/pkgbuilds/\fR, aurbuild's --save location, for the build files instead of AUR. 
+Look in \fI/var/tmp/aurbuild/pkgbuilds/\fR, aurbuild's --save location, for the build files instead of AUR.
 
 .TP
 \fB\-f, \-\-official\fR
@@ -72,19 +72,19 @@ Add this switch to not install the package after it has been built. Be sure you 
 \fB\-m, \-\-rm\-make\-deps\fR
 Remove unneeded make dependencies after a successful build. You will be prompted before proceeding.
 
-.TP 
-\fB\-S, \-\-search\fR 
+.TP
+\fB\-S, \-\-search\fR
 Use this to search AUR for a single [keyword]. Results are piped to \fBless (1)\fR.
 
 .TP
 \fB\-\-verbose\fR
 With this switch searches will display more information
 
-.TP 
+.TP
 \fB\-h, \-\-help\fR
 Display the help message and exit.
 
-.TP 
+.TP
 \fB\-v, \-\-version\fR
 Display version number and exit.
 

@@ -1,9 +1,10 @@
 #!/usr/bin/python
 
 from distutils.core import setup
+import scripts.aurbuild
 
 NAME = "aurbuild"
-VERSION = "1.8.8"
+VERSION = aurbuild.PROGRAM_VERSION
 DESC = "An utility to build and install packages from Arch Linux User Repository"
 LICENSE = "GPL"
 URL = "http://aurbuild.berlios.de"
@@ -25,6 +26,6 @@ setup(
 	platforms = "linux2",
 	packages = ['aurbuild'],
 	package_dir = {'aurbuild':'src'},
-	scripts = ['scripts/aurbuild'], 
+	scripts = ['scripts/aurbuild'],
 	data_files = DATAFILES)
 

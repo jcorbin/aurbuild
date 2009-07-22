@@ -35,7 +35,7 @@ General List:
    and select the specific repo desired (eg. core|testing, extra|unstable or
    any other repo that might have the same pkg as others)
 
- * Find what's causing a delay when building official packages 
+ * Find what's causing a delay when building official packages
 	- aurbuild.find.find_dir() is causing a delay because of some
 	  nasty recursion
 	- Using pacman -Si to find the repo THEN doing the search in

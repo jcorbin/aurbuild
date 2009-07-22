@@ -51,7 +51,7 @@ AURBUILD
 	  built by aurbuild
 	* Got rid of annoying pkgname.pid dirs in /var/tmp/aurbuild/build
 	  Now it's just /var/tmp/aurbuild/build/pkgname and it gets
-	  overwritten if you try to build via aurbuild again. 
+	  overwritten if you try to build via aurbuild again.
 	* Remove makepkgv2 support
 	* Remove all uses of versionpkg. (makepkg has assimilated its function)
 	* --revision removed. It's made obsolete by makepkg
@@ -116,7 +116,7 @@ AURBUILD
 
  -v1.7 (January 16, 2007)
  	* Running as regular user is no longer needed. Root access will be
-	  required to drop down to a designated under-privileged 
+	  required to drop down to a designated under-privileged
 	  user for building. This will enable greater future scalability while
 	  adding a higher level of security to the build process.
 	* build directory location now in
@@ -139,7 +139,7 @@ AURBUILD
 
  -v1.6.1 (November 17, 2006)
  	* Extended package search with build operations. If package is not
-	  found in AUR, repeat search with an appended space. 
+	  found in AUR, repeat search with an appended space.
 	  This finds "lost" packages for those with short names, ie. rar, not
 	  descriptive enough to be found in standard search queries.
 	* Fixed duplicate package build directories within the master build
@@ -175,7 +175,7 @@ AURBUILD
 	  circumstances:
 		- user was root.
 		- a 'install -m<MODE NUMBER>' line was excuted in the PKGBUILD
-		  without explicitly setting the first pair of octets, 
+		  without explicitly setting the first pair of octets,
 		  ie 644 instead of 0644
 		- Any other type of 'chmod' command without the first octet set.
 
@@ -310,7 +310,7 @@ AURBUILD
  -v0.7.1 (December 9, 2005)
 	* Removed the config file to use the EDITOR environment variable
 	  instead.
-	* Added --auto-build or -a as a modifier to --builddeps and --syncdeps. 
+	* Added --auto-build or -a as a modifier to --builddeps and --syncdeps.
 	  This will bypass the menu and build the package if it is detected
 	  safe.
 
@@ -335,7 +335,7 @@ AURBUILD
  -v0.5.1 (September 23, 2005)
 	* Fixed empty search fields beginning with digits.
 	* Minor improvemnts to search function.
- 
+
  -v0.5 (September 18, 2005)
 	* Search AUR with a single keyword.
 
