@@ -1,7 +1,6 @@
 #!/usr/bin/python
 
 from distutils.core import setup
-import aurbuild.version
 
 VERSION = "1.8.8"
 DESC = "An utility to build and install packages from Arch Linux User Repository"

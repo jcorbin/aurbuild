@@ -147,9 +147,9 @@ def get_depends(pkgbuild, makedeps='makedepends',
 		pkgbuild,
 		bash_array(makedeps),
 		bash_array(deps),
-		bash_array(optdeps))
+		bash_array(optdeps))]
 
-	p = Popen(commands, shell=True, stdout=PIPE, stderr=PIPE)
+	p = Popen(commands, stdout=PIPE, stderr=PIPE)
 	out = p.stdout.read()
 	err = p.stderr.read()
 	p.stdout.close()
