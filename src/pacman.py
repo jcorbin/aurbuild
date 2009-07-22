@@ -24,7 +24,7 @@ import re
 
 from subprocess import Popen, PIPE
 
-from aurbuild.version import vercmp
+from aurbuild.vercmp import vercmp
 
 class PacmanError(Exception):
 	# base excpetion

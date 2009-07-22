@@ -32,7 +32,7 @@ from shutil import rmtree, copytree, copy
 from subprocess import Popen
 
 import aurbuild.pacman
-import aurbuild.version
+import aurbuild.vercmp
 import aurbuild.find
 import aurbuild.aurparse
 import aurbuild.execute
@@ -47,7 +47,7 @@ install_app = 'pacman'
 build_app = "makepkg"
 
 apacman = aurbuild.pacman
-aversion = aurbuild.version
+avercmp = aurbuild.vercmp
 afind = aurbuild.find
 aaurparse = aurbuild.aurparse
 aexec = aurbuild.execute
@@ -842,7 +842,7 @@ def main():
 			aurpkgver = aurpkg['Version']
 			package = aurpkg['Name']
 
-			result = aversion.vercmp().vercmp(aurpkgver, installed[upgrade_ct])
+			result = avercmp.vercmp().vercmp(aurpkgver, installed[upgrade_ct])
 
 			if result == 1:
 				print '\tTarget: %s-%s' % (package, aurpkgver)

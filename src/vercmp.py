@@ -1,5 +1,5 @@
 #
-#   version.py
+#   vercmp.py
 #
 #   Copyright (C) 2006-2007 by Tyler Gates <TGates81@gmail.com>
 #   Copyright (C) 2008 by Loui Chang <louipc.ist@gmail.com>
