@@ -275,18 +275,11 @@ class operations(db_tools):
 		"""
 
 		pkgname, comp, req_version = db_tools.strip_ver_cmps(dependency)
-		pkgpath = db_tools.check_installed(pkgname)
+		p = Popen(['pacman', '-Q', pkgname], stdout=PIPE, stderr=PIPE)
+		pkginfo = p.stdout.read().split()
 
-		if not pkgpath:	return 127
-
-		try:
-			inst_version = db_tools.get_db_info(pkgpath + '/desc', '%VERSION%')[0]
-		except IndexError:
-			raise DatabaseError(
-				'Error: unable to parse VERSION information '
-				'in local database file %s/desc. Possible '
-				'corruption.\nTry re-installing %s.' %
-				(pkgpath, os.path.basename(pkgpath)))
+		if not pkginfo: return 127
+		inst_version = pkginfo[1]
 
 		# If the dependency did not have a release number, remove it
 		# from the installed for a fair comparison. We are concerned
