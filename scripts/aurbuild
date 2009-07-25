@@ -378,6 +378,8 @@ def filter_deps(pkg, fd_ct, type):
 	type is either a makedepends, depends, or optdepends.
 	"""
 
+	GROUPCHECK = False
+
 	# for tabbing over tree branch symbols
 	pre_space  = 3
 	# spaces must be greater than pre_space
@@ -391,8 +393,13 @@ def filter_deps(pkg, fd_ct, type):
 	code = apacman.operations().pacmanT(pkg)
 
 	if code == 127:
-		# see if its a group name
-		group_pkgs = apacman.db_tools().get_group(pkg)
+		group_pkgs = []
+
+		# See if it's a group name
+		if GROUPCHECK:
+			print "Checking for group: ",
+			group_pkgs = apacman.db_tools().get_group(pkg)
+
 		if group_pkgs == []:
 			print color('missing ' + type, 'red')
 			pkg = apacman.db_tools().strip_ver_cmps(pkg)[0]
