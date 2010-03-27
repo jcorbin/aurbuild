@@ -62,7 +62,7 @@ pm_cache = '/var/cache/pacman'
 
 # makepkg stuff
 makepkg_config = '/etc/makepkg.conf'
-PKGEXT = 'pkg.tar.gz'
+PKGEXT = '.pkg.tar*'
 
 # Environment stuff
 uid = os.getuid()
@@ -509,10 +509,11 @@ def get_pkgpath():
 	pkgname, pkgver, pkgrel = out[0], out[1], out[2]
 
 	pkgpath = os.path.join(_PKGDEST, pkgname + '-' + pkgver +
-			'-' + pkgrel + '-' + arch + '.' + PKGEXT)
+			'-' + pkgrel + '-' + arch + PKGEXT)
+	pkgfile = glob.glob(pkgpath)
 
-	if os.path.exists(pkgpath):
-		return pkgpath
+	if pkgfile:
+		return pkgfile[0]
 	else:
 		print >>sys.stderr.write('Error: could not find the built '
 				'package in %s' % pkgpath)
