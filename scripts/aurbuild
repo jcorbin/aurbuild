@@ -234,7 +234,7 @@ for opt, optarg in opts:
 
 def version():
 	print '%s v%s' % (PROGRAM_NAME, PROGRAM_VERSION)
-	print 'Copyright (C) 2005-2008 %s' % AUTHORS
+	print 'Copyright (C) 2005-2010 %s' % AUTHORS
 	print ''
 	print 'This program may be freely redistributed under'
 	print 'the terms of the GNU General Public License version 2'
