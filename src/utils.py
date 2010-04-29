@@ -294,17 +294,5 @@ def search(args, verbose, site):
 
 			view_list.append(pkg_info)
 
-		if not appcheck('less'):
-			for each in view_list:
-				print each
-		else:
-			pipe = os.popen('less', 'w')
-			try:
-				for line in view_list:
-					pipe.write(line)
-				pipe.close()
-			except IOError:
-				# Ignore broken pipes caused be quitting less
-				pass
-
+	return view_list
 

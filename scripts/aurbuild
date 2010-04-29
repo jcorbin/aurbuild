@@ -42,6 +42,7 @@ import aurbuild.utils
 PROGRAM_VERSION = '1.8.8'
 PROGRAM_NAME = os.path.basename(sys.argv[0])
 AUTHORS = 'Tyler Gates, Loui Chang'
+PAGER = 'less'
 
 install_app = 'pacman'
 build_app = "makepkg"
@@ -150,6 +151,7 @@ def usage(name):
 	print '  -m, --rm-make-deps    Remove uneeded make dependencies'
 	print '  -n, --noconfirm       Bypass any confirmation messages ' \
 					'by answering yes'
+	print '  --nopager             Do not pipe output to less'
 	print '  -o "OPTS", --builder-opts="OPTS"'
 	print '                        Pass OPTS to makepkg during build'
 	print '  -u, --upgrade         Upgrade all packages installed ' \
@@ -201,7 +203,7 @@ try:
 		['help', 'version', 'verbose', 'builddeps', 'syncdeps',
 		'builder-opts=',
 		'save', 'local', 'official', 'auto', 'auto-build', 'upgrade',
-		'noconfirm', 'noinstall', 'rm-make-deps', 'clean',
+		'noconfirm', 'noinstall', 'nopager', 'rm-make-deps', 'clean',
 		'search', 'url='])
 except getopt.GetoptError, e:
 	usage(PROGRAM_NAME)
@@ -224,6 +226,7 @@ for opt, optarg in opts:
 	if opt in ['-u', '--upgrade']: UPGRADE =1
 	if opt in ['-n', '--noconfirm']: NOCONFIRM = 1
 	if opt in ['-x', '--noinstall']: NOINSTALL = 1
+	if opt in ['--nopager']: PAGER = None
 	if opt in ['-m', '--rm-make-deps' ]: RM_MDEPS = 1
 	if opt in ['-c', '--clean' ]: CLEAN = 1
 	if opt in ['-S', '--search']: SEARCH = 1
@@ -812,7 +815,21 @@ def main():
 			return retcode
 
 	if SEARCH:
-		autils.search(args, VERBOSE, aursite)
+		output = autils.search(args, VERBOSE, aursite)
+
+		if not PAGER or not autils.appcheck(PAGER):
+			for line in output:
+				print line,
+		else:
+			pipe = os.popen(PAGER, 'w')
+			try:
+				for line in output:
+					pipe.write(line)
+				pipe.close()
+			except IOError:
+				# Ignore broken pipes caused by quitting PAGER
+				# early.
+				pass
 		return 0
 
 	init()
