@@ -836,12 +836,12 @@ def main():
 
 	if UPGRADE:
 		# Set args to each potential AUR candidate.
-		args, installed = apacman.db_tools().get_foreign()
+		pkgs, installed = apacman.db_tools().get_foreign()
 
 	upgrade_ct = 0
-	for argo in args:
+	for pkg in pkgs:
 		global working_pkg, pkg_build_dir, aur_tarfile
-		working_pkg = argo
+		working_pkg = pkg
 		pkg_build_dir = os.path.join(build_dir, working_pkg)
 		prepare_work_dirs()
 
@@ -854,7 +854,7 @@ def main():
 		aurpkg = None
 		if not (LOCAL or OFFICIAL) or UPGRADE:
 			try:
-				aurpkg = aaurparse.pkg_info(argo, aursite)
+				aurpkg = aaurparse.pkg_info(pkg, aursite)
 			except Exception, e:
 				print >>sys.stderr.write(str(e))
 				upgrade_ct += 1
@@ -880,7 +880,7 @@ def main():
 						continue
 			elif result == 0:
 				status = ' up to date'
-				argline = '%s %s ' % (argo, installed[upgrade_ct])
+				argline = '%s %s ' % (pkg, installed[upgrade_ct])
 				rjust_spaces = 80 - (int(len(argline)))
 				print argline + status.rjust(rjust_spaces, '.')
 				cleanup()
@@ -888,11 +888,10 @@ def main():
 				continue
 			elif result == -1:
 				print ':: local/%s %s seems newer than unsupported/%s %s' % (
-					argo, installed[upgrade_ct], argo, aurpkgver)
+					pkg, installed[upgrade_ct], pkg, aurpkgver)
 				cleanup()
 				upgrade_ct += 1
 				continue
-
 
 		if aurpkg == None:
 			# Look for package in ABS or local save paths.
@@ -903,7 +902,7 @@ def main():
 			if OFFICIAL:
 				pkgbuild_root = OFFICIAL_PATH
 
-			results = afind.find_dir(pkgbuild_root, argo)
+			results = afind.find_dir(pkgbuild_root, pkg)
 
 			if results == None:
 
@@ -912,7 +911,7 @@ def main():
 				if not (LOCAL or UPGRADE):
 					pkgbuild_root = OFFICIAL_PATH
 					try:
-						results = afind.find_dir(pkgbuild_root, argo)
+						results = afind.find_dir(pkgbuild_root, pkg)
 					except Exception, e:
 						print >>sys.stderr.write(str(e))
 				# End section.
@@ -921,7 +920,7 @@ def main():
 					upgrade_ct += 1
 
 				if results == None:
-					print >>sys.stderr.write('%s not found under %s' % (argo, pkgbuild_root))
+					print >>sys.stderr.write('%s not found under %s' % (pkg, pkgbuild_root))
 					continue
 
 			# Select one PKGBUILD first. Make this interactive.
@@ -944,7 +943,7 @@ def main():
 				#	upgrade_ct += 1
 				#	continue
 
-				#if _pkgname == argo:
+				#if _pkgname == pkg:
 				results = r
 
 			copytree(results, pkg_work_dir)
@@ -954,7 +953,7 @@ def main():
 		else:
 			try:
 				# Try to get a tarball from AUR.
-				aur_tarfile = get_tarball(argo)
+				aur_tarfile = get_tarball(pkg)
 				if aur_tarfile:
 					extract(aur_tarfile)
 				else:
@@ -974,26 +973,26 @@ def main():
 
 		# Save files.
 		if SAVE:
-			savefiles(argo, work_dir)
+			savefiles(pkg, work_dir)
 
 			# If --save is the only opt specified don't build or
 			# sync. It's OK to exit here because --upgrade (which
 			# follows) requires -b or -s
 			if not (BUILDDEPS or SYNCDEPS):
-				if argo == args[len(args)-1]:
+				if pkg == args[len(args)-1]:
 					return 0
 				else:
 					continue
 
 		# Go to menu if needed.
 		if not AUTO_BUILD:
-			select = menu(os.listdir(work_dir), argo)
+			select = menu(os.listdir(work_dir), pkg)
 			if select == 'n':
 				cleanup()
 				upgrade_ct += 1
 				continue
 			if select == 's':
-				savefiles(argo, work_dir)
+				savefiles(pkg, work_dir)
 
 		# get dependencies
 		try:
@@ -1068,7 +1067,7 @@ def main():
 					print >> sys.stderr.write('Unresolved dependencies. Exiting.')
 					return 1
 
-		pkgname = makepkgf(argo)
+		pkgname = makepkgf(pkg)
 		if not NOINSTALL:
 			try:
 				install(pkgname)
