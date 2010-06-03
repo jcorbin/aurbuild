@@ -35,4 +35,5 @@ Prior to Release
  - Merge master into stable
 
 Send git-formatted patches to louipc.ist@gmail.com
+with 'aurbuild' in the subject.
 

@@ -2,6 +2,9 @@ TODO
 Note: Some of these are just ideas and might not get implemented at all.
 
 General List:
+ * When updating make sure not to cause rebuilds of saved pkgbuilds that
+   aren't in the AUR.
+
  * Anything marked with 'TODO' in the source
 
  * Add support to build deps recursively from [unsupported] more easily
@@ -87,7 +90,7 @@ General List:
 	makepkg as well.
 
 	Cache cvs/svn/git sources as well.
-	
+
 	Correspond with dev of yaourt and makepkg to get some kind
 	of standard location for caching sources
 

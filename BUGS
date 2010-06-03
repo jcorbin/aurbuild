@@ -11,6 +11,10 @@ BUGS
 
  * File ownership and permission isn't being changed with ABS build copies.
 
+ * Versioned dependencies with comparators aren't resolved correctly.
+   ex. pcre>7.0
+   'Not found in database' error
+
 DEBUGGING
 ---------
 Enable the python debugger by adding this code:
