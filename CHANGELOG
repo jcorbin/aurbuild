@@ -1,5 +1,12 @@
 
 AURBUILD
+ -v1.8.9 (June 4, 2010)
+	* Search results are now sorted
+	* Added a --nopager switch for those who don't want output in a pager
+	* Disable group checking when scanning for dependencies
+	* Support for file compressions other than gz
+	* Some code refactoring
+
  -v1.8.8 (July 6, 2009)
 	* Fix app detection
 	* Fix searching and installing packages named with a plus sign.
