@@ -294,5 +294,5 @@ def search(args, verbose, site):
 
 			view_list.append(pkg_info)
 
-	return view_list
+	return sorted(view_list)
 
