@@ -793,6 +793,7 @@ def main():
 	"""
 
 	global args
+	pkgs = args
 	rm_packages = []
 
 	if VERSION:
@@ -811,11 +812,11 @@ def main():
 			retcode = 1
 			print "Nothing to clean"
 
-		if len(args) == 0:
+		if len(pkgs) == 0:
 			return retcode
 
 	if SEARCH:
-		output = autils.search(args, VERBOSE, aursite)
+		output = autils.search(pkgs, VERBOSE, aursite)
 
 		if not PAGER or not autils.appcheck(PAGER):
 			for line in output:
@@ -835,7 +836,7 @@ def main():
 	init()
 
 	if UPGRADE:
-		# Set args to each potential AUR candidate.
+		# Set pkgs to each potential AUR candidate.
 		pkgs, installed = apacman.db_tools().get_foreign()
 
 	upgrade_ct = 0
