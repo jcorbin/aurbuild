@@ -2,7 +2,7 @@
 # Contributor: Loui Chang <louipc.ist@gmail.com
 
 pkgname=aurbuild
-pkgver=1.8.9
+pkgver=1.8.10
 pkgrel=1
 pkgdesc="A utility to build and install packages from AUR."
 url="http://aurbuild.berlios.de/"
@@ -13,6 +13,6 @@ optdepends=('abs')
 
 build() {
 	cd $startdir/..
-	python setup.py install --root=$startdir/pkg
+	python setup.py install --root=$pkgdir
 }
 

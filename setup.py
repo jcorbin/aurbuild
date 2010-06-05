@@ -2,7 +2,7 @@
 
 from distutils.core import setup
 
-VERSION = "1.8.9"
+VERSION = "1.8.10"
 DESC = "An utility to build and install packages from Arch Linux User Repository"
 LICENSE = "GPL"
 URL = "http://aurbuild.berlios.de"

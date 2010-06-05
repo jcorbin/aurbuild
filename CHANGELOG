@@ -1,5 +1,8 @@
 
 AURBUILD
+ -v1.8.10 (June 6, 2010)
+	* Fix regression that totally breaks aurbuild
+
  -v1.8.9 (June 4, 2010)
 	* Search results are now sorted
 	* Added a --nopager switch for those who don't want output in a pager
