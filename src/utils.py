@@ -206,7 +206,7 @@ def prepare_build_user():
 		builduser_uid = pwd.getpwnam('aurbuild')[2]
 		builduser_gid = pwd.getpwnam('aurbuild')[3]
 		return builduser_uid, builduser_gid
-	except:
+	except KeyError:
 		# setup an account
 		print 'creating designated build user... ',
 		code = Popen(['useradd',
