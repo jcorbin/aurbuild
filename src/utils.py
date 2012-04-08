@@ -24,7 +24,7 @@ import re
 import sys
 import pwd
 
-from subprocess import Popen, PIPE
+from subprocess import check_call, Popen, PIPE
 from shutil import copytree
 
 import aurbuild
@@ -211,26 +211,17 @@ def prepare_build_user():
 
 	# setup an account
 	print 'creating designated build user... ',
-	code = Popen(['useradd',
+	check_call(['useradd',
 		'-s', '/bin/false',
 		'-d', '/var/tmp/aurbuild',
 		'-u', '360',
-		'-c', 'aurbuild', 'aurbuild']).wait()
-	if code != 0:
-		raise Exception('Error: could not create designated '
-			'build user. '
-			'Reports exit status %s' % str(code))
-	else:
-		print 'done.'
+		'-c', 'aurbuild', 'aurbuild'])
+	print 'done.'
 
 	# lock password
 	print 'locking password... ',
-	code = Popen(['passwd', '-l', '-q', 'aurbuild']).wait()
-	if code != 0:
-		raise Exception('Error: could not lock password. '
-			'Reports exit status of %s' % str(code))
-	else:
-		print 'done.'
+	check_call(['passwd', '-l', '-q', 'aurbuild'])
+	print 'done.'
 
 	# prepare_work_dirs() will handle the proper build directories
 
