@@ -35,6 +35,11 @@ afind = aurbuild.find
 uid = os.getuid()
 gid = os.getgid()
 
+# make usual .../sbin components are in $PATH
+for comp in ('/usr/local/sbin', '/usr/sbin', '/sbin'):
+	if comp not in os.environ['PATH'].split(':'):
+		os.environ['PATH'] = comp + ':' + os.environ['PATH']
+
 # Changes ownership of files and directories recursively.
 def own_dir(dir, user, group):
 	for file in os.listdir(dir):
