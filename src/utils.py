@@ -207,33 +207,35 @@ def prepare_build_user():
 		builduser_gid = pwd.getpwnam('aurbuild')[3]
 		return builduser_uid, builduser_gid
 	except KeyError:
-		# setup an account
-		print 'creating designated build user... ',
-		code = Popen(['useradd',
-			'-s', '/bin/false',
-			'-d', '/var/tmp/aurbuild',
-			'-u', '360',
-			'-c', 'aurbuild', 'aurbuild']).wait()
-		if code != 0:
-			raise Exception('Error: could not create designated '
-				'build user. '
-				'Reports exit status %s' % str(code))
-		else:
-			print 'done.'
+		pass
 
-		# lock password
-		print 'locking password... ',
-		code = Popen(['passwd', '-l', '-q', 'aurbuild']).wait()
-		if code != 0:
-			raise Exception('Error: could not lock password. '
-				'Reports exit status of %s' % str(code))
-		else:
-			print 'done.'
+	# setup an account
+	print 'creating designated build user... ',
+	code = Popen(['useradd',
+		'-s', '/bin/false',
+		'-d', '/var/tmp/aurbuild',
+		'-u', '360',
+		'-c', 'aurbuild', 'aurbuild']).wait()
+	if code != 0:
+		raise Exception('Error: could not create designated '
+			'build user. '
+			'Reports exit status %s' % str(code))
+	else:
+		print 'done.'
 
-		# prepare_work_dirs() will handle the proper build directories
+	# lock password
+	print 'locking password... ',
+	code = Popen(['passwd', '-l', '-q', 'aurbuild']).wait()
+	if code != 0:
+		raise Exception('Error: could not lock password. '
+			'Reports exit status of %s' % str(code))
+	else:
+		print 'done.'
 
-		# try again
-		return prepare_build_user()
+	# prepare_work_dirs() will handle the proper build directories
+
+	# try again
+	return prepare_build_user()
 
 def get_pkgbuild_path(parent_dir):
 	results = afind.find_file(parent_dir, 'PKGBUILD')
